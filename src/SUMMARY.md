@@ -1,0 +1,180 @@
+<!-- This will be ignored by the mdbook parser -->
+# Logic for Systems: Lightweight Formal Methods for the Working Engineer
+
+<!-- "prefix chapters"; cannot be nested -->
+[Logic for Systems](./chapters/manifesto/manifesto.md)
+
+<!-- # What do tic-tac-toe, binary trees, and operating systems have in common? -->
+# Modeling Systems
+- [Tic-Tac-Toe](./chapters/ttt/ttt.md)
+- [Binary Search Trees](./chapters/bst/bst.md)
+
+<!-- - [Mutual Exclusion]()
+
+  <!-- - Froglet: tic-tac-toe (boards, single moves)
+    - add: notion of "good move", strategies. what makes a move "good"?
+	- Lab follow-up: TTT part 2
+  - Froglet: simplified mutual exclusion (lock state, single moves)
+    - add: who "wins"? depends on timing! -->
+  
+# From Tests to Specification
+- [Challenge: Testing Tic-Tac-Toe]()
+- [What do you want?]()
+<!-- - The challenge of testing
+  - Python: tic-tac-toe. Let's test our TTT program.
+    - What does it mean to test such a program?
+    - Fuzzing (doesn't crash mid-game)
+    - Is there only one "best" move? No. Relational problems.
+    - Property-based testing (generator vs. is-valid) -->
+
+<!--
+- From tests to specification 
+    - our is-valid looks really similar to Froglet predicate
+    - our generator looks really similar to a different Froglet predicate
+    - algorithms differ, specification is forever (random search vs bounded-exhaustive search vs proof vs…) -->
+
+- [Constrains, not Code]()
+<!-- - Constraints, not code
+  - "All models are wrong, but some models are useful"
+    - Data modeling
+    - statistical modeling
+    - formal modeling
+      - satisfiability and unsatisfiability
+
+    - Froglet: binary search on array model
+        - Preservation of invariant
+        - Preservation fails: binary search is broken (if the array is too big – see Bloch’s post)
+        - Enrichment of invariant
+
+    - Froglet: Sudoku model
+        - solver
+        - puzzle generation
+
+    - Froglet: Tic-tac-toe traces model
+        - moving from transitions to traces, both have their strengths
+
+    - Validation (part 1)
+        - can we trust the model?
+        - vacuity, other pitfalls in verification -->
+
+<!-- ## Atoms from bits (Relational Forge)
+ 
+  - Relations in Forge (cities, objects/heap, course requirements, ACL synthesis)
+	- Lab follow-up: reference-counting GC
+
+  - Relational: Boolean logic (modeled)
+
+  - Relational: Prim’s algorithm (modeled, validation)
+  - Prim's vs. Dijkstra's (both so alike, but so different)
+
+  - Validation (part 2)
+     - domain vs. system, “optional” predicates, combinations and consistency
+
+  - Correspondence between models, abstraction functions
+  - Tying it all together: how does Forge work?
+ -->
+
+<!--  
+## Tomorrow and Tomorrow and Tomorrow (Temporal Forge)
+
+  - Relational: Mutual exclusion: "Lock 1" from 1760 (raising flags)
+      - Back to induction: mutual-exclusion preserved
+      - But non-starvation is more subtle, calls for more language power!
+
+  - Temporal: basic model (counter, lights puzzle) LTL, liveness, and lassos
+      - eventually, always, next state
+      - until
+      - past-time operators
+
+  - Temporal: Lock1: Deadlock vs. Livelock
+      - Modeling "Oops" for Lock1
+
+  - Temporal: "Lock 2" from 1760 (polite processes)
+      - Modeling "Oops" for Lock2: The importance of a good domain model
+
+  - Temporal: Peterson's lock (combining Lock1 + Lock2)
+      - Fairness: precondition or property?
+
+  - Validation (part 3): temporal pitfalls
+  -->
+
+
+<!-- ## Case Studies: Applications and Demos
+
+  - Policy / firewall analysis, control
+    - Reading: Zelkova, Azure
+    - Demo: ABAC language
+
+  - Crypto
+    - Reading: CPSA, ProVerif, (+ the one with pictures we cited)
+    - Demo: Needham-Schr. Language
+
+  - Synthesis
+    - Reading: SSA bit-vector function synthesis, SyGuS
+    - Demo: Resistor / novelty clock language
+
+  - …many more…
+
+  - Model-based testing (“stateful testing”) 
+     - Hypothesis
+     - (Need a good MBT example to use Forge for test generation. Another DSL input?) -->
+
+
+  
+<!-- ## Forge documentation (living document)
+
+- Docs and book should be combined. -->
+
+<!-- ## Modeling Tips
+
+- Guide to debugging models
+  - the evaluator 
+  - cores 
+- tips and tricks
+- modeling pitfalls (a la Jackson) – higher-order quant, bounds, etc.  
+ -->
+
+
+
+
+<!-- ## Solvers and algorithms
+
+  - Boolean SAT (DPLL)
+
+  - Propositional Resolution
+    - Model (likely can’t model full SAT runs, but can model steps)
+
+  - Tracking learned clauses in SAT
+
+  - SMT: eager vs. lazy, boolean skeletons
+  - SMT: example theory solver: integer inequalities
+
+  - CEGIS
+
+  - Decidability, completeness, and incompleteness -->
+
+
+
+<!-- ## Exercises
+
+Python:
+  - PBT
+Froglet:
+  - ABAC + Intro Froglet (family trees)
+  - Physical keys and locks
+  - Curiosity Modeling (hard to put into a textbook, but can frame it)
+Relational Forge:
+  - Memory management
+Temporal Forge:
+  - River crossing, correspond. between puzzles
+  - Tortoise and Hare algorithm
+  - Elevators
+Algorithms:
+  - SAT + PBT
+  - SAT + Resolution + PBT
+SMT:
+  - Pythagorean triples
+  - Kenken
+  - Synthesis
+
+-->
