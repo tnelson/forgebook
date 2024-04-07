@@ -34,7 +34,7 @@ jobs:
           git worktree add deployed-pages
           git config user.name "Deploy from CI" 
           git config user.email ""
-          cd deployed-pages
+          cd deployed-pages 
           # Delete the ref to avoid keeping history.
           git update-ref -d refs/heads/deployed-pages
           rm -rf *
