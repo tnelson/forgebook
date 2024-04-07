@@ -1,13 +1,13 @@
 # Intro to Modeling Systems (Part 2: BSTs)
 
--- SEPARATE THIS: TTT up to _before_ transition predicates!!!
+Now that we've written our first model&mdash;tic-tac-toe boards&mdash;let's switch to something a bit more serious: binary search trees. A binary search tree (BST) with an added property about its structure. So let's start modeling by following the our 5-step process. 
 
+## Datatypes 
 
-Now that we've written our first model&mdash;tic-tac-toe boards&mdash;let's switch to something a bit more serious: binary search trees. A binary search tree (BST) with an added property about its structure. So let's start with binary trees, and then add the search part. We'll start, as usual, by declaring the data type:
+A binary tree is made up of nodes:
 
 ```forge,editable
-#lang forge/bsl
-
+#lang forge/froglet
 sig Node {
   key: one Int,     -- every node has some key 
   left: lone Node,  -- every node has at most one left-child
@@ -15,33 +15,64 @@ sig Node {
 }
 ```
 
-So far, this datatype 
-
-**TODO: check lang name, switch to froglet**
+## Wellformedness
 
 What makes a binary tree a binary tree? One way to say it is:
-* it's a _tree_: there are no cycles and nodes have at most one parent node; and 
-* 
+* it's _tree-shaped_: there are no cycles and nodes have at most one parent node; and 
+* it's _connected_, that is, it's a tree and not a forest. 
 
+Let's get started encoding this. Sometimes it can be helpful to write a domain predicate along with wellformedness, if it makes the model more clear, hence why we wrote `root`:
 
-
-
-fun descendantsOf[ancestor: Node]: set Node {
-  ancestor.^(left + right) -- nodes reachable via transitive closure
+```forge,editable
+#lang forge/froglet
+sig Node {
+  key: one Int,     -- every node has some key 
+  left: lone Node,  -- every node has at most one left-child
+  right: lone Node  -- every node has at most one right-child
 }
-pred binary_tree {
-  -- no cycles
-  all n: Node | n not in descendantsOf[n] 
-  -- connected via finite chain of left, right, and inverses
-  all disj n1, n2: Node | n1 in n2.^(left + right + ~left + ~right)
-  -- left+right differ (unless both are empty)
-  all n: Node | some n.left => n.left != n.right 
+
+pred root[n: Node] {
+  -- a node is a root if it has no ancestor (note this doesn't enforce uniqueness)
+  no n2: Node | n = n2.left or n = n2.right
+}
+
+pred wellformed {
+  -- no cycles: no node can reach itself via a succession of left and right fields
+  all n: Node | not reachable[n, n, left, right] 
+  
+  -- all non-root nodes have a common ancestor from which both are reachable
+  -- the "disj" keyword means that n1 and n2 must be _different_
+  all disj n1, n2: Node | (not root[n1] and not root[n2]) implies {
+    some anc: Node | reachable[n1, anc, left, right] and 
+                     reachable[n2, anc, left, right] }
+
   -- nodes have a unique parent (if any)
-  all n: Node | lone parent: Node | n in parent.(left+right)
-}
+  all disj n1, n2, n3: Node | 
+    not ((n1.left = n3 or n1.right = n3) and (n2.left = n3 or n2.right = n3))
 
+}
+```
+
+
+## Write an example or two
+
+## View some instances
+
+```
 -- View a tree or two
 run {binary_tree} for exactly 8 Node
+```
+
+(Oops, not quite right, we were missing a constraint; underconstraint bug -- fix it)
+
+```
+  -- left+right differ (unless both are empty)
+  all n: Node | some n.left => n.left != n.right 
+```
+
+
+## Going further
+
 
 -- Run a test: our predicate enforces a unique root exists (if any node exists)
 pred req_unique_root {   
@@ -49,9 +80,6 @@ pred req_unique_root {
     one root: Node | 
       all other: Node-root | other in descendantsOf[root]}}
 assert binary_tree is sufficient for req_unique_root for 5 Node  
-
-
-
 ...
 
 
