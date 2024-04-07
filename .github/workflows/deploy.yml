@@ -32,7 +32,7 @@ jobs:
           cd book
           mdbook build
           git worktree add deployed-pages
-          git config user.name "Deploy from CI"
+          git config user.name "Deploy from CI" 
           git config user.email ""
           cd deployed-pages
           # Delete the ref to avoid keeping history.
