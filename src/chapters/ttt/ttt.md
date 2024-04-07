@@ -1,4 +1,4 @@
-# Modeling Systems (Basics: TTT)
+# Intro to Modeling Systems (Part 1: Tic-Tac-Toe)
 
 ## What's a Model? 
 
@@ -215,11 +215,12 @@ This isn't very useful; it looks nothing like a tic-tac-toe board! We can make m
 <center><img width="40%" src="./ttt-viz-table.png"/></center>
 
 
-Forge also allows users to make _custom_ visualizations via short JavaScript programs. The following script produces game visualizations with states like this:
+Forge also allows users to make _custom_ visualizations via short JavaScript programs; [here's](./ttt.js) an example basic visualizer for this specific tic-tac-toe model that produces images like this one:
 
-![](https://i.imgur.com/m6KRWtI.png)
+<center><img width="20%" src="./ttt-custom.png"/></center>
 
-We'll talk more about visualization scripts later. For now, [here's](./ttt.js) an example basic visualizer for this specific tic-tac-toe model. Now that we can more easily read a board, let's proceed.
+We'll talk more about visualization scripts later. For now, let's proceed. **TODO: replace img with one matching the table view**
+**TODO: add side-by-side CSS**
 
 ---
 
@@ -367,7 +368,7 @@ run { all b: Board | wellformed[b] and balanced[b]}
 
 ## Practice with `run`
 
-Let's try some variant `run` commands.
+The `run` command can be used to give Forge more detailed instructions for its search. 
 
 ### No Boards
 
@@ -393,7 +394,7 @@ Yes! There aren't any boards, so there's no obligation for anything to satisfy t
 
 ### Adding More
 
-We can add more constraints if we have a more focused idea of what we want Forge to find. For example, this addition also requires that `X` moved in the middle of the board:
+This addition also requires that `X` moved in the middle of the board:
 
 ```alloy
 run {    
@@ -408,10 +409,7 @@ run {
  } for exactly 2 Board
 ```
 
-Notice that, because we said `exactly 2 Board` here, Forge _must_ find instances containing 2 tic-tac-toe boards, and both of them must satisfy the constraints: wellformedness, `X` moving in the middle, etc.
+Notice that, because we said `exactly 2 Board` here, Forge _must_ find instances containing 2 tic-tac-toe boards, and both of them must satisfy the constraints: wellformedness, `X` moving in the middle, etc. You could ask for a board where `X` _hasn't_ won by adding `not winner[b, X]`. 
 
-
-By the way: `not` also works. So you could ask for a board where `X` _hasn't_ won by adding `not winner[b, X]`. 
-
-You also have `implies` and `iff` (if and only if), although you can still do something like comparing two predicates without `iff` (try, e.g., asking for instances where `A and not B` holds). 
+<!-- You also have `implies` and `iff` (if and only if), although you can still do something like comparing two predicates without `iff` (try, e.g., asking for instances where `A and not B` holds).  -->
 

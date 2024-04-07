@@ -5,9 +5,11 @@
 [Logic for Systems](./chapters/manifesto/manifesto.md)
 
 <!-- # What do tic-tac-toe, binary trees, and operating systems have in common? -->
+<!-- NO TRANSITIONS YET -->
 # Modeling Systems
 - [Tic-Tac-Toe](./chapters/ttt/ttt.md)
 - [Binary Search Trees](./chapters/bst/bst.md)
+- [3rd example]()
 
 <!-- - [Mutual Exclusion]()
 
@@ -18,8 +20,9 @@
     - add: who "wins"? depends on timing! -->
   
 # From Tests to Specification
-- [Challenge: Testing Tic-Tac-Toe]()
-- [What do you want?]()
+- [The Challenge of Testing Tic-Tac-Toe]()
+- [PBT: What do you want?]()
+- [Constraints, not Code]()
 <!-- - The challenge of testing
   - Python: tic-tac-toe. Let's test our TTT program.
     - What does it mean to test such a program?
@@ -33,7 +36,6 @@
     - our generator looks really similar to a different Froglet predicate
     - algorithms differ, specification is forever (random search vs bounded-exhaustive search vs proof vs…) -->
 
-- [Constrains, not Code]()
 <!-- - Constraints, not code
   - "All models are wrong, but some models are useful"
     - Data modeling
@@ -41,21 +43,37 @@
     - formal modeling
       - satisfiability and unsatisfiability
 
-    - Froglet: binary search on array model
+-->
+
+# Modeling State
+- [Tic-Tac-Toe Games]()
+    <!-- - Froglet: Tic-tac-toe traces model
+        - moving from transitions to traces, both have their strengths -->
+- [Recursive Descent on BSTs]()
+- [Binary Search on Arrays Instead]()
+<!-- correspondence??? -->
+
+
+   <!-- - Froglet: binary search on array model
         - Preservation of invariant
         - Preservation fails: binary search is broken (if the array is too big – see Bloch’s post)
-        - Enrichment of invariant
+        - Enrichment of invariant -->
 
-    - Froglet: Sudoku model
+   <!-- - Froglet: Sudoku model
         - solver
-        - puzzle generation
+        - puzzle generation -->
 
-    - Froglet: Tic-tac-toe traces model
-        - moving from transitions to traces, both have their strengths
-
-    - Validation (part 1)
-        - can we trust the model?
+   - [Validating Models]() 
+        <!-- - can we trust the model?
         - vacuity, other pitfalls in verification -->
+
+# Atoms from Bits
+- [Relational Forge]()
+- [Reference-Counting Memory Management]()
+- [Modeling Boolean Logic]()
+- [Validating Relational Models]()
+- [Comparing Prim's and Dijkstra's Algorithms]()
+- [How does Forge Work?]()
 
 <!-- ## Atoms from bits (Relational Forge)
  
@@ -73,6 +91,12 @@
   - Correspondence between models, abstraction functions
   - Tying it all together: how does Forge work?
  -->
+
+# Tomorrow and Tomorrow
+- [Safety and Liveness]()
+- [Temporal Forge]()
+- [Modeling Mutual Exclusion]()
+- [Validation: Temporal Pitfalls]()
 
 <!--  
 ## Tomorrow and Tomorrow and Tomorrow (Temporal Forge)
@@ -98,6 +122,12 @@
   - Validation (part 3): temporal pitfalls
   -->
 
+# Case Studies
+- [Model-Based ("Stateful") Testing]()
+- [Concolic Execution]()
+- [Policy and Network Analysis]()
+- [Crypto Protocol Analysis]()
+- [Program Synthesis]()
 
 <!-- ## Case Studies: Applications and Demos
 

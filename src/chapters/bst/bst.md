@@ -1,4 +1,4 @@
-# Modeling Systems (Basics: BSTs)
+# Intro to Modeling Systems (Part 2: BSTs)
 
 -- SEPARATE THIS: TTT up to _before_ transition predicates!!!
 
