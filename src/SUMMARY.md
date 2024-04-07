@@ -8,7 +8,7 @@
 <!-- NO TRANSITIONS YET -->
 # Modeling Systems
 - [Tic-Tac-Toe](./chapters/ttt/ttt.md)
-- [Binary Search Trees](./chapters/bst/bst.md)
+- [Binary Search Trees (in progress)](./chapters/bst/bst.md)
 - [3rd example]()
 
 <!-- - [Mutual Exclusion]()
@@ -46,7 +46,7 @@
 -->
 
 # Modeling State
-- [Tic-Tac-Toe Games]()
+- [Tic-Tac-Toe Games (in progress)](./chapters/ttt/ttt_games.md)
     <!-- - Froglet: Tic-tac-toe traces model
         - moving from transitions to traces, both have their strengths -->
 - [Recursive Descent on BSTs]()

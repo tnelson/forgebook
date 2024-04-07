@@ -337,7 +337,7 @@ Should we add something like `OTurn[s] or XTurn[s]` to our wellformedness predic
 * If we were generating arbitrary (not necessarily valid) boards, being able to see a cheating state might be useful. In that case, we'd leave it out of `wellformed`.
 * If we're interested in _verification_, e.g., we are asking whether the game of Tic-Tac-Toe enables ever reaching a cheating board, we shouldn't add `not cheating` to `wellformed`; because `wellformed` also excludes garbage boards, we'd probably use it in our verification&mdash;in which case, Forge will never find us a counterexample! 
 
-**TODO: positioning this point, if PBT is coming after this.**
+**[TODO: move this point to position it properly, if PBT comes after vs. before]**
 ~~~admonish tip title="Modeling vs. PBT" 
 Notice the similarity between this issue and what we do in property-based testing. Here, we're forced to distinguish between what a reasonable _board_ is (analogous to the generator's output in PBT) and what a reasonable _behavior_ is (analogous to the validity predicate in PBT). One narrows the scope of possible worlds to avoid true "garbage"; the other checks whether the system behaves as expected in one of those worlds.
 ~~~

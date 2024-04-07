@@ -56,6 +56,8 @@ pred wellformed {
 
 ## Write an example or two
 
+**[FILL: example trees: singleton, empty, unbalanced...]**
+
 ## View some instances
 
 ```
@@ -63,24 +65,26 @@ pred wellformed {
 run {binary_tree} for exactly 8 Node
 ```
 
-(Oops, not quite right, we were missing a constraint; underconstraint bug -- fix it)
+**[FILL: Oops, not quite right, we were missing a constraint; underconstraint bug -- fix it]**
 
+Missing: 
 ```
   -- left+right differ (unless both are empty)
   all n: Node | some n.left => n.left != n.right 
 ```
 
+**FILL: and iterate.**
 
 ## Going further
 
-
+```
 -- Run a test: our predicate enforces a unique root exists (if any node exists)
 pred req_unique_root {   
   no Node or {
     one root: Node | 
       all other: Node-root | other in descendantsOf[root]}}
 assert binary_tree is sufficient for req_unique_root for 5 Node  
-...
+```
 
 
 
