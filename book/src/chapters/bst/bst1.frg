@@ -88,9 +88,38 @@ example p_unbalanced_chain is wellformed for {
 -------------------------------------------------------------------------------
 
 -- A single node that is its own left-child is not well-formed. 
+example n_own_left is {not wellformed} for {
+  Node = `Node0 
+  `Node0.left = `Node0
+  no `Node0.right
+}
 
 -- A single node that is its own right-child is not well-formed. 
+example n_own_right is {not wellformed} for {
+  Node = `Node0 
+  no `Node0.left
+  `Node0.right = `Node0
+}
 
 -- A single node that's reachable via a longer cycle using both left- and right-children is not well-formed. 
+example n_mixed_cycle is {not wellformed} for {
+  Node = `Node0 + `Node1 + `Node2
+  
+  `Node0.left = `Node1 
+  no `Node0.right 
+  no `Node1.left
+  `Node1.right = `Node2
+  
+  `Node2.left = `Node0
+  no `Node2.right 
+}
 
 -- A "forest" of multiple, disconnected trees is not well-formed. 
+example n_forest is {not wellformed} for {
+  Node = `Node0 + `Node1
+  no `Node0.left
+  no `Node0.right 
+  no `Node1.left 
+  no `Node1.right 
+}
+-- ^ This example fails when run. 
