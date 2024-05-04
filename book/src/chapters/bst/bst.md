@@ -196,18 +196,60 @@ example n_forest is {not wellformed} for {
 
 ### Run the examples 
 
-[FILL] 
+Click the run button, and Forge will check that all of the examples satisfy (or dissatisfy) the `wellformed` predicate. One fails, but why? Notice two things:
+  * The failing example is a _negative_ one. We expected this instance to be ruled out by `wellformed`, but it was not. This points to a potential _under_-constraint bug in `wellformed`. 
+  * We intended the example to fail because it contains separate, disconnected trees. This points to the nature of the missing constraint. 
 
-Uh oh, the final example fails! Why?
+But we already added a constraint that forces connectivity, didn't we? We have this: 
+```forge,editable
+  all disj n1, n2: Node | (not isRoot[n1] and not isRoot[n2]) implies {
+    some anc: Node | reachable[n1, anc, left, right] and 
+                     reachable[n2, anc, left, right] }
+```
+
+What's the problem? 
+
+<details>
+<summary>Think, then click!</summary>
+
+This constraint only applies for pairs of _non-root_ nodes. That is, any two non-root nodes must have a common parent. So we ruled out forests of separate, bushy _trees_, but we neglected to exclude isolated roots!
+
+</details>
+
+In modeling, it's common for there to be a few ways to fix problems like this. We could go back and edit the constraint we wrote before, or we could write a new constraint to handle roots. In _this_ case, let's edit the original. We said that any two non-roots have a common ancestor. Why did we say "non-root"? Because if one of the nodes happened to be a root, it would have no such ancestors. 
+
+What if we allowed the node itself to count as the common ancestor? Then we would have two obligations (as before), but each would have another way to become true. 
+
+```forge,editable
+  -- for _any_ pair of nodes, there is some ancestor node, such that...
+  all disj n1, n2: Node | {
+    some anc: Node | { 
+      -- either n1 is the ancestor itself, or the ancestor reaches n1...
+      ((n1 = anc) or reachable[n1, anc, left, right])
+      -- ...and either n2 is the ancestor itself, or the ancestor reaches n2
+      ((n2 = anc) or reachable[n2, anc, left, right]) 
+    } }
+```
+
+Now all of our examples pass. While that doesn't mean the constraints are exactly right yet, it does increase our confidence in them. 
 
 ## View some instances
 
+Now we'll probe the constraints more thoroughly by asking Forge to generate _new_ instances that satisfy the `wellformed` predicate. By viewing a few of these, we can often spot issues in the initial stages of a model. 
+
 ```
 -- View a tree or two
-run {binary_tree} for exactly 8 Node
+run {wellformed} for exactly 8 Node
 ```
 
+<!-- Note: custom visualization is _bad_ for this, because it may hide the problem due to 
+     structural assumptions it makes. -->
+
+[TODO: describe visualizer opening, theming]
+
 **[FILL: Oops, not quite right, we were missing a constraint; underconstraint bug -- fix it]**
+
+![A fragment of an instance visualization, showing a node whose left and right children are the same](same-left-right.png)
 
 Missing: 
 ```
