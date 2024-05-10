@@ -88,7 +88,7 @@ example p_one_nodes is wellformed for {
 
 If we were going to draw the single-node example, we might draw it something like this:
 
-![a tree with a single node and no edges](./p_one_nodes.png)
+<img alt="a tree with a single node and no edges" src="./p_one_nodes.png" width=60%/>
 
 In fact, this is what Forge's default visualizer can generate. Notice that the node has:
 - a _name_ or identity, which we supplied when we named it `Node0` in the example; and 
@@ -119,7 +119,17 @@ example p_multi_rank is wellformed for {
 }
 ```
 
-![a tree with more than one rank](./p_multi_rank.png)
+<center>
+<img alt="a tree with more than one rank" src="./p_multi_rank.png" width=60%/>
+</center>
+
+Wait a moment; there's something strange here. What do you notice about the way we've visualized this tree? 
+
+<details> 
+<summary>Think, then click!</summary>
+
+That visualization is not how we'd choose to draw the tree: it has the `left` field to the right and the `right` field to the left! This is because we used Forge's default visualizer, and by default, Forge has no way to understand what "left" and "right" mean. We'll come back to this problem soon. 
+</details>
 
 #### An unbalanced binary tree is still well-formed.
 
@@ -139,7 +149,9 @@ example p_unbalanced_chain is wellformed for {
 }
 ```
 
-![an unbalanced chain is still a tree](./p_unbalanced_chain.png)
+<center>
+<img alt="an unbalanced chain is still a tree" src="./p_unbalanced_chain.png" width=50%/>
+</center>
 
 ### Negative examples 
 
@@ -176,7 +188,7 @@ example n_own_left is {not wellformed} for {
 }
 ```
 
-![a node that is its own left child](./n_own_left.png)
+<img alt="a node that is its own left child" src="./n_own_left.png" width=60%/>
 
 #### A single node that is its own right-child is not well-formed. 
 
@@ -188,7 +200,7 @@ example n_own_right is {not wellformed} for {
 }
 ```
 
-![a node that is its own right child](./n_own_right.png)
+<img alt="a node that is its own right child" src="./n_own_right.png" width=60%/>
 
 #### A single node that's reachable via a longer cycle using both left- and right-children is not well-formed. 
 
@@ -206,7 +218,7 @@ example n_mixed_cycle is {not wellformed} for {
 }
 ```
 
-![a cycle using both left and right](./n_mixed_cycle.png)
+<img alt="a cycle using both left and right" src="./n_mixed_cycle.png" width=60%/>
 
 #### A "forest" of multiple, disconnected trees is not well-formed. 
 
@@ -220,7 +232,7 @@ example n_forest is {not wellformed} for {
 }
 ```
 
-![a forest, not a single tree](./n_forest.png)
+<img alt="a forest, not a single tree" src="./n_forest.png" width=60%/>
 
 
 ~~~admonish note title="Sometimes it helps to _start_ with an example."

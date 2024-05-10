@@ -19,7 +19,7 @@ inst p_no_nodes {
 }
 
 -- A binary tree with a single node should be considered well-formed. 
-inst p_one_nodes {
+inst p_one_node {
   Node = `Node0 -- there is exactly one node in the tree, named "Node0".
   no left       -- there are no left-children
   no right      -- there are no right-children
@@ -102,7 +102,13 @@ inst n_forest {
 -- ^ This inst fails when run; we're missing a constraint.
 
 -- Run each, for screenshot purposes 
-run {} for n_own_left 
-run {} for n_own_right 
-run {} for n_mixed_cycle
+
+--run {} for p_no_nodes
+--run {} for p_one_node
+--run {} for p_multi_rank 
+--run {} for p_unbalanced_chain 
+
+--run {} for n_own_left 
+--run {} for n_own_right 
+--run {} for n_mixed_cycle
 --run {} for n_forest
