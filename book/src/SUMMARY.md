@@ -1,11 +1,12 @@
 <!-- This will be ignored by the mdbook parser -->
-<!-- # Logic for Systems: Lightweight Formal Methods for the Working Engineer -->
+<!-- # Logic for Systems: Lightweight Formal Methods for the Practical Engineer -->
 # Summary 
 
 [Welcome](./welcome.md)
 
 <!-- "prefix chapters"; cannot be nested -->
 # Preamble
+- [What good is this book?](./chapters/manifesto/job.md)
 - [Logic for Systems](./chapters/manifesto/manifesto.md)
 
 <!-- # What do tic-tac-toe, binary trees, and operating systems have in common? -->
