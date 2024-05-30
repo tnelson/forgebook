@@ -121,3 +121,40 @@ pred example1 {
 run {rca example1} for 1 RCA, exactly 6 FA
 
 /////////////////////////////////////////////////////////////////////
+
+// To help ease verification, augment instances with exponents of each full adder
+// which we can then use to compute the "true value" of an input or output.
+one sig Helper {
+  place: func FA -> Int
+}
+-- The "places" value should agree with the "nextAdder" function.
+pred assignPlaces {
+  -- The least-significant bit is 2^0
+  Helper.place[RCA.firstAdder] = 0
+  -- Other bits are worth 2^(i+1), where the predecessor is worth 2^i.
+  all fa: FA | some RCA.nextAdder[fa] => {    
+    Helper.place[RCA.nextAdder[fa]] = add[Helper.place[fa], 1]
+  }
+}
+
+fun trueValue[b: Bool, exp: Int]: one Int {
+  -- How to express this? We have no recursion, and no exp. 
+}
+
+// Requirement: the adder is correct. We phrase this as: for every full adder, the true 
+// value of its output is the sum of the true values of its inputs (where "true value" means 
+// the value of the boolean, taking into account its position).
+pred req_adderCorrect {
+  (rca and assignPlaces) implies {
+    all fa: FA | { 
+        -- This will fail, because carrying
+        trueValue[fa.s, Helper.place[fa]] = add[trueValue[fa.a, Helper.place[fa]], 
+                                                trueValue[fa.b, Helper.place[fa]]]
+    }
+  }
+}
+
+
+/////////////////////////////////////////////////////////////////////
+// TODO: validation
+
