@@ -10,8 +10,6 @@ You need many different skills for a successful career. This book won't teach yo
 * how to use constraints and constraint solvers in your work.
 It will also give you a set of baseline skills that will aid you in using any further "formal" methods you might encounter in your work, such as [advanced type systems](https://rust-book.cs.brown.edu), [static verification](https://dafny.org), [theorem proving](https://lean-lang.org), and more. 
 
-Here's why each of these skills is professionally valuable. 
-
 ## Modeling: What really matters?
 
 There's a useful maxim by George Box: **"All models are wrong, but some are useful"**. The only completely accurate model of a system is that system itself, including all of its real external context. This is impractical; instead, a modeler needs to make choices about what really matters to them: what do you keep, and what do you disregard? Done well, a model gets at the essence of a system. Done poorly, a model yields nothing useful or, worse, gives a false sense of security. 
@@ -45,6 +43,8 @@ When programming a
  Grid world in AI is something richer. Want to hunt the wumpus? Can the wumpus hide in the pit? Probably not by the rules of the game, which are themselves a model. In the real world, perhaps it could. Box had something to say about this, too: 
 
  > Since all models are wrong the scientist must be alert to what is importantly wrong. It is inappropriate to be concerned about safety from mice when there are tigers abroad.  -->
+
+**Strong modeling skills are professionally valuable.** 
 
 
 ## Specification: What do you want?
