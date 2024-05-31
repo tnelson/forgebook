@@ -123,7 +123,8 @@ test expect {
   consistency_e1_as_predicate: {rca example1_as_predicate} for 1 RCA, exactly 6 FA is sat
 }
 
-// We can also express this example as an `example` in Froglet:
+// We can also express this example as an `example` in Froglet, which will automatically 
+// check that the instance given satisfies the predicate `rca`. 
 example example1_as_example is {rca} for {
   RCA = `RCA0 
   FA = `FA0 + `FA1 + `FA2 + `FA3 + `FA4 + `FA5
@@ -143,8 +144,5 @@ example example1_as_example is {rca} for {
   `FA4.a = False  `FA4.b = False     
   `FA5.a = True   `FA5.b = True
 }
-
-// TODO: validation
-// TODO: viz
 
 /////////////////////////////////////////////////////////////////////
