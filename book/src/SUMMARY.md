@@ -6,26 +6,25 @@
 
 <!-- "prefix chapters"; cannot be nested -->
 # Preamble
-- [What good is this book?](./chapters/manifesto/job.md)
+- [What good is this book?](./chapters/manifesto/job.md) <!-- *** GOAL: ARTCULATE ADDED POINTS -->
 - [Logic for Systems](./chapters/manifesto/manifesto.md)
 
+
+
+
 <!-- # What do tic-tac-toe, binary trees, and operating systems have in common? -->
-<!-- NO TRANSITIONS YET -->
+<!-- STATIC INSTANCES; NO TRANSITIONS YET -->
 # Modeling Systems
 - [Tic-Tac-Toe](./chapters/ttt/ttt.md)
-- [Binary Search Trees (in progress)](./chapters/bst/bst.md)
-- [3rd example]()
+- [Binary Search Trees](./chapters/bst/bst.md)      <!-- *** GOAL: UNTANGLE (+ add pictures) -->
+- [Ripple-Carry Adder](./chapters/adder/rca.md)     <!-- *** GOAL: OUTLINE -->
 
-<!-- - [Mutual Exclusion]()
+<!-- Lab follow-up: TTT part 2 -->
 
-  <!-- - Froglet: tic-tac-toe (boards, single moves)
-    - add: notion of "good move", strategies. what makes a move "good"?
-	- Lab follow-up: TTT part 2
-  - Froglet: simplified mutual exclusion (lock state, single moves)
-    - add: who "wins"? depends on timing! -->
-  
+
+
 # From Tests to Specification
-- [The Challenge of Testing Tic-Tac-Toe]()
+- [The Challenge of Testing: Tic-Tac-Toe]()
 - [PBT: What do you want?]()
 - [Constraints, not Code]()
 <!-- - The challenge of testing
@@ -34,6 +33,10 @@
     - Fuzzing (doesn't crash mid-game)
     - Is there only one "best" move? No. Relational problems.
     - Property-based testing (generator vs. is-valid) -->
+
+
+
+
 
 <!--
 - From tests to specification 

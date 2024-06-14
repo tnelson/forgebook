@@ -1,16 +1,43 @@
 # Intro to Modeling Systems (Part 2: BSTs)
 
-Now that we've written our first model&mdash;tic-tac-toe boards&mdash;let's switch to something a bit more serious: binary search trees. A binary search tree (BST) is a binary tree with an added property about its structure. Let's start modeling. As before, we'll follow this rough 5-step progression:
+Now that we've written our first model&mdash;tic-tac-toe boards&mdash;let's switch to something a bit more serious: binary search trees. A binary search tree (BST) is a binary tree with an added property about its structure that allows it to efficiently answer many search queries related to the values it stores.
+
+Here's an example, drawn by hand:
+
+**TODO: image**
+
+<center>
+<img alt="a hand-drawn binary search tree" src="./hand_bst_example.png" width=50%/>
+</center>
+
+This is obviously a _binary tree_, since it is a tree where every node has at most 2 children. What makes it a binary _search_ tree is the invariant that every node $N$ obeys: 
+* all left-descendants of $N$ have a key less than $N$'s key; and 
+* all right-descendants of $N$ have a key greater than or equal to $N$'s key.
+
+~~~admonish warning title="A common mistake" 
+When you're first learning about binary search trees, it's easy to phrase the invariant wrong: 
+* the left child of $N$ (if any) has a key less than $N$'s key; and 
+* the right child of $N$ (if any) has a key greater than or equal to $N$'s key.
+With experience, it's straightforward to see that this is too weak; search will break. But at first that isn't so obvious. It would be interesting if we could use Forge to help us understand the difference and its impact on searching the tree.
+~~~
+
+Let's start modeling. As with programming, it's a good idea to start simple, and add complexity and optimization after. So we'll start with plain binary trees, and then add the invariant.
+
+~~~admonish tip title="the recipe"
+Like with tic-tac-toe, we'll follow this rough 5-step progression:
   - define the pertinent datatypes and fields;
   - define a well-formedness predicate;
   - write some examples;
   - run and exercise the base model; 
-  - write domain predicates.
+  - write domain predicates. 
 Keep in mind that this isn't a strict "waterfall" style progression; we may return to previous steps if we discover it's necessary. 
+~~~
 
 ## Datatypes 
 
-A binary tree is made up of nodes. Each node in the tree has at most one left child and at most one right child. Unlike in tic-tac-toe, this definition is recursive:
+A binary tree is made up of nodes. Each node in the tree has at most one left child and at most one right child. While nodes in the tree can hold values of most any type, for simplicity we'll stick to integers. 
+
+Unlike in tic-tac-toe, this definition is recursive:
 
 ```forge,editable
 #lang forge/froglet
@@ -21,13 +48,13 @@ sig Node {
 }
 ```
 
-## Wellformedness
+## Wellformedness for Binary Trees
 
 What makes a binary tree a binary tree? We might start by saying that: 
-* it's _tree-shaped_: there are no cycles and nodes have at most one parent node; and 
+* it's _single-tree-shaped_: there are no cycles and all nodes have at most one parent node; and 
 * it's _connected_: all non-root nodes have a common ancestor. 
 
-It's sometimes useful to write domain predicates early, and then use them to define wellformedness more clearly. For example, let's encode what it means for a node to be a root node:
+It's sometimes useful to write domain predicates early, and then use them to define wellformedness more clearly. For example, it might be useful to write a helper that describes what it means for a node to be a root node:
 
 ```forge,editable
 pred isRoot[n: Node] {
@@ -35,6 +62,8 @@ pred isRoot[n: Node] {
   no n2: Node | n = n2.left or n = n2.right
 }
 ```
+
+Then we'll use the `isRoot` helper in our `wellformed` predicate:
 
 ```forge,editable
 pred wellformed {
@@ -55,9 +84,7 @@ pred wellformed {
 
 ## Write an example or two
 
-**[FILL: example trees: singleton, empty, unbalanced...]**
-
-Now we'll write a few examples of well-formed and non-well-formed trees. I've listed some possibilities below.
+Let's write a few examples of well-formed and non-well-formed trees. I've listed some possibilities below.
 
 ~~~admonish note title="Are these examples enough?"
 Just like with testing a program, it's not always immediately clear when to _stop_ testing a model. 
@@ -76,6 +103,8 @@ example p_no_nodes is wellformed for {
 }
 ```
 
+Drawing this one wouldn't be very interesting.
+
 #### A binary tree with a single node should be considered well-formed. 
 
 ```forge,editable
@@ -93,6 +122,7 @@ If we were going to draw the single-node example, we might draw it something lik
 In fact, this is what Forge's default visualizer can generate. Notice that the node has:
 - a _name_ or identity, which we supplied when we named it `Node0` in the example; and 
 - a value for its `key` field, which we did not supply (and so Forge filled in). 
+Be careful not to confuse these! There's a rough analogy to programming: it's very possible that (especially if we have a buggy program or model) there might be different nodes with the same key value.
 
 **(TODO: discussion of partial vs. total examples goes where?)**
 
@@ -128,7 +158,7 @@ Wait a moment; there's something strange here. What do you notice about the way 
 <details> 
 <summary>Think, then click!</summary>
 
-That visualization is not how we'd choose to draw the tree: it has the `left` field to the right and the `right` field to the left! This is because we used Forge's default visualizer, and by default, Forge has no way to understand what "left" and "right" mean. We'll come back to this problem soon. 
+That visualization is not how we'd choose to draw the tree: it has the `left` field to the right and the `right` field to the left! This is because we used Forge's default visualizer. By default, Forge has no way to understand what "left" and "right" mean. We'll come back to this problem soon. 
 </details>
 
 #### An unbalanced binary tree is still well-formed.
@@ -236,7 +266,7 @@ example n_forest is {not wellformed} for {
 
 
 ~~~admonish note title="Sometimes it helps to _start_ with an example."
-We wouldn't normally be able to _check_ these examples until we'd finished writing the `wellformed` predicate, but it can still be useful to create a few examples first, to help guide the constraints you write. Binary trees are a _very_ simple domain; imagine modeling something like the Java class system. Things can get tricky fast, and it's good to have a few concrete exemplars in mind. 
+We wouldn't normally be able to _check_ these examples until we'd finished writing the `wellformed` predicate, but it can still be useful to create a few examples first, to help guide the constraints you write. Binary trees are a quite simple domain; imagine modeling something like the Java class system. Things can get tricky fast, and it's good to have a few concrete cases in mind. 
 ~~~
 
 
@@ -244,16 +274,17 @@ We wouldn't normally be able to _check_ these examples until we'd finished writi
 
 Click the run button, and Forge will check that all of the examples satisfy (or dissatisfy) the `wellformed` predicate. One fails, but why? Notice two things:
   * The failing example is a _negative_ one. We expected this instance to be ruled out by `wellformed`, but it was not. This points to a potential _under_-constraint bug in `wellformed`. 
-  * We intended the example to fail because it contains separate, disconnected trees. This points to the nature of the missing constraint. 
+  * We intended the example to fail because it contains separate, disconnected trees. This gives us a hint about the nature of the missing constraint. Except...
 
-But we already added a constraint that forces connectivity, didn't we? We have this: 
+We already added a constraint that forces connectivity. Didn't we? 
+
 ```forge,editable
   all disj n1, n2: Node | (not isRoot[n1] and not isRoot[n2]) implies {
     some anc: Node | reachable[n1, anc, left, right] and 
                      reachable[n2, anc, left, right] }
 ```
 
-What's the problem? 
+So what's the problem? 
 
 <details>
 <summary>Think, then click!</summary>
@@ -291,23 +322,26 @@ run {wellformed} for exactly 8 Node
 <!-- Note: custom visualization is _bad_ for this, because it may hide the problem due to 
      structural assumptions it makes. -->
 
-[TODO: describe visualizer opening, theming]
+**[TODO: describe visualizer opening, theming]**
 
-**[FILL: Oops, not quite right, we were missing a constraint; underconstraint bug -- fix it]**
+Here's something you might see in one of the instances
 
 ![A fragment of an instance visualization, showing a node whose left and right children are the same](same-left-right.png)
 
-Missing:  
-```
+This doesn't look right, does it? We have a node whose left and right child are the same; that's not tree-like. Again, we have an _under_-constraint bug: there's some instance(s) that are permitted by `wellformed`, but shouldn't be. In fact, we completely forgot to add a constraint like:
+
+```forge,editable
   -- left+right differ (unless both are empty)
   all n: Node | some n.left => n.left != n.right 
 ```
 
-**FILL: and iterate.**
+With that constraint added to `wellformed`, we don't see any more wrong-looking binary trees.
 
-## Going further
+## Validation
 
-```
+**[TODO: introduce this idea, add a domain predicate]**
+
+```forge,editable
 -- Run a test: our predicate enforces a unique root exists (if any node exists)
 pred req_unique_root {   
   no Node or {
@@ -316,11 +350,55 @@ pred req_unique_root {
 assert binary_tree is sufficient for req_unique_root for 5 Node  
 ```
 
+Now our model is looking pretty good, although we haven't yet added the "search" part of "binary search tree".
 
+## More Domain Predicates: Search Invariants 
 
+**TODO: remind about invariant. domain predicates: one at the node level, one at the instance level**
 
+```forge,editable
+pred invariant_v1[n: Node] {
+  -- "Every node's left-descendants..." via reflexive transitive closure
+  all d: n.left.*(left+right)  | d.key < n.key
+  -- "Every node's left-descendants..." via reflexive transitive closure
+  all d: n.right.*(left+right) | d.key > n.key
+}
+pred binary_search_tree_v1 {
+  binary_tree  -- a binary tree, with an added invariant
+  all n: Node | invariant_v1[n]  
+}
+```
 
+In contrast, here's an alternative pair of predicates for the _wrong_ invariant:
 
+```forge,editable
+pred invariant_v2[n: Node] {
+  -- "Every node's immediate children..."
+  some n.left implies n.left.key < n.key
+  some n.right implies n.right.key > n.key
+}
+pred binary_search_tree_v2 {
+  binary_tree  -- a binary tree, with an added invariant
+  all n: Node | invariant_v2[n]
+}
+```
 
+### A Valuable Trick: Semantic Differencing
 
+Let's use Forge to understand the structural differences between these invariants. 
 
+**TODO: wording, different shapes of analysis, naming Forge runs**
+
+```forge,editable
+-- Get examples of the difference between the two. 
+bstdiff: run {not { binary_search_tree_v1 iff binary_search_tree_v2}} for 5 Node 
+v1_is_stronger: assert binary_search_tree_v1 is sufficient for binary_search_tree_v2 for 5 Node 
+```
+
+~~~admonish tip title="Differencing for Debugging"
+
+**TODO: fill: you might use this technique to check whether two versions of the same constraint are equivalent; we'll use this in a few examples later.**
+
+~~~
+
+We'll come back to binary search trees soon, in chapter [FILL]. 
