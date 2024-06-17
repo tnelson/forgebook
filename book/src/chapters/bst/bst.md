@@ -124,7 +124,7 @@ In fact, this is what Forge's default visualizer can generate. Notice that the n
 - a value for its `key` field, which we did not supply (and so Forge filled in). 
 Be careful not to confuse these! There's a rough analogy to programming: it's very possible that (especially if we have a buggy program or model) there might be different nodes with the same key value.
 
-**(TODO: discussion of partial vs. total examples goes where?)**
+**(TODO: decide: discussion of partial vs. total examples goes where?)**
 
 #### A binary tree with more than one rank should be considered well-formed. 
 
@@ -322,9 +322,13 @@ run {wellformed} for exactly 8 Node
 <!-- Note: custom visualization is _bad_ for this, because it may hide the problem due to 
      structural assumptions it makes. -->
 
-**[TODO: describe visualizer opening, theming]**
+The `run` command searches for instances that satisfy the constraints it is given, and then automatically opens the visualizer to explore those instances. 
 
-Here's something you might see in one of the instances
+~~~admonish tip title="Visualization"
+By default, the visualizer will show nearly all relationships as arcs; e.g., the `key` field of each node will be shown as an arc from the node to the (numeric) key. If you want, you can clean this up a bit by opening the `Theme` drawer, selecting the `key` field, and checking to view the field as an attribute. 
+~~~
+
+Here's something you might see in one of the instances:
 
 ![A fragment of an instance visualization, showing a node whose left and right children are the same](same-left-right.png)
 
@@ -339,22 +343,48 @@ With that constraint added to `wellformed`, we don't see any more wrong-looking 
 
 ## Validation
 
-**[TODO: introduce this idea, add a domain predicate]**
+So far we've tested our model in two ways:
+* checking that specific instances satisfy, or don't satisfy, a Forge predicate; and 
+* manually viewing generated instances. 
+In Forge, we have recourse to more powerful techniques. 
+
+Notice that, when we were writing `binary_tree`, we never said explicitly that there must be a single unique root in the instance. It should be true, of course, that such a root exists and is unique. But that is (or should be!) a _consequence_ of what we wrote. In Forge, this is easy to test:
 
 ```forge,editable
 -- Run a test: our predicate enforces a unique root exists (if any node exists)
-pred req_unique_root {   
+pred unique_root {   
   no Node or {
     one root: Node | 
       all other: Node-root | other in descendantsOf[root]}}
-assert binary_tree is sufficient for req_unique_root for 5 Node  
+assert binary_tree is sufficient for unique_root for 5 Node  
 ```
+
+This passes; there is no counterexample using fewer than than 6 Nodes. Our confidence increases.
+
+~~~admonish note title="Different ways of writing predicates" 
+You might be thinking that we could have just added the unique-root property as a constraint to `wellformed` directly! That's a reasonable thought, and it's true that we could have. I left it out deliberately here, for a few reasons:
+* It's usually a good idea to not overload predicates with constraints that are really unnecessary. There's some wiggle room here in the service of making your model robust, but if we had added every possible property we could think of for a tree to have, the predicate would have become quite unwieldy, harder to understand, and (vitally) harder to debug. 
+* When we start modeling, we often don't know exactly what we want. Sure, we might be able to describe it in broad terms, but 
+and, of course...
+* it allowed demonstration of this general technique: checking that one predicate enforces another. 
+~~~
+
 
 Now our model is looking pretty good, although we haven't yet added the "search" part of "binary search tree".
 
 ## More Domain Predicates: Search Invariants 
 
-**TODO: remind about invariant. domain predicates: one at the node level, one at the instance level**
+Let's express our two alternative BST invariants. As a reminder, they were: 
+
+**Version 1** For all nodes $N$:
+* all left-descendants of $N$ have a key less than $N$'s key; and 
+* all right-descendants of $N$ have a key greater than or equal to $N$'s key.
+
+**Version 2** For all nodes $N$:
+* the left child of $N$ (if any) has a key less than $N$'s key; and 
+* the right child of $N$ (if any) has a key greater than or equal to $N$'s key.
+
+Notice that both are phrased in terms of single nodes, and should apply to all nodes. For convenience, we'll split these up into 2 predicates each: one to represent the per-node requirement, and another to represent the global requirement. 
 
 ```forge,editable
 pred invariant_v1[n: Node] {
@@ -369,7 +399,7 @@ pred binary_search_tree_v1 {
 }
 ```
 
-In contrast, here's an alternative pair of predicates for the _wrong_ invariant:
+Here's the same pair of predicates for the second (_wrong_) invariant:
 
 ```forge,editable
 pred invariant_v2[n: Node] {
@@ -383,22 +413,21 @@ pred binary_search_tree_v2 {
 }
 ```
 
-### A Valuable Trick: Semantic Differencing
+### Semantic Differencing
 
-Let's use Forge to understand the structural differences between these invariants. 
-
-**TODO: wording, different shapes of analysis, naming Forge runs**
+Forge supports a useful trick: comparing the _meaning_ of two different predicates. What do we mean by "meaning"? Suppose that we ran `diff` on the two versions above. We'd get a report of where the _text_ of the two differed. But that isn't very informative; we'd really like to know _which actual binary trees_ the two disagree on. That's a better way of understanding how the meaning of the two might differ, and start to grasp the consequences. 
 
 ```forge,editable
--- Get examples of the difference between the two. 
+-- Get examples of the difference between the two. Here we name the run "bstdiff".
 bstdiff: run {not { binary_search_tree_v1 iff binary_search_tree_v2}} for 5 Node 
+-- But how do they differ? We'd expect the first invariant to be _stronger_ than the second:
 v1_is_stronger: assert binary_search_tree_v1 is sufficient for binary_search_tree_v2 for 5 Node 
 ```
 
+The `v1_is_strong` test passes. The `run` command produces an instance (actually many) where the two invariants disagree. The test, however, passes, indicating that version 1 is strictly more selective than version 2: no matter how many times we clicked "Next", we'd only see trees where `binary_search_tree_v2` is satisfied but `binary_search_tree_v1` isn't.
+
 ~~~admonish tip title="Differencing for Debugging"
-
-**TODO: fill: you might use this technique to check whether two versions of the same constraint are equivalent; we'll use this in a few examples later.**
-
+This simple technique really is powerful. You might use it to check whether two versions of the same constraint are equivalent when debugging or optimizing your model. We'll use this idea in a few examples later.**
 ~~~
 
-We'll come back to binary search trees soon, in chapter [FILL]. 
+We'll come back to binary search trees soon, in chapter [FILL], to see how the different invariants impact the algorithm for searching the tree.
