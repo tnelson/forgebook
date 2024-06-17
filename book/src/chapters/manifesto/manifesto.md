@@ -2,14 +2,14 @@
 
 ## Setting the Stage
 
-If you're taking this course or reading this book, you've probably had to complete some programming assignments---or at least written some small program for a course or an online tutorial. Take a moment to list a handful of such assignments: what did you have to build? 
+If you're reading this book, you've probably had to complete some programming assignments&mdash;or at least written some small program for a course or an online tutorial. Take a moment to list a handful of such assignments: what did you have to build? 
 
 Now ask yourself:
 * How did you know what behavior to implement?
 * How did you know which data structures or algorithms were the right ones to use?
 * How did you know your program "worked", in the end?
 
-In the context of a course, there are "expected" answers to these questions. For instance, you might say you know your code worked because you tested it (very thoroughly)! But is that really the truth? In terms of consequences, the true bar for excellent in a programming class is the grade you got. That is:
+In the context of assignments, there are expected answers to these questions. For instance, you might say you know your code worked because you tested it (*very* thoroughly, I'm sure)! But is that really the truth? In terms of consequences, the true bar for excellent in a programming class is the grade you got. That is:
   - You knew what to do because _you were told what to do_.  
   - You probably knew which algorithms to use because they'd _just been taught to you_.
   - You were confident that your programs worked because _you were told by an authority figure_.
@@ -17,14 +17,14 @@ In the context of a course, there are "expected" answers to these questions. For
 But outside that context, as (say) a professional engineer, you lose the safety net. You might be working on a program that controls the fate of billions of dollars, tempers geopolitical strife, or controls a patient's insulin pump. Even if you had a TA, would you trust them to tell you that those programs worked? Would you trust your boss to understand _exactly_ what needed to happen, and tell you _exactly_ how to do it? Probably not! Instead, you need to think carefully about what you want, how to build it, and how to evaluate what you and others have built. 
 
 ~~~admonish warning title="Don't let the perfect be the enemy of the good."
-As engineers, we strive for perfection. But perfection is an ideal; it's not obtainable. Why? First: we're human. Even if we could read our customers' minds, that's no guarantee that they know what they really need. And even if we can prove our code is correct, we might be checking for the wrong things. Second: our environment is hostile. Computers break. Patches to dependencies introduce errors. Cosmic radiation can flip bits in memory. 100% reliability is hopeless. Anyone who tells you differently is trying to sell you something. 
+As engineers, we strive for perfection. But perfection is an ideal; it's not obtainable. Why? First: we're human. Even if we could read our customers' minds, that's no guarantee that *they* know what they really need. And even if we can prove our code is correct, we might be checking for the wrong things. Second: our environment is hostile. Computers break. Patches to dependencies introduce errors. Cosmic radiation can flip bits in memory. 100% reliability is hopeless. Anyone who tells you differently is trying to sell you something. 
 
-But that doesn't mean we should give up. It just means that we should moderate our expectations. This book won't teach you how to never make mistakes. Instead, it will teach you a multiple ways to _increase your confidence_ in correctness.
+But that doesn't mean we should give up. It just means that we should moderate our expectations. Instead of focusing on perfect correctness, instead try to _increase your confidence_ in correctness.
 ~~~
 
 ## Unit Testing
 
-Let's start with unit-testing and deconstruct it. What does it do well? What does it do poorly?
+Let's start by deconstructing a confidence-building exercise most of us learn in a programming course: unit-testing. What does unit testing do well? What does it do poorly?
 
 **Exercise:** Make two lists to answer the above question. Why do we test? What could go wrong, and how can the sort of testing you've done in other classes let us down? 
 
@@ -88,7 +88,7 @@ Yes! The gnomes can escape, because they're able to use the knowledge of other g
 
 To solve this puzzle, you need to reason about what the other agents know, and what we expect them to do with that knowledge. These sorts of epistemic statements can be useful in practice. -->
 
-Of course, this isn't really about logic puzzles. 
+**This isn't really about logic puzzles.**
 
 ### A Real Scenario
 
@@ -98,7 +98,11 @@ A pair of former 1710 students did an [ISP on modeling crypto protocols](http://
 
 ![An execution of the Needham-Schroeder protocol.](./ns-custom.png)
 
-You don't need to understand the specifics of the visualization; the point is that someone who has studied crypto protocols **would**. And this really does show the classic attack on Needham-Schroeder. You may not be a crypto-protocol person, but you probably are an expert in something you'd like to model, and you might very well get the chance to do so this semester.
+You don't need to understand the specifics of the visualization; the point is that someone who has studied crypto protocols **would**. And this really does show the classic attack on Needham-Schroeder. You may not be a crypto-protocol person, but you probably are an expert in something subtle that you'd like to model, reason about, and understand better. 
+
+~~~admonish warning title="Brown CSCI 1710"
+In fact, if you're reading this as part of your coursework for CSCI 1710, you will be _expected_ to select, research, and model something yourself based on your interests. This is one of our main end-goals for the course.
+~~~
 
 ## Automated Reasoning as an Assistive Device
 
@@ -126,8 +130,9 @@ Here are some examples of "systems" that students have modeled in Forge: lifetim
 <center><img width="70%" src="./borrow-newt-custom.png"/></center>
 <center><img width="70%" src="./netlab-custom-def1.png"/></center>
 <center><img width="70%" src="./texas.png"/></center>
-**TODO: CSS, arrange these**
 ~~~
+
+**TODO: CSS, arrange the above images**
 
 
 ## The Future of Computing
@@ -138,13 +143,13 @@ There are two questions that will never go out of style, and won't be answered b
 * **What do you want to build?** What does your customer really need? Answering this requires talking to them and other stakeholders, watching their processes, seeking their feedback, and adjusting your design based on it. And no matter who (or what) is writing the actual code, you need to be able to express all this precisely enough that they (or it) can succeed at the implementation.  
 * **How will you evaluate what you get?** No matter who (or what) is building the system, verification is needed before the system can be trusted.
 
-Even setting aside the customer-facing aspects, we'll still need to think critically about what it is we want and how to evaluate whether we're getting it. The skills you learn here will remain useful (or become even more so) as engineering evolves. And those skills will be useful for more than just code. 
+Even setting aside the customer-facing aspects, we'll still need to think critically about what it is we want and how to evaluate whether we're getting it. The skills you learn here will remain useful (or become even more so) as engineering evolves. In the next chapter, we'll try to convince you that these skills will be useful for more than just code.
 
-<!-- 
 ## "Formal Methods"
 
+_Formal methods_ (FM) are ways to help you think carefully about a domain, process, or system. They use math-based techniques (which are usually implemented in tools) to help. They aren't an academic exercise; they are used widely in industry and have likely saved billions of dollars and thousands of lives.
 
-This course will teach you some concrete formal methods. It will also prepare you to engage with others, if you're interested in doing so. Some industrial examples I'm fond of include:
+Some industrial examples I'm fond of include:
 * [Amazon Web Services' Zelkova](https://aws.amazon.com/blogs/security/protect-sensitive-data-in-the-cloud-with-automated-reasoning-zelkova/), which helps administrators author better security policies for their services;
 * [Microsoft's static driver verifier](https://www.microsoft.com/en-us/research/publication/thorough-static-analysis-of-device-drivers/), which helps increase the reliability of low-level device drivers in Windows;
 * [MongoDB's work on modeling replication](https://github.com/visualzhou/mongo-repl-tla), which found a real bug in their code. Quoting the linked page: "We've never encountered this issue in testing or in the field and only found it by reasoning about the edge cases. This shows writing and model checking ... specs is an excellent alternative way to find and verify edge cases." (Ellipsis mine.)
@@ -154,19 +159,20 @@ We can find real applications for FM outside Computer Science too---even the law
 [This Github repository](https://github.com/ligurio/practical-fm) keeps a (reasonably up to date, but not exhaustive!) list of other industrial applications of formal methods. Check it out! -->
 
 
-<!-- ### (Exercise) For Next Time
+### Exercise
 
-Can you find one or two of these applications that especially interest you? Alternatively, think about other kinds of "system" you interact with regularly, or have learned about. What would you like to understand better about those systems? (A prior-year final project modeled the rules of baseball, and we all learned something about the game in the process.) -->
+Can you think of one or two domains, systems, or processes that especially interest you? Think about the kinds of "system" you interact with regularly or have learned about in your life. What would you like to understand better about those systems? 
 
+Remember that we construe the word _system_ broadly. A cryptographic protocol is a system, but so is the game of baseball. A data structure is a system, but so are chemical reactions. 
 
 ## Looking Ahead: Tools 
 
-The main tool we'll use in this course is [Forge](http://forge-fm.org). Forge is a tool for _modeling systems_; we'll talk about what that means later on. For now, be aware that we'll be progressing through three _language levels_ in Forge:
-* Froglet, which restricts the set of operations available so that we can jump right in more easily. If you have intuitions about object-oriented programming, those intuitions will be useful in Froglet, although there are a few important differences that we'll talk about.
-* Relational Forge, which expands the set of operations available to include sets, relations, and relational operators. Again, we'll cover these in detail later. They are useful for reasoning about complex relationships between objects and for representing certain domains, like databases or graphs.
-* Temporal Forge, which lets us cleanly model how a system's state evolves over time. 
+The main tool we'll use in this book is [Forge](http://forge-fm.org), a tool for modeling systems. In the course of the book, we'll be progressing through three _language levels_ in Forge:
+* **Froglet**, which restricts the set of operations so that we can jump right in more easily. If you have intuitions about object-oriented programming, those intuitions will be useful in Froglet, although there are a few important differences that we'll talk about.
+* **Relational Forge**, which expands the set of operations available to include sets, relations, and relational operators. These are useful for reasoning about complex relationships between objects and for representing certain domains, like databases or graphs.
+* **Temporal Forge**, which helps us cleanly model how a system's state evolves over time. Temporal Forge is based on the industry-standard specification language LTL&mdash;Linear Temporal Logic.
 
-We'll also use:
+We'll also use some other tools, like:
 * [Hypothesis](https://hypothesis.readthedocs.io/en/latest/), a testing library for Python; and
 * [Z3](https://github.com/Z3Prover/z3), an SMT solver library. 
 

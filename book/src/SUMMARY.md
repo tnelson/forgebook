@@ -6,22 +6,15 @@
 
 <!-- "prefix chapters"; cannot be nested -->
 # Preamble
-- [What good is this book?](./chapters/manifesto/job.md) <!-- *** GOAL: ARTCULATE ADDED POINTS -->
 - [Logic for Systems](./chapters/manifesto/manifesto.md)
-
-
-
+- [What good is this book?](./chapters/manifesto/job.md) 
 
 <!-- # What do tic-tac-toe, binary trees, and operating systems have in common? -->
 <!-- STATIC INSTANCES; NO TRANSITIONS YET -->
-# Modeling Systems
+# Modeling Static Scenarios
 - [Tic-Tac-Toe](./chapters/ttt/ttt.md)
 - [Binary Search Trees](./chapters/bst/bst.md)      <!-- *** GOAL: UNTANGLE (+ add pictures) -->
 - [Ripple-Carry Adder](./chapters/adder/rca.md)     <!-- *** GOAL: OUTLINE -->
-
-<!-- Lab follow-up: TTT part 2 -->
-
-
 
 # From Tests to Specification
 - [The Challenge of Testing: Tic-Tac-Toe]()

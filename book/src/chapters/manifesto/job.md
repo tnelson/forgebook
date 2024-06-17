@@ -22,19 +22,23 @@ I suspect that people were saying "All models are wrong" long before Box did! Bu
 (Bolding mine.) **TODO: check quote text, Wiki link does not lead to a readable paper.**
 ~~~
 
-### Professional Example: Data Models in Programming
+If you want to do software (or hardware) engineering, some amount of modeling is unavoidable. Here are two basic examples of many.
+
+### Data Models Everywhere
 
 You might already have benefitted from a good model (or suffered from a poor one) in your programming work. Whenever you write data definitions or class declarations in a program, [you're modeling](https://en.wikipedia.org/wiki/Data_model). The ground truth of the data is rarely identical to its representation. You decide on a particular way that it should be stored, transformed, and accessed. You say how one piece of data relates to another. 
 
-Your data-modeling choices affect more than just execution speed: if a pizza order can't have a delivery address that is separate from the user's billing address, important user needs will be neglected. On the other hand, it is probably OK to leave the choice of cardboard box out of the user-facing order. An order has a delivery time, which probably comes with a time zone. You could model the time zone as an integer offset from UTC, but this is a [very bad idea](https://en.wikipedia.org/wiki/Time_zone). And, since there are 24 hours in a day, the real world imposes range limits: a timezone that's a million hours ahead of UTC is probably a buggy value, even though to value `1000000` is much smaller than even a signed 32-bit `int` can represent. 
+Your data-modeling choices affect more than just execution speed: if a pizza order can't have a delivery address that is separate from the user's billing address, important user needs will be neglected. On the other hand, it is probably OK to leave the choice of cardboard box out of the user-facing order. An order has a delivery time, which probably comes with a time zone. You could model the time zone as an integer offset from UTC, but this is a [very bad idea](https://en.wikipedia.org/wiki/Time_zone). And, since there are 24 hours in a day, the real world imposes range limits: a timezone that's a million hours ahead of UTC is probably a buggy value, even though the value `1000000` is much smaller than even a signed 32-bit `int` can represent. 
 
-<!-- The _level_ of abstraction matters, too. Suppose that your app scans handwritten orders. Then handwriting becomes pixels, which are converted into an instance of your data model, which is implemented as bytes, which are stored in hardware flip-flops and so on. What matters is whether the abstraction level suits your needs, and your users'.  -->
+### Data vs. Its Representation 
+
+The _level_ of abstraction matters, too. Suppose that your app scans handwritten orders. Then handwriting becomes pixels, which are converted into an instance of your data model, which is implemented as bytes, which are stored in hardware flip-flops and so on. You probably don't need, or want, to keep all those perspectives in mind simultaneously. Languages are valuable in part because of the abstractions they foster, even if those abstractions are incomplete&mdash;they can be usefully incomplete! What matters is whether the abstraction level suits your needs, and your users'.  
+
+~~~admonish tip title="Memory Management" 
+I learned to program in the 1990s, when practitioners were at odds over automated vs. manual memory management. It was often claimed that a programmer needed to _really understand_ what was happening at the hardware level, and manually control memory allocation and deallocation for the sake of performance. Most of us don't think that anymore, _unless we need to_! Sometimes we do; often we don't. Focus your attention on what matters for the task at hand. 
+~~~
 
 <!-- In security, a _threat model_ says what will be considered and what won't be. -->
-
-<!-- ~~~admonish tip title="Memory Management" 
-I learned to program in the 1990s, when practitioners were at odds over automated vs. manual memory management. It was often claimed that a programmer needed to _really understand_ what was happening at the hardware level, and manually control memory allocation for deallocation for the sake of performance. Most of us don't think that anymore, _unless we need to_! Level of abstraction matters. 
-~~~ -->
 
 <!-- ### Professional Example: Robotics 
 
@@ -44,22 +48,36 @@ When programming a
 
  > Since all models are wrong the scientist must be alert to what is importantly wrong. It is inappropriate to be concerned about safety from mice when there are tigers abroad.  -->
 
-**Strong modeling skills are professionally valuable.** 
-
-
 ## Specification: What do you want?
 
+Suppose that I want to store date-and-time values in a computer program. That's easy enough to say, right? But the devil is in the details: What is the layout of the data? Which fields will be stored, and which will be omitted? Which values are valid, and which are out of bounds? Is the format efficiently serializable? How far backward in time should the format extend, and [how far into the future should it reach](https://en.wikipedia.org/wiki/Year_2000_problem)?
 
-[ISO standard for date and time](https://en.wikipedia.org/wiki/ISO_8601)
+And which calendar are we using, anyway? 
 
-## Testing and Verification: Did you get what you wanted?
+~~~admonish note title="Yes, that's a real question."
+If our programs are meant to work with dates prior to the 1600's, only their historical context can say whether they should be interpreted with the [Gregorian calendar](https://en.wikipedia.org/wiki/Gregorian_calendar) or the [Julian calendar](https://en.wikipedia.org/wiki/Julian_calendar). And that's just two possibilities!
+~~~
+
+If you're just building a food delivery app, you probably only need to think about some of these aspects of dates and times. If you're defining [an international standard](https://en.wikipedia.org/wiki/ISO_8601), you need to think about them all.
+
+Either way, being able to think carefully about your specification can separate quiet success from famous failure.
+
+## Testing, Validation, and Verification: Did you get what you wanted?
+
+**TODO: write here**
 
 Having thought through all that, it seems reasonable that the code should check these criteria, and produce a reasonable error if the timezone isn't valid.
 
 fuzzing...
 
-## What's "Formalism"
+## "Formalism" Isn't Absolute
 
-The word "formal" has accumulated some unfortunate implications: pedantry, stuffiness, ivory-tower abstraction, etc. 
+The word "formal" has accumulated some unfortunate connotations: pedantry, stuffiness, ivory-tower snootiness, being an [architecture astronaut](https://en.wikipedia.org/wiki/Architecture_astronaut), etc. The truth is that formalism is a sliding scale, and we can take what we need and leave the rest. 
 
-We aren't used to thinking of programming, but it is. A programming language is a formal artifact: it has a precise meaning, usually defined in a specification. Some factors are often "implementation dependent", but that too is (if documented!) a formal thing. 
+You might not be used to thinking of programming as a "formal" activity, but it is. A programming language is a formal artifact: it has a precise meaning, usually defined in a detailed specification that few people need to read fully. Some factors are often left unspecified, and thus "implementation dependent", which is one reason why the difference between specification and implementation is more fluid than you might think. 
+
+**TODO: example; is median something that fits here? Above paragraph is awkward.**
+
+
+
+
