@@ -427,7 +427,7 @@ v1_is_stronger: assert binary_search_tree_v1 is sufficient for binary_search_tre
 The `v1_is_strong` test passes. The `run` command produces an instance (actually many) where the two invariants disagree. The test, however, passes, indicating that version 1 is strictly more selective than version 2: no matter how many times we clicked "Next", we'd only see trees where `binary_search_tree_v2` is satisfied but `binary_search_tree_v1` isn't.
 
 ~~~admonish tip title="Differencing for Debugging"
-This simple technique really is powerful. You might use it to check whether two versions of the same constraint are equivalent when debugging or optimizing your model. We'll use this idea in a few examples later.**
+This simple technique really is powerful. You might use it to check whether two versions of the same constraint are equivalent when debugging or optimizing your model. **We'll use this idea in a few examples later, too.**
 ~~~
 
 We'll come back to binary search trees soon, in chapter [FILL], to see how the different invariants impact the algorithm for searching the tree.

@@ -5,11 +5,9 @@
 [Welcome](./welcome.md)
 
 <!-- "prefix chapters"; cannot be nested -->
-# Preamble
+# Preamble: Beyond Testing
 - [Logic for Systems](./chapters/manifesto/manifesto.md)
 - [What good is this book?](./chapters/manifesto/job.md) 
-
-# Beyond Testing
 - [From Tests to Properties](./chapters/properties/pbt.md)
 
 <!-- # What do tic-tac-toe, binary trees, and operating systems have in common? -->
@@ -45,25 +43,20 @@
 
 -->
 
-# Modeling State
-- [Tic-Tac-Toe Games (in progress)](./chapters/ttt/ttt_games.md)
+# Modeling State: Discrete Event Systems
+- [Tic-Tac-Toe Games](./chapters/ttt/ttt_games.md)
     <!-- - Froglet: Tic-tac-toe traces model
         - moving from transitions to traces, both have their strengths -->
 - [Recursive Descent on BSTs]()
-- [Binary Search on Arrays Instead]()
+- [Binary Search on Arrays]()
 <!-- correspondence??? -->
-
 
    <!-- - Froglet: binary search on array model
         - Preservation of invariant
         - Preservation fails: binary search is broken (if the array is too big – see Bloch’s post)
         - Enrichment of invariant -->
 
-   <!-- - Froglet: Sudoku model
-        - solver
-        - puzzle generation -->
-
-   - [Validating Models]() 
+- [Validating Stateful Models]() 
         <!-- - can we trust the model?
         - vacuity, other pitfalls in verification -->
 
@@ -92,7 +85,7 @@
   - Tying it all together: how does Forge work?
  -->
 
-# Tomorrow and Tomorrow
+# State with Temporal Specification 
 - [Safety and Liveness]()
 - [Temporal Forge]()
 - [Modeling Mutual Exclusion]()
