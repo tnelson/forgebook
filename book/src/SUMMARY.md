@@ -9,17 +9,16 @@
 - [Logic for Systems](./chapters/manifesto/manifesto.md)
 - [What good is this book?](./chapters/manifesto/job.md) 
 
+# Beyond Testing
+- [From Tests to Properties](./chapters/properties/pbt.md)
+
 <!-- # What do tic-tac-toe, binary trees, and operating systems have in common? -->
 <!-- STATIC INSTANCES; NO TRANSITIONS YET -->
 # Modeling Static Scenarios
-- [Tic-Tac-Toe](./chapters/ttt/ttt.md)
-- [Binary Search Trees](./chapters/bst/bst.md)      <!-- *** GOAL: UNTANGLE (+ add pictures) -->
+- [Tic-Tac-Toe](./chapters/ttt/ttt.md)              <!-- *** GOAL: re-read, touch on methodology, spec vs. reqs. reinforce "constraints, not code" vs. PBT beforehand. -->
+- [Binary Search Trees](./chapters/bst/bst.md)      <!-- *** GOAL: add pictures -->
 - [Ripple-Carry Adder](./chapters/adder/rca.md)     <!-- *** GOAL: OUTLINE -->
 
-# From Tests to Specification
-- [The Challenge of Testing: Tic-Tac-Toe]()
-- [PBT: What do you want?]()
-- [Constraints, not Code]()
 <!-- - The challenge of testing
   - Python: tic-tac-toe. Let's test our TTT program.
     - What does it mean to test such a program?
