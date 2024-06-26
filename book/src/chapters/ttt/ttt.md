@@ -121,6 +121,12 @@ a table of (`Int`, `Int`, `Player`) tuples for each `Board`. We'll see how to wo
 These definitions sketch the overall shape of a board: players, marks on the board, and so on. But not all boards that fit the definition will be valid. For example:
 * Forge integers aren't true mathematical integers, but are bounded by a bitwidth we give whenever we run the tool. So we need to be careful here. We want a classical 3-by-3 board with indexes of (say) `0`, `1`, and `2`, not a board where (e.g.) row `-5`, column `-1` is a valid location. 
 
+~~~admonish note title="Why start with 0?" 
+
+We could just as easily use `1`, `2`, and `3` as our indexes. I picked `0` as the starting point out of habit, because list indexes start from `0` in the programming languages I tend to use.
+
+~~~
+
 We'll call these _well-formedness_ constraints. They aren't innately enforced by our `sig` declarations, but we'll almost always want Forge to enforce them, so that it doesn't find "garbage instances". Let's write a _wellformedness predicate_:
 
 ```forge,editable
@@ -214,6 +220,8 @@ There are many options for visualization. The default which loads initially is a
 
 <center><img width="70%" src="./ttt-viz.png"/></center>
 
+**(TODO: make this clickable to show it bigger? Want to see the whole window, but then the graph is small.)**
+
 This isn't very useful; it looks nothing like a tic-tac-toe board! We can make more progress by using the "Table" visualization&mdash;which isn't ideal either:
 
 <center><img width="40%" src="./ttt-viz-table.png"/></center>
@@ -231,6 +239,10 @@ We'll talk more about visualization scripts later. For now, let's proceed. **TOD
 This instance contains a single board, and it has 9 entries. Player `O` has moved in all of them (the `0` suffix of `O0` in the display is an artifact of how Forge's engine works; ignore it for now). It's worth noticing two things:
 * This board doesn't look quite right: player `O` occupies all the squares. We might ask: has player `O` been cheating? But the fact is that this board _satisfies the constraints we have written so far_. Forge produces it simply because our model isn't yet restrictive enough, and for no other reason. "Cheating" doesn't exist yet. 
 * We didn't say _how_ to find that instance. We just said what we wanted, and the tool performed some kind of search to find it. So far the objects are simple, and the constraints basic, but hopefully the power of the idea is coming into focus. 
+
+~~~admonish note title="Why `Board3` when there's only one board?" 
+Here, we see `Board3` because the solver had a few options to pick from: we never said there should only ever be one `Board`, after all. So, under the hood, it was considering the potential existence of multiple boards. And then it happened to pick this one to exist in this instance.
+~~~
 
 ### Reflection: Implementation vs. Model
 
@@ -346,7 +358,7 @@ Should we add something like `OTurn[s] or XTurn[s]` to our wellformedness predic
 Notice the similarity between this issue and what we do in property-based testing. Here, we're forced to distinguish between what a reasonable _board_ is (analogous to the generator's output in PBT) and what a reasonable _behavior_ is (analogous to the validity predicate in PBT). One narrows the scope of possible worlds to avoid true "garbage"; the other checks whether the system behaves as expected in one of those worlds.
 ~~~
 
-We'll come back to this later, when we've had a bit more modeling experience. For now, let's separate our goal into a new predicate called `balanced`, and add it to our `run` command above:
+We'll come back to this later, when we've had a bit more modeling experience. For now, let's separate our goal into a new predicate called `balanced`, and add it to our `run` command above so that Forge will find us an instance where some board is both `balanced` and `wellformed`:
 
 ```forge,editable
 pred balanced[s: Board] {
@@ -355,9 +367,9 @@ pred balanced[s: Board] {
 run { some b: Board | wellformed[b] and balanced[b]} 
 ```
 
-If we click the "Next" button a few times, we see that not all is well: we're getting boards where `wellformed` is violated (e.g., entries at negative rows, or multiple moves in one square). 
+If we click the "Next" button a few times, we see that not all is well: we're getting boards where `wellformed` is violated (e.g., entries at negative rows, or multiple moves in one square). Why is this happening?
 
-We're getting this because of how the `run` was phrased. We said to find an instance where _some board_ was well-formed and valid, not one where _all boards_ were. By default, Forge will find instances with up to 4 `Boards`. So we can fix the problem either by telling Forge to find instances with only 1 Board:
+We're getting this because of how the `run` was phrased. We said to find an instance where _some board_ was well-formed and valid, not one where _all boards_ were. Our `run` is satisfied by any instance where _at least one_ `Board` is `wellformed`; the others won't affect the truth of the constraint. By default, Forge will find instances with up to 4 `Boards`. So we can fix the problem either by telling Forge to find instances with only 1 Board:
 
 ```forge,editable
 run { some b: Board | wellformed[b] and balanced[b]} 
