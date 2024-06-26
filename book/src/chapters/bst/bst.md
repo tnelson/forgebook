@@ -163,6 +163,8 @@ That visualization is not how we'd choose to draw the tree: it has the `left` fi
 
 #### An unbalanced binary tree is still well-formed.
 
+When we draw binary trees, often we draw them in a _balanced_ way: nice and "bushy", with roughly even distribution of nodes to the left and right. But an unbalanced tree is still a tree, and we should make sure it counts as one.
+
 ```forge,editable
 example p_unbalanced_chain is wellformed for {
   Node = `Node0 + `Node1 + `Node2 + `Node3

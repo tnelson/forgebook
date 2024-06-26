@@ -25,7 +25,7 @@ Air resistance! Friction! We can still get a reasonable approximation for many p
 
 ## Systems vs. Models (and Implementations)
 
-When we say "systems" in this module, we mean the term broadly. A distributed system (like [replication in MongoDB](https://github.com/visualzhou/mongo-repl-tla)) is a system, but so are user interfaces and hardware devices like CPUs and insulin pumps. Git is a system for version control. The web stack, cryptographic protocols, chemical reactions, the rules of sports and games---these are all systems too!
+When we say "systems" in this module, we mean the term broadly. A distributed system (like [replication in MongoDB](https://github.com/visualzhou/mongo-repl-tla)) is a system, but so are user interfaces and hardware devices like CPUs and insulin pumps. Git is a system for version control. The web stack, cryptographic protocols, chemical reactions, the rules of sports and games&mdash;these are all systems too!
 
 To help build intuition, let's work with a simple system: the game of [tic-tac-toe](https://en.wikipedia.org/wiki/Tic-tac-toe) (also called noughts and crosses). There are _many_ implementations of this game, including [this one](https://csci1710.github.io/2023/examples/ttt.py) that Tim wrote for these notes in Python. And, of course, these implementations often have corresponding test suites, like [this (incomplete) example](https://csci1710.github.io/2023/examples/test_ttt.py).
 
@@ -92,7 +92,7 @@ abstract sig Player {}
 one sig X, O extends Player {}
 ```
 
-You can think of `sig` in Forge as declaring a kind of object. A `sig` can extend another, in which case we say that it is a _child_ of its parent, and child `sig`s cannot overlap. When a sig is `abstract`, any member must also be a member of one of that `sig`'s children; in this case, any `Player` must either be `X` or `O`. Finally, a `one` sig has exactly one member---there's only a single `X` and `O` in our model.
+You can think of `sig` in Forge as declaring a kind of object. A `sig` can extend another, in which case we say that it is a _child_ of its parent, and child `sig`s cannot overlap. When a sig is `abstract`, any member must also be a member of one of that `sig`'s children; in this case, any `Player` must either be `X` or `O`. Finally, a `one` sig has exactly one member&mdash;there's only a single `X` and `O` in our model.
 
 We also need a way to represent the game board. We have a few options here: we could create an `Index` sig, and encode an ordering on those (something like "column A, then column B, then column C"). Another is to use Forge's integer support. Both solutions have their pros and cons. Let's use integers, in part to get some practice with them.
 
@@ -134,6 +134,10 @@ pred wellformed[b: Board] {
 }
 ```
 
+~~~admonish tip title="Comments in Forge"
+Forge treats either `--` or `//` as beginning a line-level comment, and `/* ... */` as denoting a block comment. This is different from the Python code we saw in the last section! In Forge, `#` has meaning.
+~~~
+
 This predicate is true of any `Board` if and only if the above 2 constraints are satisfied. Let's break down the syntax: 
 * Constraints can quantify over a domain. E.g.,`all row, col: Int | ...` says that for any pair of integers (up to the given bidwidth), the following condition (`...`) must hold. Forge also supports, e.g., existential quantification (`some`), but we don't need that yet. We also have access to standard boolean operators like `or`, `implies`, etc. 
 * _Formulas_ in Forge always evaluate to a boolean; _expressions_ evaluate to sets. For example,
@@ -142,7 +146,7 @@ This predicate is true of any `Board` if and only if the above 2 constraints are
 * A `pred` (predicate) in Forge is a helper function that evaluates to a boolean. Thus, its body should always be a formula. 
 
 ~~~admonish tip title="Predicates are declarative"
-Notice that, rather than describing a process that produces a well-formed board, or even instructions to check well-formedness, we've just given a declarative description of what's necessary and sufficient for a board to be well-formed. If we'd left the predicate body empty, _any_ board would be considered well-formed---there'd be no formulas to enforce!
+Notice that, rather than describing a process that produces a well-formed board, or even instructions to check well-formedness, we've just given a declarative description of what's necessary and sufficient for a board to be well-formed. If we'd left the predicate body empty, _any_ board would be considered well-formed&mdash;there'd be no formulas to enforce!
 ~~~
 
 ### A Few Examples
@@ -210,7 +214,7 @@ There are many options for visualization. The default which loads initially is a
 
 <center><img width="70%" src="./ttt-viz.png"/></center>
 
-This isn't very useful; it looks nothing like a tic-tac-toe board! We can make more progress by using the "Table" visualization---which isn't ideal either:
+This isn't very useful; it looks nothing like a tic-tac-toe board! We can make more progress by using the "Table" visualization&mdash;which isn't ideal either:
 
 <center><img width="40%" src="./ttt-viz-table.png"/></center>
 
