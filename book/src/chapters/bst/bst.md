@@ -38,8 +38,8 @@ Keep in mind that this isn't a strict "waterfall" style progression; we may retu
 A binary tree is made up of nodes. Each node in the tree has at most one left child and at most one right child. While nodes in the tree can hold values of most any type, for simplicity we'll stick to integers. 
 
 Unlike in tic-tac-toe, this definition is recursive:
-
-```forge,editable
+  
+```forge,runnable
 #lang forge/froglet
 sig Node {
   key: one Int,     -- every node has some key 
@@ -56,7 +56,14 @@ What makes a binary tree a binary tree? We might start by saying that:
 
 It's sometimes useful to write domain predicates early, and then use them to define wellformedness more clearly. For example, it might be useful to write a helper that describes what it means for a node to be a root node:
 
-```forge,editable
+```forge,runnable
+~#lang forge/froglet
+~sig Node {
+~  key: one Int,     -- every node has some key 
+~  left: lone Node,  -- every node has at most one left-child
+~  right: lone Node  -- every node has at most one right-child
+~}
+~
 pred isRoot[n: Node] {
   -- a node is a root if it has no ancestor
   no n2: Node | n = n2.left or n = n2.right

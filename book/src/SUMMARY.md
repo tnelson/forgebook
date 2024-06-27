@@ -2,7 +2,7 @@
 <!-- # Logic for Systems: Lightweight Formal Methods for the Practical Engineer -->
 # Summary 
 
-[Welcome](./welcome.md)
+[How to Read this book](./welcome.md)
 
 <!-- "prefix chapters"; cannot be nested -->
 # Preamble: Beyond Testing
@@ -43,7 +43,7 @@
 
 -->
 
-# Modeling State: Discrete Event Systems
+# Discrete Event Systems
 - [Tic-Tac-Toe Games](./chapters/ttt/ttt_games.md)
     <!-- - Froglet: Tic-tac-toe traces model
         - moving from transitions to traces, both have their strengths -->
@@ -60,7 +60,7 @@
         <!-- - can we trust the model?
         - vacuity, other pitfalls in verification -->
 
-# Atoms from Bits
+# Modeling Relationships 
 - [Relational Forge]()
 - [Reference-Counting Memory Management]()
 - [Modeling Boolean Logic]()
@@ -85,7 +85,7 @@
   - Tying it all together: how does Forge work?
  -->
 
-# State with Temporal Specification 
+# Temporal Specification
 - [Safety and Liveness]()
 - [Temporal Forge]()
 - [Modeling Mutual Exclusion]()
@@ -176,6 +176,8 @@
 
   - Decidability, completeness, and incompleteness -->
 
+# Forge Documentation
+- [Placeholder Test](./chapters/docs/test.md)
 
 
 <!-- ## Exercises

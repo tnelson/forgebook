@@ -34,11 +34,20 @@ inline-delimiter = { left = "$", right = "$" }
 
 [output.html]
 site-url = "/book/"
+default-theme = "navy"
 additional-css = ["././mdbook-admonish.css", "./mdbook-admonish.css"]
+smart-punctuation = true
+no-section-label = true
 
 [output.html.fold]
 enable = true
+level = 1
 
 [output.html.playground]
 editable = true
 runnable = true
+copyable = true
+
+[output.html.code.hidelines]
+python = "~"
+forge = "~" 
