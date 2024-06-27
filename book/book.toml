@@ -35,7 +35,7 @@ inline-delimiter = { left = "$", right = "$" }
 [output.html]
 site-url = "/book/"
 default-theme = "navy"
-additional-css = ["././mdbook-admonish.css", "./mdbook-admonish.css"]
+additional-css = ["././mdbook-admonish.css", "./mdbook-admonish.css", "./custom.css"]
 smart-punctuation = true
 no-section-label = true
 

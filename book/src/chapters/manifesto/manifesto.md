@@ -127,13 +127,34 @@ Jeanette Wing and Daniel Jackson wrote a short article coining the term "lightwe
 When we say "systems" in this book we don't necessarily mean the kind of systems you see in a class on networks, hardware architecture, or operating systems. You can apply the techniques in this book to those subjects quite naturally, but you can also apply it to user interfaces, type systems in programming, hardware, version control systems like Git, web security, cryptographic protocols, robotics, puzzles, sports and games, and much more. So we construe the word "system" very broadly.
 
 Here are some examples of "systems" that students have modeled in Forge: lifetimes in Rust, network reachability, and poker!
-<center><img width="70%" src="./borrow-newt-custom.png"/></center>
-<center><img width="70%" src="./netlab-custom-def1.png"/></center>
-<center><img width="70%" src="./texas.png"/></center>
+
+<div class="showcase">
+  <div class="example">
+    <div class="vizimg"><img width="100%" src="./borrow-newt-custom.png"/></div>
+    <div class="viztext">
+      <div class="vizlabel">Rust Lifetimes and Borrowing</div>
+      <div class="vizauthor">Thomas Castleman and Ria Rajesh</div>
+      <div class="vizpub">Course Project</div>
+    </div>
+  </div>
+  <div class="example">
+    <div class="vizimg"><img width="100%" src="./netlab-custom-def1.png"/></div>
+    <div class="viztext">
+      <div class="vizlabel">Network Reachability</div>
+      <div class="vizauthor">Tim Nelson and Pamela Zave</div>
+      <div class="vizpub"><a href="https://fm.csl.sri.com/SSFT23/">(link to lab)</a></div>
+    </div>
+  </div>
+  <div class="example">
+    <div class="vizimg"><img width="100%" src="./texas.png"/></div>
+    <div class="viztext">
+      <div class="vizlabel">Texas Hold 'Em</div>
+      <div class="vizauthor">Matthew Boranian and Austin Lang</div>
+      <div class="vizpub">Course Project</div>
+    </div>
+  </div>
+</div>
 ~~~
-
-**TODO: CSS, arrange the above images**
-
 
 ## The Future of Computing
 
@@ -150,13 +171,13 @@ Even setting aside the customer-facing aspects, we'll still need to think critic
 _Formal methods_ (FM) are ways to help you think carefully about a domain, process, or system. They use math-based techniques (which are usually implemented in tools) to help. They aren't an academic exercise; they are used widely in industry and have likely saved billions of dollars and thousands of lives.
 
 Some industrial examples I'm fond of include:
-* [Amazon Web Services' Zelkova](https://aws.amazon.com/blogs/security/protect-sensitive-data-in-the-cloud-with-automated-reasoning-zelkova/), which helps administrators author better security policies for their services;
-* [Microsoft's static driver verifier](https://www.microsoft.com/en-us/research/publication/thorough-static-analysis-of-device-drivers/), which helps increase the reliability of low-level device drivers in Windows;
-* [MongoDB's work on modeling replication](https://github.com/visualzhou/mongo-repl-tla), which found a real bug in their code. Quoting the linked page: "We've never encountered this issue in testing or in the field and only found it by reasoning about the edge cases. This shows writing and model checking ... specs is an excellent alternative way to find and verify edge cases." (Ellipsis mine.)
+* [Amazon Web Services' Zelkova](https://aws.amazon.com/blogs/security/protect-sensitive-data-in-the-cloud-with-automated-reasoning-zelkova/), which helps administrators author better security policies for their services. This book will give you the tools to build a policy-analysis system like Zelkova yourself. 
+* [Microsoft's static driver verifier](https://www.microsoft.com/en-us/research/publication/thorough-static-analysis-of-device-drivers/), which helps increase the reliability of low-level device drivers in Windows. While this book doesn't cover the techniques they used, I love to showcase this work (which helped Microsoft ship more stable drivers and, at this point, is now decades old).
+* [MongoDB's work on modeling replication](https://github.com/visualzhou/mongo-repl-tla), which found a real bug in their code. Quoting the linked page: "We've never encountered this issue in testing or in the field and only found it by reasoning about the edge cases. This shows writing and model checking ... specs is an excellent alternative way to find and verify edge cases." (Ellipsis mine.) We won't use this exact _tool_, but we'll cover other model checkers in this book.
 
 We can find real applications for FM outside Computer Science too---even the law. [Here's an article](https://roundtablelaw.medium.com/utterly-unpersuasive-formal-methods-and-law-bb8ecf048374) about the value of modeling _legal concepts_ to find loopholes in the law. This is the sort of FM we'll be learning how to do in 1710.
 
-[This Github repository](https://github.com/ligurio/practical-fm) keeps a (reasonably up to date, but not exhaustive!) list of other industrial applications of formal methods. Check it out! -->
+[This Github repository](https://github.com/ligurio/practical-fm) keeps a (reasonably up to date, but not exhaustive!) list of other industrial applications of formal methods. Check it out! 
 
 
 ### Exercise
