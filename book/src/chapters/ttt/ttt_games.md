@@ -119,8 +119,6 @@ The visualizer also has a "Next" button. If you press it enough times, Forge run
 
 Recall that our worldview for this model is that systems _transition_ between _states_, and thus we can think of a system as a directed graph. If the transitions have arguments, we'll sometimes label the edges of the graph with those arguments. This view is sometimes called a _discrete event_ model, because one event happens at a time. Here, the events are moves of the game. In a bigger model, there might be many different types of events.
 
-**TODO: I think this goes later in the book, we don't want to start on finite traces yet.**
-
 Today, we'll ask Forge to find us traces of the system, starting from an initial state. We'll also add a `Game` sig to incorporate some metadata.
 
 ```alloy
@@ -226,7 +224,7 @@ One of the tricky things about modeling is that often you're trying to formalize
 
 ## Anticipated Questions
 
-**TODO: much of this should be moved later**
+**TODO: much of this should be moved EARLIER -- into the Q&A for part 1**
 
 ### A Visual Sketch of How Forge Searches
 
@@ -365,3 +363,456 @@ These two tests do not express the same thing! One asks Forge to find an instanc
 ~~~admonish warning title="Use `assert`" 
 We encourage using `assert` whenever possible in practice. We'll show you soon how to use `assert` with predicates that take arguments, etc. 
 ~~~
+
+
+
+
+
+<!-- This ends roughly where intro_modeling 4 ended in Spring 2024's notes. -->
+<!-- Now, we start finite_and_inductive -->
+
+
+
+
+
+
+
+## Back To Tic-Tac-Toe: Ending Games
+
+When we stopped last time, we'd written this `run` command:
+
+```alloy
+run {
+  wellformed
+  traces
+} for exactly 10 State for {next is linear}
+```
+
+**Reminder:** Without a `run`, an `example`, or a similar _command_, running a Forge model will do nothing. 
+
+From this `run` command, Forge will find _traces_ of the system (here, games of Tic-Tac-Toe) represented as a linear sequence of exactly 10 `State` objects.
+
+Do you have any worries about the way this is set up?
+
+<details>
+<summary>Think, then click!</summary>
+Are all Tic-Tac-Toe games 10 states long? 
+    
+Well, _maybe_; it depends on how we define a game. If we want a game to stop as soon as nobody can win, our `exactly 10 State` bound is going to prevent us from finding games that are won before the final cell of the board is filled.    
+</details>
+
+Let's add the following guard constraint to the `move` transition, which forces games to end as soon as somebody wins.
+
+```alloy
+all p: Player | not winner[pre, p]
+```
+
+Now we've got problems. Normally we could fix the issue by getting rid of the `exactly`. Unfortunately, there's a hidden snag: when we tell Forge in this way that that `next` is linear, it automatically makes the bound exact. 
+
+This behavior, which I admit is bizarre at first, exists for two reasons:
+* historical reasons: we inherit `is linear` from Alloy, which uses somewhat different syntax to mean the same thing; and
+* performance reasons: since the `is linear` annotation is almost always used for trace-generation, and trace-generation solving time grows (in the worst case) exponentially in the length of the trace, we will almost always want to reduce unnecessary uncertainty. Forcing the trace length to always be the same reduces the load on the solver, and makes trace-generation somewhat more efficient.
+
+But now we need to work around that constraint. Any ideas? Hint: do we need to have _only one_ kind of transition in our system?
+ 
+<details>
+<summary>Think, then click!</summary>
+
+No. A common way to allow trace length to vary is by adding a "do nothing" transition. (In the literature, this is called a _stutter transition_.) 
+    
+The trick is in how to add it without also allowing a "game" to consist of nobody doing anything. To do that requires some more careful modeling.
+
+</details>
+</br>
+
+Let's add an additional transition that does nothing. We can't "do nothing" in the predicate body, though -- an empty predicate body would just mean _anything_ could happen. What we mean to say is that the state of the board remains the same, even if the before and after `State` objects differ.
+
+```alloy
+pred doNothing[pre: State, post: State] {
+    all row2: Int, col2: Int | 
+        post.board[row2][col2] = pre.board[row2][col2]
+}
+```
+
+We also need to edit the `traces` predicate to allow `doNothing` to take place:
+
+```alloy
+pred traces {
+    -- The trace starts with an initial state
+    starting[Game.initialState]
+    no sprev: State | sprev.next = Game.initialState
+    -- Every transition is a valid move
+    all s: State | some Game.next[s] implies {
+      some row, col: Int, p: Player | {
+        move[s, row, col, p, Game.next[s]] 
+      }
+      or
+      doNothing[s, Game.next[s]]      
+    } 
+}
+```
+
+As it stands, this fix solves the _overconstraint_ problem of never seeing an early win, but introduces a new _underconstraint_ problem: we don't want `doNothing` transitions to happen just anywhere!
+
+Here's how I like to fix it:
+
+```alloy
+gameOver[s: State] {
+  some p: Player | winner[s, p]
+}
+```
+
+Why a new predicate? Because I want to use different predicates to represent different concepts. 
+
+When should a `doNothing` transition be possible? _When the game is over!_
+
+```alloy
+pred doNothing[pre: State, post: State] {
+    gameOver[pre] -- guard of the transition
+    pre.board = post.board -- effect of the transition
+}
+```
+
+If we wanted to, we could add a `not gameOver[pre]` to the `move` predicate, enforcing that nobody can move at all after someone has won.
+
+## Do The Rules Allow Cheating?
+
+Let's ask Forge whether a `cheating` state is possible under the rules. 
+
+```alloy
+run {
+  wellformed
+  traces
+  some bad: State | cheating[bad]
+} for exactly 10 State for {next is linear}
+```
+
+This should work---assuming we don't drop the `is linear` annotation. Without it, nothing says that every state must be in the trace, and so Forge could produce an instance with an "unused" cheating state.
+
+## Checking Conjectures
+
+When I was very small, I thought that moving in the middle of the board would guarantee a win at Tic-Tac-Toe. Now I know that isn't true. But could I have used Forge to check my conjecture (if I'd taken 1710 at that point in life)?
+
+<details>
+<summary>Think, then Click!</summary>
+Here's how I did it:    
+    
+```alloy
+run {
+  wellformed
+  traces
+  -- "let" just lets us locally define an expression
+  --  good for clarity in the model!
+  -- here we say that X first moved in the middle
+  let second = Trace.next[Trace.initialState] |
+    second.board[1][1] = X
+  -- ...but X didn't win
+  all s: State | not winner[s, X]
+} for exactly 10 State for {next is linear}
+```    
+    
+</details>
+
+We could also write this using an assertion (which would fail):
+
+```
+pred moveInMiddle { 
+  wellformed
+  traces
+  let second = Trace.next[Trace.initialState] |
+    second.board[1][1] = X
+}
+pred xWins {
+  all s: State | not winner[s, X]
+}
+assert moveInMiddle is sufficient for xWins 
+  for exactly 10 State for {next is linear}
+```
+
+---
+
+You might wonder how `assert` can be used for predicates that take arguments. For example, suppose we had defined `wellformed` to take a board, rather than quantifying over `all` boards in its body. The `assert` syntax can take (one layer of) quantification. Would `move` preserve `wellformed`-ness?
+
+Here's how we'd write that. Notice we don't even need to use the `Game` here (and thus don't need to give the `is linear` annotation)! We're just asking Forge about 2 boards at a time:
+
+```
+pred someMoveFromWF[pre, post: Board] { 
+  wellformed[pre]
+  some r, c: Int, p: Player | move[pre, r, c, p, post]
+}
+assert all pre,post: Board | move[pre,post] is sufficient for wellformed[post] 
+```
+
+### Reminder: The Evaluator
+
+If you're viewing an instance, you can always select the evaluator tray and enter Forge syntax to see what it evaluates to in the instance shown. You can enter both formulas and expressions. We also have the ability to refer to objects in the world directly. E.g., we could try:
+
+```alloy
+all s: State | not winner[s, X]
+```
+
+but also (assuming `Board0` is an object):
+
+```alloy
+winner[Board0, X]
+```
+
+### Going Further
+
+This illustrates a new class of queries we can ask Forge. Given parties following certain _strategies_, is it possible to find a trace where one strategy fails to succeed vs. another? 
+
+**Challenge exercise:** Write a `run` that searches for a game where both parties always _block_ immediate wins by their opponent. Is it ever possible for one party to win, if both will act to prevent a 3-in-a-row on the next turn?
+
+## Will This Always Work?
+
+Let's say you're checking properties for a real system. A distributed-systems algorithm, maybe, or a new processor. Even a more complex version of Tic-Tac-Toe! 
+
+Next time, we'll talk about the problems with traces, which turn out to be  **central challenges in software and hardware verification**. 
+
+
+## (Optional) Modeling Tip: Dealing with Unsatisfiability
+
+Many of you have had your first encounter with an over-constraint bug this week. Maybe you wrote an `assert` and it seemed to never stop. Maybe you wrote a `run` command and Sterling just produced an `UNSAT0` result. 
+
+Getting back an unsat result can take a long time. Why? Think of the search process. If there is a satisfying instance, the solver can find it early. If there isn't, the solver needs to explore the entire space of possibilities. Yeah, there are smart algorithms for this, and it's not *really* enumerating the entire space of instances, but the general idea holds. 
+
+So if you run Forge and it doesn't seem to ever terminate, it's not necessary a Forge problem---surprising over-constraint bugs can produce this behavior.
+
+So, how do you debug a problem like this? The first thing I like to do is reduce the bounds (if possible) and, if I still get unsat, I'll use that smaller, faster run to debug. But at that point, we're kind of stuck. `UNSAT0` isn't very helpful. 
+
+Today I want to show you a very useful technique for discovering the problem. There are more advanced approaches we'll get to later in the course, but for now this one should serve you well. 
+
+The core idea is: encode an instance you'd expect to see as a set of constraints, run _those_ constraints only, and then use the evaluator to explore why it fails your other constraints. Let's do an example!
+
+```alloy
+#lang forge/bsl
+-- NOT THE EXACT STENCIL!
+sig State {
+  top: lone Element
+}
+sig Element {
+  next: lone Element             
+}
+
+pred buggy {
+  all s: State | all e: Element {
+    s.top = e or reachable[e, s.top, next]
+  }
+  some st1, st2: State | st1.top != st2.top     
+  all e: Element | not reachable[e, e, next]
+}
+test expect {
+  exampleDebug: {buggy} is sat
+}
+```
+
+This test fails. But why?
+
+```alloy
+run {
+  some st1, st2: State |
+  some ele1, ele2: Element | {
+    st1.top = ele1
+    st2.top = ele2
+    ele1.next = ele2   
+    no ele2.next    
+  }
+} for exactly 2 State, exactly 2 Element
+```
+
+Given this instance, the question is: **why didn't Forge accept it?** There must be some constraint, or constraints, that it violates. Let's find out which one. We'll paste them into the evaluator...
+* `some st1, st2: State | st1.top != st2.top`? This evaluates to `#t` (true). No problem there.
+* `  all s: State | all e: Element {
+    s.top = e or reachable[e, s.top, next]
+  }`? This evaluates to `#f` (false). So this is a problem.
+  
+Now we proceed by breaking down the constraint. The outer shell is an `all`, so let's plug in a concrete value:
+*  `all e: Element {
+    State0.top = e or reachable[e, State0.top, next]
+  }`? This evaluates to `#f`. So the constraint fails for `State0`. 
+  
+**Important**: Don't try to name specific states in your model. They _don't exist_ at that point. 
+
+Which element does the constraint fail on? Again, we'll substitute concrete values and experiment:
+*  `State0.top = Element0 or reachable[Element0, State0.top, next]`? This evaluates to `#t`. What about `State0.top = Element1 or reachable[Element1, State0.top, next]`?
+
+Following this process very often leads to discovering an over-constraint bug, or a misconception the author had about the goals of the model or the meaning of the constraints. 
+
+**Question: What's the problem here?**
+
+<details>
+<summary>Think, then click!</summary>
+
+Since the `next` field never changes with time, the `all` constraint doesn't allow states to vary the `top` of the stack. Instead, we need a weaker constraint to enforce that the stack is shaped like a state.
+
+</details>
+
+
+
+
+
+
+
+
+
+
+
+~~~admonish note title="CSCI 1710"
+Good job on Intro to Modeling! Your next homework will be released today. It's about two things:
+* exploring the design space of physical keys; and 
+* pooling knowledge to hack them, with a little help from Forge. 
+
+After that homework, your curiosity modeling assignment will begin! Think of this like a miniature final project: you'll use Forge to model something you're interested in, on a relatively small scale. We like this to be a partner project if possible, so it's worth finding partners and thinking about ideas now. If you don't know anyone in the class, we'll provide some help. 
+~~~
+
+Today, we'll focus on:
+* testing with examples and assertions; 
+* some of the limitations of full-trace verification; and  
+* trying another approach to verification that doesn't require generating full traces.
+
+## Reminder about Examples
+
+Where an `assert` or `run` is about checking satisfiability or unsatisfiability of some set of constraints, an `example` is about whether a _specific_ instance satisfies a given predicate. This style of test can be extremely useful for checking that (e.g.) small helper predicates do what you expect.
+
+Why use `example` at all? A couple of reasons:
+* It is often much more convenient (once you get past the odd syntax) than adding `one sig`s or `some` quantification for every object in the instance, provided you're trying to describe an _instance_ rather than a property that defines a set of them---which becomes a better option as models become more complex.
+* Because of how it's compiled, an `example` can sometimes run faster than a constraint-based equivalent. 
+
+You may be wondering whether there's a way to leverage that same speedup in a `run` command. Yes, there is! But for now, let's get used to the syntax just for writing examples. Here are some, well, examples:
+
+```alloy
+pred someXTurn {some s: State | XTurn[s]}
+example emptyBoardXturn is {someXTurn} for {
+  State = `State0
+  no `State0.board
+}
+```
+
+Here, we've said that there is one state in the instance, and its `board` field has no entries. We could have also just written `no board`, and it would have worked the same.
+
+```alloy
+-- You need to define all the sigs that you'll use values from
+pred someOTurn {some b: Board | OTurn[b]}
+example xMiddleOturn is {someOTurn} for {
+  Board = `Board0
+  Player = `X0 + `O0
+  X = `X0
+  O = `O0
+  `Board0.board =  (1, 1) -> `X0
+}
+```
+
+What about assertions, though? You can think of assertions as _generalizing_ examples. I could have written something like this:
+
+```alloy
+pred someXTurn {some b:Board | xturn[b]}
+pred emptySingleBoard {
+  one b: Board | true
+  all b: Board, r,c: Int | no b.board[r][c]
+}
+assert emptySingleBoard is sufficient for someXTurn  
+```
+
+That's pretty coarse-grained, though. So let's write it in a better way:
+
+```alloy
+pred emptyBoard[b: Board] { all r, c: Int | no b.board[r][c] }
+assert all b: Board | emptyBoard[b] is sufficient for xturn[b]
+```
+
+Notice how, by adding variables to the assertion, we're able to write less-verbose assertions and re-use our predicates better. 
+
+~~~admonish tip title="But if examples are faster, why use assertions?"
+First, examples aren't _always_ faster. There are also some models we'll write later where `example` isn't supported. And, of course, as the model becomes more complex, the example becomes longer and longer as you try to define the value of all fields.
+
+But there's a more important reason: assertions can express _properties_. Because they can state arbitrary constraints, there's an analogy to property-based testing: where `example`s are like traditional unit tests, `assert`ions are like the checker predicates you wrote in Hypothesis. 
+
+So there's a role for both of them.
+~~~
+
+## Traces: Good and Bad
+
+When we stopped last time, we'd finished our model of tic-tac-toe. We could generate a full game of up to 10 board states, and reason about what was possible in any game. 
+
+This works great for tic-tac-toe, and also in many other real verification settings. But there's a huge problem ahead. Think about verifying properties about a more complex system---one that didn't always stop after at most 9 steps. If we want to confirm that some bad condition can never be reached, _how long a trace do we need to check?_
+
+<details>
+<summary>Think, then click!</summary>
+
+What's the longest (simple--i.e., no cycles) path in the transition system? That's the trace length we'd need. 
+</details>
+
+That's potentially a lot of states in a trace. Hundreds, thousands, billions, ... So is this entire approach doomed from the start? 
+
+Note two things:
+* Often there _are_ "shallow" bugs that can be encountered in only a few steps. In something like a protocol or algorithm, scaling to traces of length 10 or 20 can still find real bugs and increase confidence in correctness. 
+* There's more than one way to verify. This wasn't the only technique we used to check properties of tic-tac-toe; let's look deeper at something we saw awhile back.
+
+## Proving Preservation Inductively
+
+Let's turn to a programming problem. Suppose that we've just been asked to write the `add` method for a linked list class in Java. The code involves a `start` reference to the first node in the list, and every node has a `next` reference (which may be null). 
+
+Here's what we hope is a _property of linked lists_: **the last node of a non-empty list always has `null` as its value for `next`**. 
+
+How can we prove that our `add` method preserves this property, _without_ generating traces of ever-increasing length? There's no limit to how long the list might get, and so the length of the longest path in the transition system is infinite: 0 nodes, 1 node, 2 nodes, 3 nodes,...
+
+This might not be immediately obvious. After all, it's not as simple as asking Forge to run `all s: State | last.next = none`. (Why not?)
+
+<details>
+<summary>Think, then click!</summary>
+
+Because that would just be asking Forge to find us instances full of good states. Really, we want a sort of higher-level `all`, something that says: "for all **runs of the system**, it's impossible for the run to contain a bad linked-list state.
+
+</details>
+
+This simple example illustrates a **central challenge in software and hardware verification**. Given a discrete-event model of a system, how can we check whether all reachable states satisfy some property? In your other courses, you might have heard properties like this called _invariants_.
+
+One way to solve the problem _without_ the limitation of bounded-length traces goes something like this:
+* Step 1: Ask Forge whether any starting states are bad states. If not, then at least we know that executions with no moves obey our invariant. (It's not much, but it's a start---and it's easy for Forge to check.)
+* Step 2: Ask Forge whether it's possible, in any good state, to transition to a bad state. 
+ 
+Consider what it means if both checks pass. We'd know that runs of length $0$ cannot involve a bad state. And since we know that good states can't transition to bad states, runs of length $1$ can't involve bad states either. And for the same reason, runs of length $2$ can't involve bad states, nor games of length $3$, and so on.
+
+### How do we write this in Forge?
+
+Not just Forge, but any other solver-based tool, including those used in industry! 
+
+Modeling linked lists in Forge is very doable, but more complicated than I'd like to try to do in 10 minutes of class. So let's do this with the tic-tac-toe model for today. A `balanced` state is a good state.
+ 
+This assertion checks for counterexamples to the first component: are there any bad states that are also starting states?
+
+```alloy
+assert all b: Board | initial[b] is sufficient for balanced[b]
+  for 1 Board, 3 Int
+```
+
+Notice that we didn't _need_ to use the `next is linear` annotation, because we're not asking for traces at all. We've also limited our scope to exactly 1 Board. We also don't need 4 integer bits; 3 suffices. This should be quite efficient. It should also pass, because the empty board isn't unbalanced.
+
+Now we can ask: are there any transitions from a good state to a bad state? Again, we only need 2 boards for this to make sense.
+
+```alloy
+pred moveFromBalanced[pre: Board, row, col: Int, p: Player, post: board] {
+  balanced[pre]
+  move[pre, row, col, p, post]
+}
+assert all pre, post: Board, row, col: Int, p: Player | 
+  moveFromBalanced[pre, row, col, p, post] is sufficient for balanced[post]
+    for 2 Board, 3 Int
+```
+
+If both of these pass, we've just shown that bad states are impossible to reach via valid moves of the system. Does this technique always work? We'll find out next time.
+
+### Aside: Performance 
+
+That second step is still pretty slow on my laptop: around 10 or 11 seconds to yield `UNSAT`. Can we give the solver any help? Hint: **is the set of possible values for `pre` bigger than it really needs to be?**
+
+<details>
+<summary>Think, then click!</summary>
+    
+If we assume the `pre` board is well-formed, we'll exclude transitions involving invalid boards. There are still a lot of these, even at `3 Int`, since row and column indexes will range from `-4` to `3` (inclusive).
+    
+But is it really _safe_ to assert `wellformed[pre]`? Good question! Is there a way we could check?
+    
+</details>
+
+

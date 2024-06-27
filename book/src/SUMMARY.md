@@ -1,10 +1,9 @@
 <!-- This will be ignored by the mdbook parser -->
 <!-- # Logic for Systems: Lightweight Formal Methods for the Practical Engineer -->
 # Summary 
-
 [How to Read this book](./welcome.md)
-
 <!-- "prefix chapters"; cannot be nested -->
+
 # Preamble: Beyond Testing
 - [Logic for Systems](./chapters/manifesto/manifesto.md)
 - [What good is this book?](./chapters/manifesto/job.md) 
@@ -13,42 +12,37 @@
 <!-- # What do tic-tac-toe, binary trees, and operating systems have in common? -->
 <!-- STATIC INSTANCES; NO TRANSITIONS YET -->
 # Modeling Static Scenarios
-- [Tic-Tac-Toe](./chapters/ttt/ttt.md)              <!-- *** GOAL: re-read, touch on methodology, spec vs. reqs. reinforce "constraints, not code" vs. PBT beforehand. -->
-- [Binary Search Trees](./chapters/bst/bst.md)      <!-- *** GOAL: add pictures -->
-- [Ripple-Carry Adder](./chapters/adder/rca.md)     <!-- *** GOAL: OUTLINE -->
+- [Tic-Tac-Toe](./chapters/ttt/ttt.md)             
+- [Binary Search Trees](./chapters/bst/bst.md)     
+- [Ripple-Carry Adder](./chapters/adder/rca.md)   
+- [Q&A: Static Modeling](./chapters/qna/static.md) 
 
 <!-- - The challenge of testing
   - Python: tic-tac-toe. Let's test our TTT program.
     - What does it mean to test such a program?
     - Fuzzing (doesn't crash mid-game)
     - Is there only one "best" move? No. Relational problems.
-    - Property-based testing (generator vs. is-valid) -->
-
-
-
-
+    - Property-based testing (generator vs. is-valid) 
+    
+    
+    - Satisfiability and unsatisfiability
+    - => as "if"; classical logic weirdness when it comes up first
+    - methodology, shapes
+    -->
 
 <!--
-- From tests to specification 
+- From tests to specification   [ended up doing this in reverse]
     - our is-valid looks really similar to Froglet predicate
     - our generator looks really similar to a different Froglet predicate
     - algorithms differ, specification is forever (random search vs bounded-exhaustive search vs proof vs…) -->
 
-<!-- - Constraints, not code
-  - "All models are wrong, but some models are useful"
-    - Data modeling
-    - statistical modeling
-    - formal modeling
-      - satisfiability and unsatisfiability
-
--->
-
 # Discrete Event Systems
-- [Tic-Tac-Toe Games](./chapters/ttt/ttt_games.md)
-    <!-- - Froglet: Tic-tac-toe traces model
-        - moving from transitions to traces, both have their strengths -->
-- [Recursive Descent on BSTs]()
-- [Binary Search on Arrays]()
+- [T.T.T. Games: Inductive Verification](./chapters/ttt/ttt_games.md)
+- [Counterexamples to Induction: Binary Search on Arrays](./chapters/inductive/bsearch.md)
+- [BSTs: Recursive Descent](./chapters/bst/descent.md)
+- [Validating Models](./chapters/validation/validating_events.md) 
+- [Q&A: Event Systems](./chapters/qna/events.md) 
+
 <!-- correspondence??? -->
 
    <!-- - Froglet: binary search on array model
@@ -56,7 +50,6 @@
         - Preservation fails: binary search is broken (if the array is too big – see Bloch’s post)
         - Enrichment of invariant -->
 
-- [Validating Stateful Models]() 
         <!-- - can we trust the model?
         - vacuity, other pitfalls in verification -->
 
@@ -67,6 +60,7 @@
 - [Validating Relational Models]()
 - [Comparing Prim's and Dijkstra's Algorithms]()
 - [How does Forge Work?]()
+- [Q&A: Relations]() 
 
 <!-- ## Atoms from bits (Relational Forge)
  
@@ -90,6 +84,7 @@
 - [Temporal Forge]()
 - [Modeling Mutual Exclusion]()
 - [Validation: Temporal Pitfalls]()
+- [Q&A: Temporal Logic]() 
 
 <!--  
 ## Tomorrow and Tomorrow and Tomorrow (Temporal Forge)
