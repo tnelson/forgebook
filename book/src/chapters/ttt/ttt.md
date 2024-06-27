@@ -295,7 +295,13 @@ pred OTurn[s: Board] {
 </details>
 
 ~~~admonish note title="Integer addition"
-Forge supports arithmetic operations on integers like `add`. While it doesn't matter for this model yet, addition (and other operations) can overflow according to 2's complement arithmetic. For example, if we're working with 4-bit integers, then `add[7,1]` will be `-8`. You can experiment with this in the visualizer's _evaluator_, which we'll be using a lot after the initial modeling tour is done.
+
+Forge supports arithmetic operations on integers like `add`. Forge integers are signed (i.e., can be positive or negative) and are bounded by a _bit width_, which defaults to `4` bits. The number of available integers is always $2^k$, where $k$ is the bit width.
+
+Forge follows the [2's complement arithmetic](https://en.wikipedia.org/wiki/Two%27s_complement) convention, which means that the available integers are split evenly between positive and negative numbers, but counting `0` as "positive". So with 4 bits, we can represent numbers between `-8` and `7` (inclusive).
+
+This means that (while it doesn't matter for this model yet), arithmetic operations can overflow&mdash;just like primitive integers in languages like Java! For example, if we're working with 4-bit integers, then `add[7,1]` will be `-8`. You can experiment with this in the visualizer's _evaluator_, which we'll be using a lot after the initial modeling tour is done.
+
 ~~~
 
 ~~~admonish warning title="Use `add` for addition, not `+`"
