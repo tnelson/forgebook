@@ -14,8 +14,8 @@
 # Modeling Static Scenarios
 - [Tic-Tac-Toe](./chapters/ttt/ttt.md)             
 - [Binary Search Trees](./chapters/bst/bst.md)     
-- [Ripple-Carry Adder](./chapters/adder/rca.md)   
-- [Q&A: Static Modeling](./chapters/qna/static.md) 
+- [Ripple-Carry Adder (FINISH EXAMPLES)](./chapters/adder/rca.md)   
+- [Q&A: Static Modeling (MOVE FROM BELOW))](./chapters/qna/static.md) 
 
 <!-- - The challenge of testing
   - Python: tic-tac-toe. Let's test our TTT program.
@@ -37,11 +37,11 @@
     - algorithms differ, specification is forever (random search vs bounded-exhaustive search vs proof vs…) -->
 
 # Discrete Event Systems
-- [T.T.T. Games: Inductive Verification](./chapters/ttt/ttt_games.md)
-- [Counterexamples to Induction: Binary Search on Arrays](./chapters/inductive/bsearch.md)
-- [BSTs: Recursive Descent](./chapters/bst/descent.md)
-- [Validating Models](./chapters/validation/validating_events.md) 
-- [Q&A: Event Systems](./chapters/qna/events.md) 
+- [T.T.T. Games: Inductive Verification (EDIT)](./chapters/ttt/ttt_games.md)
+- [Counterexamples to Induction: Binary Search on Arrays (EDIT)](./chapters/inductive/bsearch.md)
+- [BSTs: Recursive Descent (EDIT)](./chapters/bst/descent.md)
+- [Validating Models (FILL)](./chapters/validation/validating_events.md) 
+- [Q&A: Event Systems (FILL/ADAPT)](./chapters/qna/events.md) 
 
 <!-- correspondence??? -->
 
@@ -50,7 +50,7 @@
         - Preservation fails: binary search is broken (if the array is too big – see Bloch’s post)
         - Enrichment of invariant -->
 
-        <!-- - can we trust the model?
+<!-- can we trust the model?
         - vacuity, other pitfalls in verification -->
 
 # Modeling Relationships 
