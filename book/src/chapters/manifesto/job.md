@@ -1,5 +1,5 @@
 
-# Our Value Proposition
+## Our Value Proposition
 
 Everybody has endless demands on their time. If you're a student, you might be deciding which classes to take. There's never enough time to take them all, so you need to prioritize based on expected value. If you're a professional, you're deciding how to best use your limited "free" time to learn new skills and stay current. Either way, you're probably wondering: **What good is this book?** (And if you aren't asking that, you ought to be.)
 
@@ -8,9 +8,9 @@ You need many different skills for a successful career. This book won't teach yo
 * how to better express what you want from it;
 * how to more thoroughly evaluate what a system actually does give you; and
 * how to use constraints and constraint solvers in your work.
-It will also give you a set of baseline skills that will aid you in using any further "formal" methods you might encounter in your work, such as [advanced type systems](https://rust-book.cs.brown.edu), [static verification](https://dafny.org), [theorem proving](https://lean-lang.org), and more. 
+It will also give you a set of baseline skills that will aid you in using any further formal-methods techniques you might encounter in your work, such as [advanced type systems](https://rust-book.cs.brown.edu), [static verification](https://dafny.org), [theorem proving](https://lean-lang.org), and more. 
 
-## Modeling: What really matters?
+### Modeling: What really matters?
 
 There's a useful maxim by George Box: **"All models are wrong, but some are useful"**. The only completely accurate model of a system is that system itself, including all of its real external context. This is impractical; instead, a modeler needs to make choices about what really matters to them: what do you keep, and what do you disregard? Done well, a model gets at the essence of a system. Done poorly, a model yields nothing useful or, worse, gives a false sense of security. 
 
@@ -24,13 +24,13 @@ I suspect that people were saying "All models are wrong" long before Box did! Bu
 
 If you want to do software (or hardware) engineering, some amount of modeling is unavoidable. Here are two basic examples of many.
 
-### Data Models Everywhere
+#### Data Models Everywhere
 
 You might already have benefitted from a good model (or suffered from a poor one) in your programming work. Whenever you write data definitions or class declarations in a program, [you're modeling](https://en.wikipedia.org/wiki/Data_model). The ground truth of the data is rarely identical to its representation. You decide on a particular way that it should be stored, transformed, and accessed. You say how one piece of data relates to another. 
 
 Your data-modeling choices affect more than just execution speed: if a pizza order can't have a delivery address that is separate from the user's billing address, important user needs will be neglected. On the other hand, it is probably OK to leave the choice of cardboard box out of the user-facing order. An order has a delivery time, which probably comes with a time zone. You could model the time zone as an integer offset from UTC, but this is a [very bad idea](https://en.wikipedia.org/wiki/Time_zone). And, since there are 24 hours in a day, the real world imposes range limits: a timezone that's a million hours ahead of UTC is probably a buggy value, even though the value `1000000` is much smaller than even a signed 32-bit `int` can represent. 
 
-### Data vs. Its Representation 
+#### Data vs. Its Representation 
 
 The _level_ of abstraction matters, too. Suppose that your app scans handwritten orders. Then handwriting becomes pixels, which are converted into an instance of your data model, which is implemented as bytes, which are stored in hardware flip-flops and so on. You probably don't need, or want, to keep all those perspectives in mind simultaneously. Languages are valuable in part because of the abstractions they foster, even if those abstractions are incomplete&mdash;they can be usefully incomplete! What matters is whether the abstraction level suits your needs, and your users'.  
 
@@ -38,17 +38,11 @@ The _level_ of abstraction matters, too. Suppose that your app scans handwritten
 I learned to program in the 1990s, when practitioners were at odds over automated vs. manual memory management. It was often claimed that a programmer needed to _really understand_ what was happening at the hardware level, and manually control memory allocation and deallocation for the sake of performance. Most of us don't think that anymore, _unless we need to_! Sometimes we do; often we don't. Focus your attention on what matters for the task at hand. 
 ~~~
 
-<!-- In security, a _threat model_ says what will be considered and what won't be. -->
+The examples don't stop: In security, a _threat model_ says what powers an attacker has. In robotics and AI, reinforcement learning works over a probabilistic model of real space. And so on. The key is: **what matters for your needs?** Box had something to say about that, too:
 
-<!-- ### Professional Example: Robotics 
+> Since all models are wrong the scientist must be alert to what is importantly wrong. It is inappropriate to be concerned about safety from mice when there are tigers abroad.  
 
-When programming a 
-
- Grid world in AI is something richer. Want to hunt the wumpus? Can the wumpus hide in the pit? Probably not by the rules of the game, which are themselves a model. In the real world, perhaps it could. Box had something to say about this, too: 
-
- > Since all models are wrong the scientist must be alert to what is importantly wrong. It is inappropriate to be concerned about safety from mice when there are tigers abroad.  -->
-
-## Specification: What do you want?
+### Specification: What do you want?
 
 Suppose that I want to store date-and-time values in a computer program. That's easy enough to say, right? But the devil is in the details: What is the layout of the data? Which fields will be stored, and which will be omitted? Which values are valid, and which are out of bounds? Is the format efficiently serializable? How far backward in time should the format extend, and [how far into the future should it reach](https://en.wikipedia.org/wiki/Year_2000_problem)?
 
@@ -62,21 +56,20 @@ If you're just building a food delivery app, you probably only need to think abo
 
 Either way, being able to think carefully about your specification can separate quiet success from famous failure.
 
-## Testing, Validation, and Verification: Did you get what you wanted?
+### Validation and Verification: Did you get what you wanted?
 
-**TODO: write here**
+Whether you're working out an algorithm on paper or checking a finished implementation, you need some means of judging correctness. Here, too, precision (and a little bit of adversarial thinking) matters in industry:
+  * When ordinary testing isn't good enough, techniques like fuzzing, [property-based testing](../properties/pbt.md), and others give you new evaluative power. 
+  * When you're updating, refactoring, or optimizing a system, a model of its ideal behavior can be leveraged for validation (Here's an example from 2014: [external webpage](https://randomascii.wordpress.com/2014/01/27/theres-only-four-billion-floatsso-test-them-all/)).
+  * A model of the system's behavior is also useful for test-case generation, and [enable tools to generate test suites](https://hypothesis.readthedocs.io/en/latest/stateful.html) that have a higher coverage of the potential state space. 
 
-Having thought through all that, it seems reasonable that the code should check these criteria, and produce a reasonable error if the timezone isn't valid.
+And all that's even before we consider more heavyweight methods, like model checking and program verification.
 
-fuzzing...
+### Formalism Isn't Absolute
 
-## "Formalism" Isn't Absolute
+The word "formal" has accumulated some unfortunate connotations: pedantry, stuffiness, ivory-tower snootiness, being an [architecture astronaut](https://en.wikipedia.org/wiki/Architecture_astronaut), etc. The truth is that formalism is a sliding scale. We can take what we need and leave the rest. What really matters is the ability to precisely express your goals, and the ability to take advantage of that precision. 
 
-The word "formal" has accumulated some unfortunate connotations: pedantry, stuffiness, ivory-tower snootiness, being an [architecture astronaut](https://en.wikipedia.org/wiki/Architecture_astronaut), etc. The truth is that formalism is a sliding scale, and we can take what we need and leave the rest. 
-
-You might not be used to thinking of programming as a "formal" activity, but it is. A programming language is a formal artifact: it has a precise meaning, usually defined in a detailed specification that few people need to read fully. Some factors are often left unspecified, and thus "implementation dependent", which is one reason why the difference between specification and implementation is more fluid than you might think. 
-
-**TODO: example; is median something that fits here? Above paragraph is awkward.**
+<!-- You might not be used to thinking of programming as a "formal" activity, but it is. A programming language is a formal artifact: it has a precise meaning, usually defined in a detailed specification that few people need to read fully. Some factors are often left unspecified, and thus "implementation dependent", which is one reason why the difference between specification and implementation is more fluid than you might think.  -->
 
 
 

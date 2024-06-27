@@ -1,4 +1,4 @@
-# From Tests to Properties 
+## From Tests to Properties 
 
 <!-- Other examples we could include
 
@@ -11,8 +11,6 @@ Implementation of a linked list.
   * let's try this on LLM-generated code
 
  -->
-
-## Where are we going?
 
 We'll talk about more than just software soon. For now, let's go back to testing. Most of us have learned how to write test cases. Given an input, here's the output to expect. Tests are a kind of pointwise *specification*; a partial one, and not great for fully describing what you want, but a kind of specification nonetheless. They're cheap, non-trivially useful, and better than nothing.
 
@@ -33,9 +31,9 @@ Sometimes the input space is small enough that exhaustive testing works well. Th
 Depending on your experience, this may also be a different kind from testing from what you're used to. Building a repertoire of different tools is essential for any engineer! 
 ~~~
 
-## A New Kind of Testing
+### A New Kind of Testing
 
-### Cheapest Paths
+#### Cheapest Paths
 
 Consider the problem of finding cheapest paths in a weighted graph. There are quite a few algorithms you might use: Dijkstra, Bellman-Ford, even a plain breadth-first search for an unweighted graph. You might have implemented one of these for another class! 
 
@@ -124,7 +122,7 @@ isValid : input: (graph, vertex, vertex), output: list(vertex) -> bool
 
 </details>
 
-This style of testing is called Property-Based Testing (PBT). When we're using a trusted implementation---or some other artifact---to either evaluate the output or to help generate useful inputs, it is also a variety of Model-Based Testing (MBT). 
+This style of testing is called Property-Based Testing (PBT). When we're using a trusted implementation&mdash;or some other artifact&mdash;to either evaluate the output or to help generate useful inputs, it is also a variety of Model-Based Testing (MBT). 
 
 ~~~admonish note title="Model-Based Testing"
 There's a lot of techniques under the umbrella of MBT. A model can be another program, a formal specification, or some other type of artifact that we can "run". Often, MBT is used in a more stateful way: to generate sequences of user interactions that drive the system into interesting states. 
@@ -160,7 +158,7 @@ It's important to note that some creativity is still involved here: you need to 
 
 If we were still thinking in terms of traditional test cases, this would make no sense: where would the outputs come from? Instead, we've created a testing system where concrete outputs aren't something we need to provide. Instead, we check whether the program under test produces _any valid output_.
 
-## Hypothesis
+### The Hypothesis Library
 
 There are PBT libraries for most every popular language. In this book, we'll be using a library for Python called [Hypothesis](https://hypothesis.readthedocs.io/en/latest/index.html). Hypothesis has many helper functions to make generating random inputs relatively easy. It's worth spending a little time stepping through the library. Let's test a function in Python itself: the `median` function in the `statistics` library, which we began this chapter with. What are some important properties of `median`?
 
@@ -204,11 +202,12 @@ def test_python_median(input_list):
     if len(input_list) % 2 == 1:
         assert output_median in input_list 
     # The above checks a conditional property. But what if the list length isn't even?
-    #   (and can we write a stronger property, regardless?)
-    # ...
+    # We should be able to do better!
 ```
 
-After some back and forth, we might end up somewhere like this:
+**Exercise**: See if you an express what it means for `median` to be correct in the language of your choice. 
+
+Expressing properties can often be challenging. After some back and forth, we might reach a candidate function like this:
 
 ```python
 def test_python_median(input_list):
@@ -217,24 +216,61 @@ def test_python_median(input_list):
     if len(input_list) % 2 == 1:
         assert output_median in input_list
     
-    # Question 1: What's going wrong? The _property_ seems reasonable...
     lower_or_eq =  [val for val in input_list if val <= output_median]
     higher_or_eq = [val for val in input_list if val >= output_median]
     assert len(lower_or_eq) >= len(input_list) // 2    # // ~ floor
     assert len(higher_or_eq) >= len(input_list) // 2   # // ~ floor
-    # Question 2: Is this enough? :-)
 ```
 
-As the questions in the code hint, there's still a problem with this. What do you think is missing? 
+Unfortunately, there's a problem with this solution. Python's `median` implementation _fails_ this test! Hypothesis provides a random input on which the function fails: `input_list=[9502318016360823, 9502318016360823]`. Give it a try! This is what _my_ computer produced; what happens on yours?
 
-<!-- <details>
+Exercise: **What do you think is going wrong?**
+
+<details>
   <summary>Think, then click!</summary>
 
-  What do you think? 
+Here's what my Python console reports:
+```python
+>>> statistics.median([9502318016360823, 9502318016360823])
+9502318016360824.0
+```
 
-<details> -->
+I really don't like seeing a number that's larger than both numbers in the input set. But I'm also suspicious of that trailing `.0`. `median` has returned a `float`, not an `int`. That might matter. But first, we'll try the computation that we might expect `median` to run:
 
+```python
+>>> (9502318016360823*2)/2
+9502318016360824.0
+```
 
-Notice how _being precise_ about what correctness means is very important. With ordinary unit tests, we're able to think about behavior point-wise; here, we need to broadly describe our goals. There's advantages to that work: comprehension, more powerful testing, better coverage, etc. 
+What if we force Python to perform _integer_ division?
 
-There's more to do, but hopefully this gives you a reasonably nice starting point.
+```python
+>>> (9502318016360823*2)//2
+9502318016360823
+```
+
+Could this be a floating-point imprecision problem? Let's see if Hypothesis can find another failing input where the values are smaller. We'll change the generator to produce only small numbers, and increase the number of trials hundredfold:
+
+```python
+@given(lists(integers(min_value=-1000,max_value=1000), min_size=1))
+@settings(max_examples=50000)
+```
+
+No error manifests. That doesn't mean one _couldn't_, but it sure looks like large numbers make the chance of an error much higher. 
+
+The issue is: we've inadvertently been testing the accuracy of Python's primitive floating-point division, and floating-point division is [known to be imprecise](https://docs.python.org/3/tutorial/floatingpoint.html) in some cases. It might even manifest differently on different hardware. 
+
+Anyway, we have two or three potential fixes: 
+  - bound the range of potential input values; 
+  - check equality within some error term (a common trick when writing tests about `float` values); or 
+  - change libraries to one that uses an arbitrary-precision, like [BigNumber](https://pypi.org/project/BigNumber/). We could adapt our test fairly easily to that setting, and we'd expect this problem to not occur. 
+
+<details>
+
+### Takeaways
+
+We'll close this section by noticing two things:
+
+First, _being precise_ about what correctness means is very important. With ordinary unit tests, we're able to think about behavior only point-wise. Here, we need to broadly describe our goals. There's a cost to that, but also advantages: comprehensibility, more powerful testing, better coverage, etc. And we can still get value from a partial definition, because we can then at least apply PBT to that portion of the program's behavior. 
+
+Second, the very act of trying to precisely express, and test, correctness for `median` _taught us something subtle about how our programming language works_, which tightened our definition of correctness. Modeling often leads to such a virtuous cycle. 

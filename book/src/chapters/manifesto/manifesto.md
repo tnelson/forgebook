@@ -196,10 +196,3 @@ The main tool we'll use in this book is [Forge](http://forge-fm.org), a tool for
 We'll also use some other tools, like:
 * [Hypothesis](https://hypothesis.readthedocs.io/en/latest/), a testing library for Python; and
 * [Z3](https://github.com/Z3Prover/z3), an SMT solver library. 
-
-<!-- 
-### How can you use generative AI in this course?
-
-You are allowed to "collaborate" with generative AI **using the specific method(s) we provide and within the limits we set**. You may not otherwise employ such tools in 1710; doing so would be a violation of the academic code. 
-
-Note that *you shouldn't use the 2023 syllabus to gauge how we'll use AI in 2024*. AI has a much larger role in some of our assignments this year. (E.g., you'll now be using techniques from this course to work with LLM-generated code.) -->
