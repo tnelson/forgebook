@@ -265,7 +265,7 @@ Anyway, we have two or three potential fixes:
   - check equality within some error term (a common trick when writing tests about `float` values); or 
   - change libraries to one that uses an arbitrary-precision, like [BigNumber](https://pypi.org/project/BigNumber/). We could adapt our test fairly easily to that setting, and we'd expect this problem to not occur. 
 
-<details>
+</details>
 
 ### Takeaways
 
