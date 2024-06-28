@@ -1,6 +1,6 @@
 # Ripple Carry Adder 
 
-Let's model a third system in Froglet. We'll focus on something even more concrete, something that is implemented in _hardware_: a circuit for adding together two numbers called a _ripple-carry adder_ (RCA). 
+Let's model a third system in Froglet. We'll focus on something even more concrete, something that is implemented in _hardware_: a circuit for adding together two numbers called a _ripple-carry adder_ (RCA). Along the way, even though the adder doesn't "change", we'll still learn a useful technique for modeling systems that change over time. 
 
 To understand an RCA, let's first think about adding together a pair of one-bit numbers. We might draw a table with four rows to represent this:
 
@@ -95,6 +95,98 @@ pred wellformed {
 ```
 
 We've used the `reachable` helper before, but it's worth mentioning again: `A` is reachable from `B` via _one or more applications_ of `f` if and only if `reachable[A, B, f]` is true. That "one or more applications" is important, and is why we needed to add the `(fa != RCA.firstAdder) implies` portion of the first constraint: `RCA.firstAdder` shouldn't be the successor of any full adder, and if it were its own successor, that would be a cycle in the line of adders. If we had left out the implication, and written just `all fa: FA | reachable[fa, RCA.firstAdder, RCA.nextAdder]`, `RCA.firstAdder` would need to have a predecessor, which would contradict the second constraint.
+
+## More Predicates
+
+Before we write some examples for `wellformed`, let's also try to model how each adder should behave, given that it's wired up to other adders in this specific order. Let's write a couple of helpers first, and then combine them to describe the behavior of each adder, given its place in the sequence.
+
+### When is an adder's output bit set to true? 
+
+Just like `pred`icates can be used as boolean-valued helpers, `fun`ctions can act as helpers for arbitrary return types. Let's try to write one that says what the _output_ bit should be for a specific full adder, given its input bits. 
+
+```forge
+// Helper function: what is the output bit for this full adder?
+fun adder_S_RCA[f: one FA]: one Bool  {
+  // FILL THIS IN
+} 
+```
+
+Looking at the table above, the adder's output value is true if and only if an odd number of its 3 inputs is true. That gives us 4 combinations:
+* `A`, `B`, and `CIN`;
+* `A` only; 
+* `B` only; or
+* `C` only. 
+
+We'll use Forge's `let` construct to make it easier to write the value for each of these wires, and then combine them using logical `or`. 
+
+```forge
+// Helper function: what is the output bit for this full adder?
+fun adder_S_RCA[f: one FA]: one Bool  {
+  // Note: "True" and "False" are values in the model, we cannot use them as Forge formulas.
+  let A = (f.a = True), B = (f.b = True), CIN = (f.cin = True) |
+	 ((A and B and CIN) or 
+    (A and (not B) and (not CIN)) or 
+    ((not A) and B and (not CIN)) or 
+    ((not A) and (not B) and CIN))
+	 	  =>   True 
+      else False
+} 
+```
+
+~~~admonish tip title="Couldn't we have just used a `pred` here?"
+It's admittedly a bit strange to write a helper function that returns a `Bool`, rather than a predicate that returns a Forge boolean. We could make a `pred` work; we'd just have to eventually use `True` and `False` somewhere, since they are the values that the output bits can take on. 
+~~~
+
+### When is an adder's carry bit set to true? 
+
+This one is quite similar. The carry bit is set to true if and only if 2 or 3 of the adder's inputs are true. 
+
+```forge
+// Helper function: what is the output carry bit for this full adder?
+fun adder_cout_RCA[f: one FA]: one Bool {
+ let A = (f.a = True), B = (f.b = True), CIN = (f.cin = True) |
+     ((not A and B and CIN) or 
+      (A and not B and CIN) or 
+      (A and B and not CIN) or 
+      (A and B and CIN)) 
+	      =>   True 
+        else False
+} 
+```
+
+### Adder Behavior
+
+Finally, what ought an adder's behavior to be? Well, we need to specify its output bits in terms of its input bits. We'll also add a constraint that says this adder's output carry bit flows into its successor's input carry bit.  
+
+```forge
+pred fullAdderBehavior[f: FA] {
+  -- Each full adder's outputs are as expected
+  f.s = adder_S_RCA[f]
+  f.cout = adder_cout_RCA[f]
+  -- Full adders are chained appropriately
+  (some RCA.nextAdder[f]) implies (RCA.nextAdder[f]).cin = f.cout 
+}
+```
+
+~~~admonish note title="Wouldn't it be better to put the carry-bit connection in `wellformed`?" 
+There's a strong argument for that. The way the wires are connected isn't really part of a single full adder's behavior in itself. If I were going to re-write this model, I would probably either move that line into `wellformed` or somewhere else that has responsibility for the connectivity of the full adders. 
+~~~
+
+Finally, we'll make a predicate that describes the behavior of the overall ripple-carry adder: 
+
+```
+// Top-level system specification: compose preds above
+pred rca {  
+  wellformed
+  all f: FA | add_per_unit[f] 
+}
+```
+
+~~~admonish note title="Notice what we've done."
+Here's something to keep in mind for when we start the next chapter. By wiring together full adders into a sequence via the `rca` predicate, we are now implicitly hinting at time in our model: signal flows through each adder, in order, over time. We'll re-use this same technique in the next chapter to combine different system states into a succession of them that represents a complete run of the system.
+~~~
+
+Now we're ready to write some examples. 
 
 ## Examples
 
