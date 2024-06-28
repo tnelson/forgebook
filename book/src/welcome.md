@@ -7,12 +7,12 @@ Welcome to Logic for Systems! Here are some quick hints that will help you use t
 ### Organization 
 
 The book is organized into a series of short sections, each of which are grouped into chapters: 
-* Chapter 1 (Beyond Testing) briefly motivates the content in this book and sets the stage with a new technique for testing your software. 
-* Chapter 2 (Modeling Static Scenarios) provides an introduction to modeling systems in Forge by focusing on systems that don't change over time. 
-* Chapter 3 (Discrete Event Systems) shows a common way to model the state of a system changing over time. 
-* Chapter 4 (Modeling Relationships) enriches the modeling language to support arbitrary relations between objects in the world.
-* Chapter 5 (Temporal Specification) covers temporal operators, which are commonly used in industrial modeling and specification, and how to use them. 
-* Chapter 6 (Case Studies) touches on some larger applications of lightweight formal methods. 
+* **Chapter 1 (Beyond Testing)** briefly motivates the content in this book and sets the stage with a new technique for testing your software. 
+* **Chapter 2 (Modeling Static Scenarios)** provides an introduction to modeling systems in Forge by focusing on systems that don't change over time. 
+* **Chapter 3 (Discrete Event Systems)** shows a common way to model the state of a system changing over time. 
+* **Chapter 4 (Modeling Relationships)** enriches the modeling language to support arbitrary relations between objects in the world.
+* **Chapter 5 (Temporal Specification)** covers temporal operators, which are commonly used in industrial modeling and specification, and how to use them. 
+* **Chapter 6 (Case Studies)** touches on some larger applications of lightweight formal methods. Some of these will involve large models written in Forge, and others will lean more heavily on industrial systems.
 
 Each chapter contains a variety of examples: data structures, puzzles, algorithms, hardware concepts, etc. We hope that the diversity of domains covered means that everyone will see an example that resonates with them. Full language and tool documentation come _after_ the main body of the book.
 
