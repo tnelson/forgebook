@@ -178,7 +178,7 @@ Finally, we'll make a predicate that describes the behavior of the overall rippl
 // Top-level system specification: compose preds above
 pred rca {  
   wellformed
-  all f: FA | add_per_unit[f] 
+  all f: FA | fullAdderBehavior[f] 
 }
 ```
 
@@ -186,26 +186,58 @@ pred rca {
 Here's something to keep in mind for when we start the next chapter. By wiring together full adders into a sequence via the `rca` predicate, we are now implicitly hinting at time in our model: signal flows through each adder, in order, over time. We'll re-use this same technique in the next chapter to combine different system states into a succession of them that represents a complete run of the system.
 ~~~
 
-Now we're ready to write some examples. 
+Now we're ready to write some examples. We'll make a pair of examples for `wellformed` and an overall example for the full system. In practice, we'd probably want to write a couple of examples for `fullAdderBehavior` as well, but we'll leave those out for brevity. 
 
 ## Examples
 
-We'll always try to write at least some positive _and_ negative examples.
+Always try to write at least some positive _and_ negative examples.
 
-### Positive Examples
+### Positive Example
 
-**FILL**
+```forge
+example twoAddersLinear is {wellformed} for {
+  RCA = `RCA0 
+  FA = `FA0 + `FA1
+  -- Remember the back-tick mark here! These lines say that, e.g., for the atom `RCA0, 
+  -- its firstAdder field contains `FA0. And so on.
+  `RCA0.firstAdder = `FA0
+  `RCA0.nextAdder = `FA0 -> `FA1
+}
+```
 
-### Negative Examples
+~~~admonish tip title="Notice that this example is limited."
+Because we are testing `wellformed`, we left out fields that didn't matter to that predicate. Forge will feel free to adjust them as needed. When a field is left unspecified, the example is said to be *partial*, and it becomes a check for consistency. E.g., in this case, the example passes because the partial instance given *can* satisfy `wellformed`&mdash;not that it must satisfy `wellformed`&mdash;although in this case the difference is immaterial because `wellformed` really doesn't care about any of the other fields. 
+~~~
 
-**FILL**
+### Negative Example
+
+```forge
+example twoAddersLoop is {not wellformed} for {
+  RCA = `RCA0 
+  FA = `FA0 + `FA1
+  `RCA0.firstAdder = `FA0
+  `RCA0.nextAdder = `FA0 -> `FA1 + `FA1 -> `FA0
+}
+```
 
 ## Run 
 
-**FILL**
+Let's have a look at a ripple-carry adder in action. We'll pick a reasonably small number of bits: 4. 
+
+```forge
+run {rca} for 4 FA
+```
+
+**(FILL: screenshot)**
+
+
 
 ## More Domain Predicates and Validation
 
-**FILL**
+Ok, we've looked at some of the model's output, and it seems right. But how can we be really confident that the ripple-carry adder _works_? Can we use our model to _verify_ the adder? Yes, but we'll need to do a bit more work. 
+
+
+
+**FILL: verification story with ghost int**
 
 

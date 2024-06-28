@@ -97,6 +97,29 @@ pred rca {
   all f: FA | add_per_unit[f] 
 }
 
+
+/*****************************************************/
+/* Basic positive and negative examples for wellformed
+/*****************************************************/
+
+example twoAddersLinear is {wellformed} for {
+  RCA = `RCA0 
+  FA = `FA0 + `FA1
+  -- Remember the back-tick mark here! These lines say that, e.g., for the atom `RCA0, 
+  -- its firstAdder field contains `FA0. And so on.
+  `RCA0.firstAdder = `FA0
+  `RCA0.nextAdder = `FA0 -> `FA1
+}
+
+example twoAddersLoop is {not wellformed} for {
+  RCA = `RCA0 
+  FA = `FA0 + `FA1
+  `RCA0.firstAdder = `FA0
+  `RCA0.nextAdder = `FA0 -> `FA1 + `FA1 -> `FA0
+}
+
+
+
 // Specific example: add together 2 6-bit values. 
 // We'll express this as a predicate to demonstrate the use of `let`.
 // Note that the ordering of full adders starts with the *least* significant bit.
@@ -146,3 +169,5 @@ example example1_as_example is {rca} for {
 }
 
 /////////////////////////////////////////////////////////////////////
+
+run {rca}
