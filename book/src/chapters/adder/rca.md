@@ -225,19 +225,34 @@ example twoAddersLoop is {not wellformed} for {
 Let's have a look at a ripple-carry adder in action. We'll pick a reasonably small number of bits: 4. 
 
 ```forge
-run {rca} for 4 FA
+run {rca} for exactly 4 FA
 ```
 
 **(FILL: screenshot)**
 
 
 
-## More Domain Predicates and Validation
+## Verification
 
 Ok, we've looked at some of the model's output, and it seems right. But how can we be really confident that the ripple-carry adder _works_? Can we use our model to _verify_ the adder? Yes, but we'll need to do a bit more work. 
 
-
-
 **FILL: verification story with ghost int**
 
+The verification step took over a minute on my laptop! That's rather slow for a model this size. When this sort of unexpected slowdown happens, it's often because we've given the solver too much freedom, causing it to explore a much larger search space than it should have to. This is especially pronounced when we expect an "unsatisfiable" result&mdash;then, the solver really does need to explore _everything_ before concluding that no, there are no solutions. We're in that situation here, since we're hoping there are no counter-examples to correctness. 
 
+So let's ask ourselves: *What did we leave the solver to figure out on its own, that we maybe could give it some help with?**
+
+<details>
+<summary>Think, then click!</summary>
+
+There are at least two things. 
+* First, the exact ordering of full adders isn't something we provided. We just said "create up to 6 of them, and wire them together in a line". Considering just the 6-adder case (and not the 5-adder case, 4-adder case, etc.), how many ways are there to arrange the adders? $6! = 720$. Unless the solver can detect and eliminate these symmetries, it's doing a _lot_ more work than it needs to. 
+* Second, we said that `Helper.place` mapped full adders to integers. But does the solver need to consider _all_ integers? No! Just `1`, `2`, `4`, `8`, and so on. The vast majority of integers in the scope we provided cannot be used&mdash;and the solver will have to discover that on its own.
+
+</details>
+
+These both present opportunities for optimization! For now, let's just tackle the first one: we need to somehow give Forge a specific ordering on the adders. 
+
+**FILL: `is plinear` -- not `linear`. What it does, why we don't do it in a constraint (no way to name specific atoms outside an example yet...)**
+
+Now Forge finishes the check in under a second on my laptop. Eliminating symmetries can make a huge difference! 

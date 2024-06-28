@@ -170,4 +170,91 @@ example example1_as_example is {rca} for {
 
 /////////////////////////////////////////////////////////////////////
 
-run {rca}
+-- run {rca}
+
+
+
+
+
+
+
+
+/////////////////////////////////////////////////////////////////////
+
+// To help ease verification, augment instances with place-values of each full adder
+// which we can then use to compute the "true value" of an input or output. E.g., 
+// the first full adder would have place-value 1, and its successors would have 
+// place-value 2, then 4, etc. 
+one sig Helper {
+  place: func FA -> Int
+}
+-- The "places" value should agree with the "nextAdder" function.
+pred assignPlaces {
+  -- The least-significant bit is 2^0
+  Helper.place[RCA.firstAdder] = 1
+  -- Other bits are worth 2^(i+1), where the predecessor is worth 2^i.
+  all fa: FA | some RCA.nextAdder[fa] => {    
+    Helper.place[RCA.nextAdder[fa]] = multiply[Helper.place[fa], 2]
+  }
+}
+
+fun trueValue[b: Bool, placeValue: Int]: one Int {
+  -- TODO: for efficiency, would it be better to just use 0/1, not Bool?
+  (b = True) => placeValue else 0
+}
+
+// Requirement: the adder is correct. We phrase this as: for every full adder, the true 
+// value of its output is the sum of the true values of its inputs (where "true value" means 
+// the value of the boolean, taking into account its position).
+pred req_adderCorrect_wrong {
+  (rca and assignPlaces) implies {
+    all fa: FA | { 
+        -- This will fail, because carrying needs to be considered, too. 
+        -- Notice how even if the model (or system) is correct, sometimes the property is wrong!
+        trueValue[fa.s, Helper.place[fa]] = add[trueValue[fa.a, Helper.place[fa]], 
+                                                trueValue[fa.b, Helper.place[fa]]]
+    }
+  }
+}
+pred req_adderCorrect {
+  (rca and assignPlaces) implies {
+    all fa: FA | { 
+        -- Include carrying, both for input and output. The _total_ output's true value is equal to
+        -- the the sum of the total input's true value.
+
+        -- output value bit + output carry bits; note carry value is *2 (and there may not be a "next adder")
+        add[trueValue[fa.s, Helper.place[fa]], 
+            multiply[trueValue[fa.cout, Helper.place[fa]], 2]] 
+        = 
+        -- input a bit + input b bit + input carry bit
+        add[trueValue[fa.a, Helper.place[fa]],     
+            trueValue[fa.b, Helper.place[fa]],    
+            trueValue[fa.cin, Helper.place[fa]]]  
+        -- Notice: I don't use trailing comments much on lines, because I want to be able to easily paste 
+        -- these into the evaluator.
+    }
+  }
+}
+
+option sb 20000
+
+
+
+test expect {
+  -- Test with a bitwidth of 9, letting us count between [-256, 255].
+  -- The maximum value we expect with *6* full adders is 111111 = 63, plus 
+  -- a carry bit, giving us 1111111 = 127. We aren't using the negatives. 
+  
+  --r_adderCorrect: {req_adderCorrect} for 6 FA, 1 RCA, 8 Int is theorem
+
+  r_adderCorrect: {req_adderCorrect} for 6 FA, 1 RCA, 8 Int for {nextAdder is plinear} is theorem
+}
+
+-- NOTE: very high #clauses: 645459; ~86 seconds to solve (quick translation)
+--   remove boolean abstract?
+--   eliminate negatives? (this is a case for actual integers, since we're talking of value)
+
+
+/////////////////////////////////////////////////////////////////////
+// TODO: validation
+
