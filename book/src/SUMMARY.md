@@ -15,7 +15,7 @@
 - [Tic-Tac-Toe](./chapters/ttt/ttt.md)             
 - [Binary Search Trees](./chapters/bst/bst.md)     
 - [Ripple-Carry Adder (FINISH VERIFICATION PROSE, PICTURES)](./chapters/adder/rca.md)   
-- [Q&A: Static Modeling (MOVE FROM BELOW))](./chapters/qna/static.md) 
+- [Q&A: Static Modeling](./chapters/qna/static.md) 
 
 <!-- - The challenge of testing
   - Python: tic-tac-toe. Let's test our TTT program.
