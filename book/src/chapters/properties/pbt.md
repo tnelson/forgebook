@@ -264,7 +264,10 @@ Anyway, we have two or three potential fixes:
   - bound the range of potential input values when we test; 
   - check equality within some error term (a common trick when writing tests about `float` values); or 
   - change libraries to one that uses an arbitrary-precision, like [BigNumber](https://pypi.org/project/BigNumber/). We could adapt our test fairly easily to that setting, and we'd expect this problem to not occur. 
-Which is best? Well, I don't really like the first one in this situation. Between an error term and changing libraries, it depends on the engineering context we're working in. 
+
+Which is best? I don't really like the idea of arbitrarily limiting the range of input values here, because picking a range would require me to understand the floating-point arithmetic specification a lot more than I do. For instance, how do I know that there exists some number $x$ before which this issue can't manifest? How do I know that all processor architectures would produce the same thing? 
+
+Between the other two options (adding an error term and changing libraries) it depends on the engineering context we're working in. Changing libraries may have consequences for performance or system design. Testing equality _within some small window_ may be the best option in this case, where we know that many inputs will involve `float` division. 
 
 </details>
 
@@ -272,6 +275,6 @@ Which is best? Well, I don't really like the first one in this situation. Betwee
 
 We'll close this section by noticing two things:
 
-First, _being precise_ about what correctness means is powerful. With ordinary unit tests, we're able to think about behavior only _point-wise_. Here, we need to broadly describe our goals, and tere's a cost to that, but also advantages: comprehensibility, more powerful testing, better coverage, etc. And we can still get value from a partial definition, because we can then at least apply PBT to that portion of the program's behavior. 
+First, being precise about _what correctness means_ is powerful. With ordinary unit tests, we're able to think about behavior only _point-wise_. Here, we need to broadly describe our goals, and tere's a cost to that, but also advantages: comprehensibility, more powerful testing, better coverage, etc. And we can still get value from a partial definition, because we can then at least apply PBT to that portion of the program's behavior. 
 
 Second, the very act of trying to precisely express, and test, correctness for `median` _taught us (or reminded us about) something subtle about how our programming language works_, which tightened our definition of correctness. Modeling often leads to such a virtuous cycle. 

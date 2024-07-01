@@ -6,7 +6,7 @@
 
 # Preamble: Beyond Testing
 - [Logic for Systems](./chapters/manifesto/manifesto.md)
-- [What good is this book?](./chapters/manifesto/job.md) 
+- [What good is this book? (TODO: pull some context from paper)](./chapters/manifesto/job.md) 
 - [From Tests to Properties](./chapters/properties/pbt.md)
 
 <!-- # What do tic-tac-toe, binary trees, and operating systems have in common? -->
@@ -14,7 +14,7 @@
 # Modeling Static Scenarios
 - [Tic-Tac-Toe](./chapters/ttt/ttt.md)             
 - [Binary Search Trees](./chapters/bst/bst.md)     
-- [Ripple-Carry Adder (FINISH VERIFICATION PROSE, PICTURES)](./chapters/adder/rca.md)   
+- [Ripple-Carry Adder (TODO: FINISH VERIFICATION PROSE, PICTURES)](./chapters/adder/rca.md)   
 - [Q&A: Static Modeling](./chapters/qna/static.md) 
 
 <!-- - The challenge of testing
@@ -54,12 +54,15 @@
         - vacuity, other pitfalls in verification -->
 
 # Modeling Relationships 
-- [Relational Forge]()
-- [Reference-Counting Memory Management]()
-- [Modeling Boolean Logic]()
-- [Validating Relational Models]()
-- [Comparing Prim's and Dijkstra's Algorithms]()
-- [How does Forge Work?]()
+- [Relational Forge, Modeling Logic (EDIT)](./chapters/relations/modeling-booleans-1.md)
+- [Reachability](./chapters/relations/reachability.md)
+- [Modeling Mutal Exclusion](./chapters/relations/sets-induction-mutex.md)
+- [Beyond Assertions](./chapters/relations/sets-beyond-assertions.md)
+- [Reference-Counting Memory Management (FILL)]()
+
+- [Validating Relational Models (FILL)]()
+- [Comparing Prim's and Dijkstra's Algorithms (FILL from model)]()
+- [How does Forge Work?](./chapters/solvers/bounds_booleans_how_forge_works.md)
 - [Q&A: Relations]() 
 
 <!-- ## Atoms from bits (Relational Forge)
@@ -80,9 +83,11 @@
  -->
 
 # Temporal Specification
-- [Safety and Liveness]()
-- [Temporal Forge]()
-- [Modeling Mutual Exclusion]()
+- [Safety and Liveness](./chapters/temporal/liveness_and_lassos.md)
+- [Temporal Forge 1](./chapters/temporal/temporal_operators.md)
+- [Temporal Forge 2](./chapters/temporal/temporal_operators_2.md)
+- [Obligations and the Past](./chapters/temporal/obligations_past.md)
+- [Modeling Mutual Exclusion](./chapters/temporal/fixing_lock_temporal.md)
 - [Validation: Temporal Pitfalls]()
 - [Q&A: Temporal Logic]() 
 
@@ -111,11 +116,11 @@
   -->
 
 # Case Studies
-- [Model-Based ("Stateful") Testing]()
-- [Concolic Execution]()
-- [Policy and Network Analysis]()
-- [Crypto Protocol Analysis]()
-- [Program Synthesis]()
+- [Model-Based ("Stateful") Testing (FILL)]()
+- [Concolic Execution (DEMO: KLEE)]()
+- [Policy and Network Analysis (DEMO: ABAC, Margrave, Zelkova)]()
+- [Crypto Protocol Analysis (DEMO: crypto lang, CPSA or other)]()
+- [Program Synthesis (DEMO: SSA synth, Sygus)]()
 
 <!-- ## Case Studies: Applications and Demos
 
@@ -172,7 +177,7 @@
   - Decidability, completeness, and incompleteness -->
 
 # Forge Documentation
-- [Placeholder Test](./chapters/docs/test.md)
+- [Placeholder Test for search](./chapters/docs/test.md)
 
 
 <!-- ## Exercises
