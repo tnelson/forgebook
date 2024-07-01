@@ -176,6 +176,13 @@
 
   - Decidability, completeness, and incompleteness -->
 
+# Construction Storage
+- [unused 1](./chapters/solvers/cegis.md)
+- [unused 2](./chapters/solvers/dpll.md)
+- [unused 3](./chapters/solvers/resolution.md)
+- [unused 4](./chapters/solvers/smt.md)
+
+
 # Forge Documentation
 - [Placeholder Test for search](./chapters/docs/test.md)
 
