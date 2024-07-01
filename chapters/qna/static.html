@@ -1,0 +1,329 @@
+<!DOCTYPE HTML>
+<html lang="en" class="navy" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Q&amp;A: Static Modeling - Logic for Systems: Lightweight Formal Methods for the Practical Engineer</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="shortcut icon" href="../../favicon.png">
+        <link rel="stylesheet" href="../../css/variables.css">
+        <link rel="stylesheet" href="../../css/general.css">
+        <link rel="stylesheet" href="../../css/chrome.css">
+        <link rel="stylesheet" href="../../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../../highlight.css">
+        <link rel="stylesheet" href="../../tomorrow-night.css">
+        <link rel="stylesheet" href="../../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../../././mdbook-admonish.css">
+        <link rel="stylesheet" href="../.././mdbook-admonish.css">
+        <link rel="stylesheet" href="../.././custom.css">
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "navy";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('navy')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../../welcome.html">How to Read this book</a></li><li class="chapter-item expanded affix "><li class="part-title">Preamble: Beyond Testing</li><li class="chapter-item expanded "><a href="../../chapters/manifesto/manifesto.html">Logic for Systems</a></li><li class="chapter-item expanded "><a href="../../chapters/manifesto/job.html">What good is this book? (TODO: pull some context from paper)</a></li><li class="chapter-item expanded "><a href="../../chapters/properties/pbt.html">From Tests to Properties</a></li><li class="chapter-item expanded affix "><li class="part-title">Modeling Static Scenarios</li><li class="chapter-item expanded "><a href="../../chapters/ttt/ttt.html">Tic-Tac-Toe</a></li><li class="chapter-item expanded "><a href="../../chapters/bst/bst.html">Binary Search Trees</a></li><li class="chapter-item expanded "><a href="../../chapters/adder/rca.html">Ripple-Carry Adder (TODO: FINISH VERIFICATION PROSE, PICTURES)</a></li><li class="chapter-item expanded "><a href="../../chapters/qna/static.html" class="active">Q&A: Static Modeling</a></li><li class="chapter-item expanded affix "><li class="part-title">Discrete Event Systems</li><li class="chapter-item expanded "><a href="../../chapters/ttt/ttt_games.html">T.T.T. Games: Inductive Verification (EDIT)</a></li><li class="chapter-item expanded "><a href="../../chapters/inductive/bsearch.html">Counterexamples to Induction: Binary Search on Arrays (EDIT)</a></li><li class="chapter-item expanded "><a href="../../chapters/bst/descent.html">BSTs: Recursive Descent (EDIT)</a></li><li class="chapter-item expanded "><a href="../../chapters/validation/validating_events.html">Validating Models (FILL)</a></li><li class="chapter-item expanded "><a href="../../chapters/qna/events.html">Q&A: Event Systems (FILL/ADAPT)</a></li><li class="chapter-item expanded affix "><li class="part-title">Modeling Relationships</li><li class="chapter-item expanded "><a href="../../chapters/relations/modeling-booleans-1.html">Relational Forge, Modeling Logic (EDIT)</a></li><li class="chapter-item expanded "><a href="../../chapters/relations/reachability.html">Reachability</a></li><li class="chapter-item expanded "><a href="../../chapters/relations/sets-induction-mutex.html">Modeling Mutal Exclusion</a></li><li class="chapter-item expanded "><a href="../../chapters/relations/sets-beyond-assertions.html">Beyond Assertions</a></li><li class="chapter-item expanded "><div>Reference-Counting Memory Management (FILL)</div></li><li class="chapter-item expanded "><div>Validating Relational Models (FILL)</div></li><li class="chapter-item expanded "><div>Comparing Prim's and Dijkstra's Algorithms (FILL from model)</div></li><li class="chapter-item expanded "><a href="../../chapters/solvers/bounds_booleans_how_forge_works.html">How does Forge Work?</a></li><li class="chapter-item expanded "><div>Q&A: Relations</div></li><li class="chapter-item expanded affix "><li class="part-title">Temporal Specification</li><li class="chapter-item expanded "><a href="../../chapters/temporal/liveness_and_lassos.html">Safety and Liveness</a></li><li class="chapter-item expanded "><a href="../../chapters/temporal/temporal_operators.html">Temporal Forge 1</a></li><li class="chapter-item expanded "><a href="../../chapters/temporal/temporal_operators_2.html">Temporal Forge 2</a></li><li class="chapter-item expanded "><a href="../../chapters/temporal/obligations_past.html">Obligations and the Past</a></li><li class="chapter-item expanded "><a href="../../chapters/temporal/fixing_lock_temporal.html">Modeling Mutual Exclusion</a></li><li class="chapter-item expanded "><div>Validation: Temporal Pitfalls</div></li><li class="chapter-item expanded "><div>Q&A: Temporal Logic</div></li><li class="chapter-item expanded affix "><li class="part-title">Case Studies</li><li class="chapter-item expanded "><div>Model-Based ("Stateful") Testing (FILL)</div></li><li class="chapter-item expanded "><div>Concolic Execution (DEMO: KLEE)</div></li><li class="chapter-item expanded "><div>Policy and Network Analysis (DEMO: ABAC, Margrave, Zelkova)</div></li><li class="chapter-item expanded "><div>Crypto Protocol Analysis (DEMO: crypto lang, CPSA or other)</div></li><li class="chapter-item expanded "><div>Program Synthesis (DEMO: SSA synth, Sygus)</div></li><li class="chapter-item expanded affix "><li class="part-title">Construction Storage</li><li class="chapter-item expanded "><a href="../../chapters/solvers/cegis.html">unused 1</a></li><li class="chapter-item expanded "><a href="../../chapters/solvers/dpll.html">unused 2</a></li><li class="chapter-item expanded "><a href="../../chapters/solvers/resolution.html">unused 3</a></li><li class="chapter-item expanded "><a href="../../chapters/solvers/smt.html">unused 4</a></li><li class="chapter-item expanded affix "><li class="part-title">Forge Documentation</li><li class="chapter-item expanded "><a href="../../chapters/docs/test.html">Placeholder Test for search</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Logic for Systems: Lightweight Formal Methods for the Practical Engineer</h1>
+
+                    <div class="right-buttons">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css" integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3+Aro6EYUG4+cU+KJWu/X" crossorigin="anonymous">
+<h1 id="anticipated-questions-static-models"><a class="header" href="#anticipated-questions-static-models">Anticipated Questions: Static Models</a></h1>
+<h3 id="a-visual-sketch-of-how-forge-searches"><a class="header" href="#a-visual-sketch-of-how-forge-searches">A Visual Sketch of How Forge Searches</a></h3>
+<p>Suppose we're using Forge to search for family trees. There are infinitely many potential family tree instances, but Forge needs to work with a finite search space. This is where the bounds of a <code>run</code> come in; they limit the set of instances Forge will even consider. Constraints you write are <em>not yet involved</em> at this point.</p>
+<p>Once the bounded search space has been established, Forge uses the constraints you write to find satisfying instances within the bounded search space.</p>
+<p><img src="https://i.imgur.com/eQ76Hv8.png" alt="" /></p>
+<p>The engine uses bounds and constraints very differently, and inferring constraints is often less efficient than inferring bounds. But the engine treats them differently, which means sometimes the distinction leaks through.</p>
+<h3 id="nulls-in-forge"><a class="header" href="#nulls-in-forge">&quot;Nulls&quot; in Forge</a></h3>
+<p>In Forge, there is a special value called <code>none</code>. It's analogous (but not exactly the same!) to a <code>None</code> in languages like Python.</p>
+<p>Suppose I add this predicate to our <code>run</code> command in the tic-tac-toe model:</p>
+<pre><code class="language-alloy">pred myIdea {
+    all row1, col1, row2, col2: Int | 
+        (row1 != row2 or col1 != col2) implies
+            Board.board[row1][col1] != 
+            Board.board[row2][col2]
+}
+</code></pre>
+<p>I'm trying to express that every entry in the board is different. This should easily be true about, e.g., the initial board, as there are no pieces there at all. But <strong>do you think the empty board satisfies this predicate?</strong></p>
+<details>
+<summary>Think (or try it in Forge) then click!</summary>
+<p>It's very likely this predicate would <em>not</em> be satisfied by the empty board. Why?</p>
+<p>Because <code>none</code> equals itself! We can check this:</p>
+<pre><code class="language-alloy">test expect {
+    nullity: {none != none} is unsat
+} 
+</code></pre>
+<p>Thus, when you're writing constraints like the above, you need to watch out for <code>none</code>: the value for <em>every</em> cell in the initial board is equal to the value for <em>every</em> other cell!</p>
+</details>
+<div id="admonition-reachability-and-none" class="admonition admonish-tip">
+<div class="admonition-title">
+<p>Reachability and none</p>
+<p><a class="admonition-anchor-link" href="#admonition-reachability-and-none"></a></p>
+</div>
+<div>
+<p>The <code>none</code> value in Forge has at least one more subtlety: <code>none</code> is &quot;reachable&quot; from everything if you're using the built-in <code>reachable</code> helper predicate. That has an impact even if we don't use <code>none</code> explicitly. If I write something like: <code>reachable[p.spouse, Nim, parent1, parent2]</code> I'm asking whether, for some person <code>p</code>, their spouse is an ancestor of <code>Nim</code>. If <code>p</code> doesn't have a spouse, then <code>p.spouse</code> is <code>none</code>, and so this predicate would yield true for <code>p</code>.</p>
+<p>This is why it's often advisible to qualify your use of <code>reachable</code>. E.g., I could write <code>some p.spouse and reachable[p.spouse, Nim, parent1, parent2]</code>.</p>
+</div>
+</div>
+<h3 id="some-as-a-quantifier-versus-some-as-a-multiplicity"><a class="header" href="#some-as-a-quantifier-versus-some-as-a-multiplicity">Some as a Quantifier Versus Some as a Multiplicity</a></h3>
+<p>The keyword <code>some</code> is used in 2 different ways in Forge:</p>
+<ul>
+<li>it's a <em>quantifier</em>, as in <code>some b: Board, p: Player | winner[s, p]</code>, which says that somebody has won in some board (and gives us a name for that board, and also for the winner); and</li>
+<li>it's a <em>multiplicity operator</em>, as in <code>some Board.board[1][1]</code>, which says only that the middle cell of the board is populated.</li>
+</ul>
+<p>Don't be afraid to use both; they're both quite useful! But remember the difference. </p>
+<h3 id="implies-vs-such-that"><a class="header" href="#implies-vs-such-that">Implies vs. Such That</a></h3>
+<p>You can read <code>some row : Int | ...</code> as &quot;There exists some integer <code>row</code> such that ...&quot;. The transliteration isn't quite as nice for <code>all</code>; it's better to read <code>all row : Int | ...</code> as &quot;In all integer <code>row</code>s, it holds that ...&quot;. </p>
+<p>If you want to <em>further restrict</em> the values used in an <code>all</code>, you'd use <code>implies</code>. But if you want to <em>add additional requirements</em> for a <code>some</code>, you'd use <code>and</code>.  Here are 2 examples:</p>
+<ul>
+<li><strong>All</strong>: &quot;Everybody who has a <code>parent1</code> doesn't also have that person as their <code>parent2</code>&quot;: <code>all p: Person | some p.parent1 implies p.parent1 != p.parent2</code>.</li>
+<li><strong>Some</strong>: &quot;There exists someone who has a <code>parent1</code> and a <code>spouse</code>&quot;: <code>some p: Person | some p.parent1 and some p.spouse</code>.</li>
+</ul>
+<p><strong>Technical aside:</strong> The type designation on the variable can be interpreted as having a character similar to these add-ons: <code>and</code> (for <code>some</code>) and <code>implies</code> (for <code>all</code>). E.g., &quot;there exists some <code>row</code> such that <code>row</code> is an integer and ...&quot;, or &quot;In all <code>row</code>s, if <code>row</code> is an integer, it holds that...&quot;.</p>
+<h3 id="there-exists-some-atom-vs-some-instance"><a class="header" href="#there-exists-some-atom-vs-some-instance">There Exists <code>some</code> <em>Atom</em> vs. Some <em>Instance</em></a></h3>
+<p>Forge searches for instances that satisfy the constraints you give it. Every <code>run</code> in Forge is about <em>satisfiability</em>; answering the question &quot;Does there exist an instance, such that...&quot;. </p>
+<p>Crucially, <strong>you cannot write a Forge constraint that quantifies over <em>instances</em> themselves</strong>. You can ask Forge &quot;does there exist an instance such that...&quot;, which is pretty flexible on its own. E.g., if you want to check that something holds of <em>all</em> instances, you can ask Forge to find counterexamples. This is how <code>assert ... is necessary for ...</code> is implemented, and how the examples from last week worked.</p>
+<h3 id="one-versus-some"><a class="header" href="#one-versus-some">One Versus Some</a></h3>
+<p>The <code>one</code> quantifier is for saying &quot;there exists a UNIQUE ...&quot;. As a result, there are hidden constraints embedded into its use. <code>one x: A | myPred[x]</code> really means, roughly, <code>some x: A | myPred[x] and all x2: A | not myPred[x]</code>. This means that interleaving <code>one</code> with other quantifiers can be subtle; for that reason, we won't use it except for very simple constraints.</p>
+<p>If you use quantifiers other than <code>some</code> and <code>all</code>, beware. They're convenient, but various issues can arise.</p>
+<h3 id="testing-predicate-equivalence"><a class="header" href="#testing-predicate-equivalence">Testing Predicate Equivalence</a></h3>
+<p>Checking whether or not two predicates are <em>equivalent</em> is the core of quite a few Forge applications---and a great debugging technique sometimes. </p>
+<p>How do you do it? Like this:</p>
+<pre><code class="language-alloy">pred myPred1 {
+    some i1, i2: Int | i1 = i2
+}
+pred myPred2 {
+    not all i2, i1: Int | i1 != i2
+}
+assert myPred1 is necessary for myPred2
+assert myPred2 is necessary for myPred1
+</code></pre>
+<p><strong>(TODO: confirm assertions explained and introduced already)</strong></p>
+<p>If you get an instance where the two predicates aren't equivalent, you can use the Sterling evaluator to find out <strong>why</strong>. Try different subexpressions, discover which is producing an unexpected result! E.g., if we had written (forgetting the <code>not</code>):</p>
+<pre><code class="language-alloy">pred myPred2 {
+    all i2, i1: Int | i1 != i2
+}
+</code></pre>
+<p>One of the assertions would fail, yielding an instance in Sterling you could use the evaluator with.</p>
+<h4 id="satisfiability-testing-and-a-pitfall"><a class="header" href="#satisfiability-testing-and-a-pitfall">Satisfiability Testing and a Pitfall</a></h4>
+<p>We haven't used the <code>test expect</code> syntax for much yet, but it's quite powerful. Here it lets us express a fairly common mistake that new Forge users can make. Here is a test block with 2 tests in it. Both of them may look like they are comparing <code>myPred1</code> and <code>myPred2</code> for equivalence:</p>
+<pre><code class="language-alloy">test expect {
+    -- correct: &quot;no counterexample exists&quot;
+    -- Forge tries to find an instance where myPred1 and myPred2 disagree
+    p1eqp2_A: {
+        not (myPred1 iff myPred2)        
+    } is unsat
+
+    -- incorrect: &quot;it's possible to satisfy what i think always holds&quot;
+    -- Forge tries to find an instance where myPred1 and myPred2 agree
+    p1eqp2_B: {
+        myPred1 iff myPred2
+    } is sat
+}
+</code></pre>
+<p>These two tests do not express the same thing! One asks Forge to find an instance where the predicates are not equivalent. If it can find one, we know they aren't, and can see why. The other test asks Forge to find an instance where they <em>are</em> equivalent. But that's what we're hoping holds in <em>all</em> instances, not just a single one!</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../chapters/adder/rca.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../../chapters/ttt/ttt_games.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../chapters/adder/rca.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../../chapters/ttt/ttt_games.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+        <script src="../../ace.js"></script>
+        <script src="../../editor.js"></script>
+        <script src="../../mode-rust.js"></script>
+        <script src="../../theme-dawn.js"></script>
+        <script src="../../theme-tomorrow_night.js"></script>
+
+        <script src="../../elasticlunr.min.js"></script>
+        <script src="../../mark.min.js"></script>
+        <script src="../../searcher.js"></script>
+
+        <script src="../../clipboard.min.js"></script>
+        <script src="../../highlight.js"></script>
+        <script src="../../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>
