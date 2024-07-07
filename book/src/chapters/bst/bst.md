@@ -10,6 +10,8 @@ Here's an example, drawn by hand:
 <img alt="a hand-drawn binary search tree" src="./hand_bst_example.png" width=50%/>
 </center>
 
+Each node of the tree holds some value that the tree supports searching for. We'll call this value the search key, or just the _key_ for each node. 
+
 This is obviously a _binary tree_, since it is a tree where every node has at most 2 children. What makes it a binary _search_ tree is the invariant that every node $N$ obeys: 
 * all left-descendants of $N$ have a key less than $N$'s key; and 
 * all right-descendants of $N$ have a key greater than or equal to $N$'s key.
@@ -48,6 +50,10 @@ sig Node {
 }
 ```
 
+~~~admonish note title="Teminology Reminder" 
+Recall that a `sig` is a datatype, each of which may have a set of _fields_. Here, we're saying that there is a datatype called `Node`, and that every `Node` has a `key`, `left`, and `right` field.
+~~~
+
 ## Wellformedness for Binary Trees
 
 What makes a binary tree a binary tree? We might start by saying that: 
@@ -70,7 +76,7 @@ pred isRoot[n: Node] {
 }
 ```
 
-Then we'll use the `isRoot` helper in our `wellformed` predicate:
+Then we'll use the `isRoot` helper in our `wellformed` predicate. But to write this predicate, there's a new challenge. We'll need to express constraints like "no node can reach itself via `left` or `right` fields". So far we've only spoken of a node's _immediate left or right child_. Instead, we now need a way to talk about _reachability_ over any number of `left` or `right` fields. Forge provides a helper, `reachable`, that makes this straightforward:
 
 ```forge,editable
 pred wellformed {
@@ -88,6 +94,12 @@ pred wellformed {
     not ((n1.left = n3 or n1.right = n3) and (n2.left = n3 or n2.right = n3))
 }
 ```
+
+~~~admonish tip title="The `reachable` built-in" 
+The built-in `reachable` predicate returns true if and only if its first argument is reachable from its second argument, via all of the remaining arguments. Thus, `reachable[n1, anc, left, right]` means: "`anc` can reach `n1` via some sequence of `left` and `right` fields."
+
+For reasons we'll explore later, `reachable` can be subtle; if you're curious now, see the [Static Models Q&A](../qna/static.md) for a discussion of this. 
+~~~
 
 ## Write an example or two
 
@@ -133,13 +145,13 @@ Be careful not to confuse these! There's a rough analogy to programming: it's ve
 
 **(TODO: decide: discussion of partial vs. total examples goes where?)**
 
-#### A binary tree with more than one rank should be considered well-formed. 
+#### A binary tree with more than one row should be considered well-formed. 
 
 ```forge,editable
-example p_multi_rank is wellformed for {
-  Node = `Node0 +                               -- rank 0
-         `Node1 + `Node2 +                      -- rank 1
-         `Node3 + `Node4 + `Node5 + `Node6      -- rank 2
+example p_multi_row is wellformed for {
+  Node = `Node0 +                               -- row 0
+         `Node1 + `Node2 +                      -- row 1
+         `Node3 + `Node4 + `Node5 + `Node6      -- row 2
   
   -- Define the child relationships (and lack thereof, for leaves)
   -- This is a bit verbose; we'll learn more concise syntax for this soon!
@@ -157,7 +169,7 @@ example p_multi_rank is wellformed for {
 ```
 
 <center>
-<img alt="a tree with more than one rank" src="./p_multi_rank.png" width=60%/>
+<img alt="a tree with more than one row" src="./p_multi_row.png" width=60%/>
 </center>
 
 Wait a moment; there's something strange here. What do you notice about the way we've visualized this tree? 

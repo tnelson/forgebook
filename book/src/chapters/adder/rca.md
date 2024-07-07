@@ -1,4 +1,4 @@
-# Ripple Carry Adder 
+# Ripple-Carry Adder 
 
 Let's model a third system in Froglet. We'll focus on something even more concrete, something that is implemented in _hardware_: a circuit for adding together two numbers called a _ripple-carry adder_ (RCA). Along the way, even though the adder doesn't "change", we'll still learn a useful technique for modeling systems that change over time. 
 
@@ -24,7 +24,11 @@ We need to carry a bit with value `1` in the `2s` place.
 |           1 |           0 |          1 |                         0 |
 |           1 |           1 |          0 |                         1 |
 
-Suppose we've built a circuit like the above using logic gates; this is called a _full adder_ (FA).
+Suppose we've built a circuit like the above; this is called a _full adder_ (FA).
+
+~~~admonish note title="Building circuits"
+Exactly how we build that circuit is outside the scope of this example. Generally, we build them with logic gates: tiny devices that implement boolean operators like "and", "not", etc. 
+~~~
 
 **(TODO: insert picture of a single adder doing this: 2 inputs, 2 outputs)**
 
@@ -42,14 +46,14 @@ If you've studied physics or electrical engineering, you might also see that thi
 
 ## Datatypes
 
-We'll start by defining a boolean data type, for the wire values.
+We'll start by defining the boolean data type&mdash;true and false&mdash;for the wire values.
 
 ```forge,editable
 abstract sig Bool {}
 one sig True, False extends Bool {}
 ```
 
-Then we'll define a `sig` for full adders, which will be chained together to form the ripple-carry adder:
+Then we'll define a `sig` for full adders, which will be chained together to form the ripple-carry adder. We'll give each full adder fields representing its input bits and output bits:
 
 ```forge,editable
 sig FA { 
@@ -65,7 +69,7 @@ sig FA {
 ```
 
 ~~~admonish warning title="Bool is not boolean!"
-Beware confusing the `Bool` sig we created, which is a definition in our model and denotes a set of `Bool` atoms, with the booleans that Forge formulas evaluate to. Forge doesn't "know" anything special about the definition above, which means we won't be able to write something like: `(some FA) = True`. To Forge, `True` is an just expression that denotes some value, but `some FA` must evaluate to either true or false. 
+Beware confusing the `Bool` sig we created (which is a definition in our model and denotes a set of `Bool` atoms), with the result of evaluating Forge constraints. Forge doesn't "know" anything special about `Bool`; it's just another datatype. **If we write something like `(some FA) = True`, Forge will give an error message.** This is because, to Forge, `True` is just another value we defined in the model. Instead, we write just `(some FA)`. This will come up again as we continue to develop the model. 
 ~~~
 
 Finally, we'll define the ripple-carry adder chain:
@@ -77,6 +81,10 @@ one sig RCA {
   -- the next full adder in the chain (if any)
   nextAdder: pfunc FA -> FA
 }
+~~~
+
+~~~admonish note title="Reminder"
+Recall that a `pfunc` field is a partial function, sort of like a dictionary: every input is mapped to at most one output. 
 ~~~
 
 Notice that there is only ever one ripple-carry adder in an instance, and that it has fields that define which full adder comes first (i.e., operates on the `1`s place), and what the succession is. We will probably need to enforce what these mean once we start defining wellformedness. 
@@ -93,6 +101,10 @@ pred wellformed {
   all fa: FA | not reachable[fa, fa, RCA.nextAdder]  
 }
 ```
+
+~~~admonish tip title="Case sensitivity and variable names"
+In our model so far, `FA` is the name of a datatype. When writing the constraints above, I said: "for every full adder..." and named this arbitrary adder `fa`. These two, `FA` and `fa` are different. For a start, `FA` is defined within the entire model, but `fa` is only defined within the scope of the `all` quantifier. 
+~~~
 
 We've used the `reachable` helper before, but it's worth mentioning again: `A` is reachable from `B` via _one or more applications_ of `f` if and only if `reachable[A, B, f]` is true. That "one or more applications" is important, and is why we needed to add the `(fa != RCA.firstAdder) implies` portion of the first constraint: `RCA.firstAdder` shouldn't be the successor of any full adder, and if it were its own successor, that would be a cycle in the line of adders. If we had left out the implication, and written just `all fa: FA | reachable[fa, RCA.firstAdder, RCA.nextAdder]`, `RCA.firstAdder` would need to have a predecessor, which would contradict the second constraint.
 

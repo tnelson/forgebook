@@ -14,7 +14,7 @@ In this course, **the models we build aren't inert**; we have tools that we can 
 
 _We don't need to fully model a system to be able to make useful inferences_. We can simplify, omit, and abstract concepts/attributes to make models that approximate the system while preserving the fundamentals that we're interested in. 
 
-**EXERCISE:** If you've studied physics, there's a great example of this in statics and dynamics. Suppose I drop a coin from the top of the science library, and ask you what its velocity will be when it hits the ground. Using the methods you learn in beginning physics, what's something you usefully _disregard_?
+**Exercise:** If you've studied physics, there's a great example of this in statics and dynamics. Suppose I drop a coin from the top of the science library, and ask you what its velocity will be when it hits the ground. Using the methods you learn in beginning physics, what's something you usefully _disregard_?
 
 <details>
 <summary>Think, then click!</summary>
@@ -278,7 +278,7 @@ pred XTurn[s: Board] {
 
 The `{row, col: Int | ...}` syntax means a set comprehension, and describes the set of row-column pairs where the board contains `X` (or `O`). The `#` operator gives the size of these sets, which we then compare.
 
-**Question**: Is it enough to say that `OTurn` is the negation of `XTurn`? 
+**Exercise:** Is it enough to say that `OTurn` is the negation of `XTurn`? 
 
 <details>
 <summary>Think, then click!</summary>
@@ -393,7 +393,7 @@ The `run` command can be used to give Forge more detailed instructions for its s
 
 ### No Boards
 
-Is it possible for an instance with _no_ boards to still satisfy constraints like these?
+**Exercise:** Is it possible for an instance with _no_ boards to still satisfy constraints like these?
 
 ```alloy
 run {    
