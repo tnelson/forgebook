@@ -9,7 +9,7 @@ Now ask yourself:
 * How did you know which data structures or algorithms were the right ones to use?
 * How did you know your program "worked", in the end?
 
-In the context of assignments, there are expected answers to these questions. For instance, you might say you know your code worked because you tested it (*very* thoroughly, I'm sure)! But is that really the truth? In terms of consequences, the true bar for excellent in a programming class is the grade you got. That is:
+In the context of assignments, there are expected answers to these questions. For instance, you might say you know your code worked because you tested it (*very* thoroughly, I'm sure)! But is that really the truth? In terms of consequences, the true bar for excellence in a programming class is the grade you got. That is:
   - You knew what to do because _you were told what to do_.  
   - You probably knew which algorithms to use because they'd _just been taught to you_.
   - You were confident that your programs worked because _you were told by an authority figure_.
@@ -24,11 +24,9 @@ But that doesn't mean we should give up. It just means that we should moderate o
 
 ## Unit Testing
 
-Let's start by deconstructing a confidence-building exercise most of us learn in a programming course: unit-testing. What does unit testing do well? What does it do poorly?
-
-**Exercise:** Make two lists to answer the above question. Why do we test? What could go wrong, and how can the sort of testing you've done in other classes let us down? 
-
-Hopefully we all agree that concrete input-output testing has its virtues and that we should keep doing it. But let's focus on the things that testing _doesn't_ do well. 
+Hopefully we all agree that unit testing with concrete input-output pairs has its virtues and that we should keep doing it. But let's investigate what it does and doesn't do well. 
+  
+**Exercise:** Make two lists: What does unit testing do well? What doesn't it do well? (Hint: Why do we test? What could go wrong, and how can the sort of testing you've done in other classes let us down?)
 
 <details>
 <summary>Think, then click!</summary>
@@ -46,12 +44,14 @@ Worse, we can't test the things we don't think of, or don't know about; we're vu
 
 Suppose we're thinking about the workings of a small company. We're given some facts about the company, and have to answer a question based on those facts. Here's an example. We know that:
 
-* Alice supervises Bob.
-* Bob supervises Charlie.
+* Alice directly supervises Bob.
+* Bob directly supervises Charlie.
 * Alice graduated Brown.
 * Charlie graduated Harvale.
 
-**Question:** Does someone who graduated from Brown directly supervise someone who graduated from another University?
+To keep things simple, we'll assume that all three people graduated some university.
+
+**Exercise:** Does someone who graduated from Brown directly supervise someone who graduated from another University?
 
 <details>
 <summary>Think, then click.</summary>
@@ -78,7 +78,7 @@ Here's an example configuration of the puzzle room:
 |:--:| 
 |  *(Why are they smiling?)* |
 
-In this configuration, can the gnomes escape? If so, why?
+**Exercise:** In this configuration, can the gnomes escape? If so, why?
 
 <details>
     <summary>Think, then click.</summary>
@@ -158,7 +158,7 @@ Here are some examples of "systems" that students have modeled in Forge: lifetim
 
 ## The Future of Computing
 
-For better or worse, The shape of engineering is changing. Lots of people are excited, scared, or both about large language models like ChatGPT. This book won't teach you how to use generative AI, so it's reasonable to wonder: _why learn from this book, instead of another AI book?_
+For better or worse, The shape of engineering is changing. Lots of people are excited, scared, or both about large language models like ChatGPT. This book won't teach you how to use generative AI, so it's reasonable to wonder: _why learn from this book, instead of reading yet another book on another (deservedly) hot topic, like machine learning?_
 
 There are two questions that will never go out of style, and won't be answered by AI (at least, not in our lifetimes):
 * **What do you want to build?** What does your customer really need? Answering this requires talking to them and other stakeholders, watching their processes, seeking their feedback, and adjusting your design based on it. And no matter who (or what) is writing the actual code, you need to be able to express all this precisely enough that they (or it) can succeed at the implementation.  

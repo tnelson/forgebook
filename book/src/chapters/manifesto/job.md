@@ -60,7 +60,7 @@ Either way, being able to think carefully about your specification can separate 
 
 Whether you're working out an algorithm on paper or checking a finished implementation, you need some means of judging correctness. Here, too, precision (and a little bit of adversarial thinking) matters in industry:
   * When ordinary testing isn't good enough, techniques like fuzzing, [property-based testing](../properties/pbt.md), and others give you new evaluative power. 
-  * When you're updating, refactoring, or optimizing a system, a model of its ideal behavior can be leveraged for validation (Here's an example from 2014: [external webpage](https://randomascii.wordpress.com/2014/01/27/theres-only-four-billion-floatsso-test-them-all/)).
+  * When you're updating, refactoring, or optimizing a system, a model of its ideal behavior can be leveraged for validation. [Here's an example from 2014](https://news.ycombinator.com/item?id=34726919)&mdash;click through the header of the linked article to read the original blog post.)
   * A model of the system's behavior is also useful for test-case generation, and [enable tools to generate test suites](https://hypothesis.readthedocs.io/en/latest/stateful.html) that have a higher coverage of the potential state space. 
 
 And all that's even before we consider more heavyweight methods, like model checking and program verification.

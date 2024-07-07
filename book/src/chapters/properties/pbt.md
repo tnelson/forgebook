@@ -14,7 +14,9 @@ Implementation of a linked list.
 
 We'll talk about more than just software soon. For now, let's go back to testing. Most of us have learned how to write test cases. Given an input, here's the output to expect. Tests are a kind of pointwise *specification*; a partial one, and not great for fully describing what you want, but a kind of specification nonetheless. They're cheap, non-trivially useful, and better than nothing.
 
-But they also carry our biases, they can't cover an infinite input space, etc. Even more, they're not always adequate carriers of intent: if I am writing a program to compute the statistical median of a dataset, and write `assert median([1,2,3]) == 2`, what exactly is the behavior of the system I'm trying to confirm? Surely I'm not writing the test because I care specifically about `[1,2,3]` only, and not about `[3,4,5]` in the same way? Maybe there was some broader aspect, some _property_ of median I cared about when I wrote that test. What do you think it was? What makes an implementation of `median` correct?
+But they also carry our biases, they can't cover an infinite input space, etc. Even more, they're not always adequate carriers of intent: if I am writing a program to compute the statistical median of a dataset, and write `assert median([1,2,3]) == 2`, what exactly is the behavior of the system I'm trying to confirm? Surely I'm not writing the test because I care specifically about `[1,2,3]` only, and not about `[3,4,5]` in the same way? Maybe there was some broader aspect, some _property_ of median I cared about when I wrote that test. 
+
+**Exercise:** What do you think it was? What makes an implementation of `median` correct?
 
 <details>
 <summary>Think, then click!</summary>
@@ -39,7 +41,7 @@ Consider the problem of finding cheapest paths in a weighted graph. There are qu
 
 The problem statement seems simple: take a graph $GRAPH$ and two vertex names $V1$ and $V2$ as input. Produce the cheapest path from $V1$ to $V2$ in $GRAPH$. But it turns out that this problem hides a lurking issue.
 
-Find the cheapest path from vertex $G$ to vertex $E$ on the graph below.
+**Exercise:** Find the cheapest path from vertex $G$ to vertex $E$ on the graph below.
 
 ![](https://i.imgur.com/CT7MSgl.jpg)
 
@@ -66,7 +68,7 @@ shortest(GRAPH, G, E) == [(G, D), (D, B), (B, E)] or
 shortest(GRAPH, G, E) == [(G, H), (H, F), (F, E)]
 ```
 
-What's wrong with the "big or" strategy? Can you think of a graph where it'd be unwise to try to do this?
+**Exercise:** What's wrong with the "big or" strategy? Can you think of a graph where it'd be unwise to try to do this?
 
 <details>
     <summary>Think, then click!</summary>
@@ -77,7 +79,7 @@ There are at least two problems. First, we might have missed some possible solut
 
 This problem -- multiple correct answers -- occurs in every part of Computer Science. Once you're looking for it, you can't stop seeing it. Most graph problems exhibit it. Worse, so do most optimization problems. Unique solutions are convenient, but the universe isn't built for our convenience. 
 
-What's the solution? If _test cases_ won't work, is there an alternative? (Hint: instead of defining correctness bottom-up, by small test cases, think top-down: can we say what it __means__ for an implementation to be correct, at a high level?)
+**Exercise:** What's the solution? If _test cases_ won't work, is there an alternative? (Hint: instead of defining correctness bottom-up, by small test cases, think top-down: can we say what it __means__ for an implementation to be correct, at a high level?)
 
 <details>
 <summary>Think, then click!</summary>
@@ -95,9 +97,9 @@ This might be something you were taught to do when implementing cheapest-path al
 
 Notice that we just did something subtle and interesting. Even if there are a billion cheapest paths between two vertices in the input graph, they all have that same, minimal length. Our testing strategy has just evolved past naming _specific_ values of output to checking broader _properties_ of output.
 
-Similarly, we can move past specific inputs: randomly generate them. Then, write a function `is_valid` that takes an arbitrary `input, output` pair and returns true if and only if the output is a valid solution for the input. Just pipe in a bunch of inputs, and the function will try them all. You can apply this strategy to most any problem, in any programming language. (For your homework this week, you'll be using Python.)
+Similarly, we can move past specific inputs: randomly generate them. Then, write a function `is_valid` that takes an arbitrary `input, output` pair and returns true if and only if the output is a valid solution for the input. Just pipe in a bunch of inputs, and the function will try them all. You can apply this strategy to most any problem, in any programming language. (For your homework this week, you'll be using Python.) Let's be more careful, though.
 
-Let's be more careful, though. Is there something _else_ that `cheapest` needs to guarantee for that input, beyond finding a path with the same cost as our solution?
+**Exercise:** Is there something _else_ that `cheapest` needs to guarantee for that input, beyond finding a path with the same cost as our solution?
 
 <details>
 <summary>Think, then click!</summary>
@@ -106,7 +108,7 @@ We also need to confirm that the path returned by `cheapest` is indeed a path in
 
 </details>
 
-Here's a sketch of an `is_valid` function for cheapest path:
+**Exercise:** Now take that list of goals, and see if you can outline a function that tests for it. Remember that the function should take the problem input (in this case, a graph and the source and destination vertices) and the output (in this case, a path). You might generate something like this pseudocode:
 
 <details>
 <summary>Think, then click!</summary>
@@ -142,9 +144,16 @@ And anyway, often we don't need recourse to any trusted model; we can just phras
 
 **Exercise:** What if we don't have a trusted implementation?
 
+<details>
+<summary>Think, then click!</summary>
+
 You can use this approach whenever you can write a function that checks the correctness of a given output. It doesn't need to use an existing implementation (it's just easier to talk about that way). In the next example we won't use a trusted implementation at all!
 
-**Question:** Where do the inputs come from?
+</details>
+
+#### Input Generation
+
+Now you might wonder: _Where do the inputs come from_?
 
 Great question! Some we will manually create based on our own cleverness and understanding of the problem. Others, we'll generate randomly.
 
@@ -205,7 +214,7 @@ def test_python_median(input_list):
     # We should be able to do better!
 ```
 
-**Exercise**: See if you an express what it means for `median` to be correct in the language of your choice. 
+**Exercise**: Take a moment to try to express what it means for `median` to be correct in the language of your choice. Then continue on with reading this section.
 
 Expressing properties can often be challenging. After some back and forth, we might reach a candidate function like this:
 
@@ -218,8 +227,8 @@ def test_python_median(input_list):
     
     lower_or_eq =  [val for val in input_list if val <= output_median]
     higher_or_eq = [val for val in input_list if val >= output_median]
-    assert len(lower_or_eq) >= len(input_list) // 2    # // ~ floor
-    assert len(higher_or_eq) >= len(input_list) // 2   # // ~ floor
+    assert len(lower_or_eq) >= len(input_list) // 2    # int division, drops decimal part
+    assert len(higher_or_eq) >= len(input_list) // 2   # int division, drops decimal part
 ```
 
 Unfortunately, there's a problem with this solution. Python's `median` implementation _fails_ this test! Hypothesis provides a random input on which the function fails: `input_list=[9502318016360823, 9502318016360823]`. Give it a try! This is what _my_ computer produced; what happens on yours?
@@ -262,7 +271,7 @@ The issue is: because Python's `statistics.median` returns a `float`, we've inad
 
 Anyway, we have two or three potential fixes: 
   - bound the range of potential input values when we test; 
-  - check equality within some error term (a common trick when writing tests about `float` values); or 
+  - check equality within some small amount of error you're willing to tolerate (a common trick when writing tests about `float` values); or 
   - change libraries to one that uses an arbitrary-precision, like [BigNumber](https://pypi.org/project/BigNumber/). We could adapt our test fairly easily to that setting, and we'd expect this problem to not occur. 
 
 Which is best? I don't really like the idea of arbitrarily limiting the range of input values here, because picking a range would require me to understand the floating-point arithmetic specification a lot more than I do. For instance, how do I know that there exists some number $x$ before which this issue can't manifest? How do I know that all processor architectures would produce the same thing? 
