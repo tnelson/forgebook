@@ -294,6 +294,8 @@ pred OTurn[s: Board] {
 
 </details>
 
+---
+
 ~~~admonish note title="Integer addition"
 
 Forge supports arithmetic operations on integers like `add`. Forge integers are signed (i.e., can be positive or negative) and are bounded by a _bit width_, which defaults to `4` bits. The number of available integers is always $2^k$, where $k$ is the bit width.

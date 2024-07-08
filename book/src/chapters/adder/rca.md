@@ -119,7 +119,7 @@ Just like `pred`icates can be used as boolean-valued helpers, `fun`ctions can ac
 ```forge
 // Helper function: what is the output bit for this full adder?
 fun adder_S_RCA[f: one FA]: one Bool  {
-  // FILL THIS IN
+  // What expression should we put here?
 } 
 ```
 
@@ -129,7 +129,7 @@ Looking at the table above, the adder's output value is true if and only if an o
 * `B` only; or
 * `C` only. 
 
-We'll use Forge's `let` construct to make it easier to write the value for each of these wires, and then combine them using logical `or`. 
+We'll use Forge's `let` construct to make it easier to write the value for each of these wires, and then combine them using logical `or`. Notice that this is where we need to remember that the sig `True` is not a Forge formula yet; to make it into one, we need to explicitly test whether each value is equal to `True`:
 
 ```forge
 // Helper function: what is the output bit for this full adder?
@@ -146,7 +146,7 @@ fun adder_S_RCA[f: one FA]: one Bool  {
 ```
 
 ~~~admonish tip title="Couldn't we have just used a `pred` here?"
-It's admittedly a bit strange to write a helper function that returns a `Bool`, rather than a predicate that returns a Forge boolean. We could make a `pred` work; we'd just have to eventually use `True` and `False` somewhere, since they are the values that the output bits can take on. 
+It might be a bit strange to write a helper function that returns a `Bool`, rather than a predicate directly. We could make a `pred` work, but we'd still have to eventually use `True` and `False` somewhere, since they are the values that the output bits can take on. 
 ~~~
 
 ### When is an adder's carry bit set to true? 
@@ -246,13 +246,138 @@ run {rca} for exactly 4 FA
 
 ## Verification
 
-Ok, we've looked at some of the model's output, and it seems right. But how can we be really confident that the ripple-carry adder _works_? Can we use our model to _verify_ the adder? Yes, but we'll need to do a bit more work. 
+Ok, we've looked at some of the model's output, and it seems right. But how can we be really confident that the ripple-carry adder _works_? Can we use our model to _verify_ the adder? Yes, but we'll need to do a bit more modeling. 
 
-**FILL: verification story with ghost int**
+**Exercise:** What does it mean for the adder to "work"? 
 
-The verification step took over a minute on my laptop! That's rather slow for a model this size. When this sort of unexpected slowdown happens, it's often because we've given the solver too much freedom, causing it to explore a much larger search space than it should have to. This is especially pronounced when we expect an "unsatisfiable" result&mdash;then, the solver really does need to explore _everything_ before concluding that no, there are no solutions. We're in that situation here, since we're hoping there are no counter-examples to correctness. 
+<details>
+<summary>Think, then click!</summary>
 
-So let's ask ourselves: *What did we leave the solver to figure out on its own, that we maybe could give it some help with?**
+For one thing, it had better produce a series of boolean outputs that correspond to the output we'd get if we just did the addition. That is, if we add together the numbers `2` (`10`) and `3` (`11`) we should expect to get `5`&mdash;which should be `101` in binary, provided we always set the bit-width high enough to match the number of bits we're adding together. 
+
+Let's augment our model to check this. We'll ask Forge for an instance where the ripple-carry adder produces a different result (taken as the sum of the outputs of each full adder) than the expected (produced via Forge's `add` function). 
+
+</details>
+
+---
+
+When I'm expanding a model in this way, I like to augment instances with extra fields that exist _just for verification_, and which aren't part of the system we're modeling. Here, we'll keep track of the place-values of each full adder, which we can then use to compute the "true" value of its input or output. E.g., the first full adder would have place-value 1, and its successors would have place-value 2, then 4, etc. 
+
+~~~admonish note title="Helper values"
+Sometimes you'll hear this sort of new field or value referred to as a "ghost": it isn't real; it doesn't exist in the actual system.
+~~~
+
+We could store this field in the `FA` sig, but let's keep the original unmodified, and instead add a `Helper` sig. This keeps the for-verification-only fields separate from the model of the system:
+
+```forge
+one sig Helper {
+  place: func FA -> Int
+}
+```
+
+The ripple-carry adder gives us the context we need to speak of the place value each full adder ought to have. We can write this for the first adder easily:
+
+```forge
+-- The "places" helper value should agree with the ordering that the RCA establishes.
+pred assignPlaces {
+  -- The least-significant bit is 2^0
+  Helper.place[RCA.firstAdder] = 1
+  -- ...
+}
+```
+
+Now we need to, in effect, write a for-loop or a recursive function that constrains `places` for all the other adders. But Forge has no recursion or loops! Fortunately, it does have the `all` quantifier, which lets us define every other adder's `place` value in terms of its predecessor:
+
+```forge
+-- The "places" helper value should agree with the ordering that the RCA establishes.
+pred assignPlaces {
+  -- The least-significant bit is 2^0
+  Helper.place[RCA.firstAdder] = 1
+  -- Other bits are worth 2^(i+1), where the predecessor is worth 2^i.
+  all fa: FA | some RCA.nextAdder[fa] => {    
+    Helper.place[RCA.nextAdder[fa]] = multiply[Helper.place[fa], 2]
+  }
+}
+```
+
+When you have quantification and helper fields, you can often avoid needing real iteration or recursion.
+
+We'll add a helper function for convenience later:
+
+```forge
+fun trueValue[b: Bool, placeValue: Int]: one Int {
+  (b = True) => placeValue else 0
+}
+```
+
+### The Requirement
+
+Let's try to express our requirement that the adder is correct. Again, we'll phrase this as: for every full adder, the true  value of its output is the sum of the true values of its inputs (where "true value" means the value of the boolean, taking into account its position). We might produce something like this:
+
+```forge
+pred req_adderCorrect_wrong {
+  (rca and assignPlaces) implies {
+    all fa: FA | { 
+        trueValue[fa.s, Helper.place[fa]] = add[trueValue[fa.a, Helper.place[fa]], 
+                                                trueValue[fa.b, Helper.place[fa]]]
+    }
+  }
+}
+```
+
+And then we'll use it in a test. It's vital that we have a high-enough bitwidth, so that Forge can count up to the actual expected result, without overflowing. Forge `int`s are signed, so we actually need a bigger bit-width than the number of full adders. If we have, say, 6 full adders, we might end up producing a 7-bit output (with carrying). A 7-bit value can conservatively hold up to $2^7 - 1 = 127$. To count up to that high, we need to use _8_ bits in Forge, giving the solver all the numbers between $-128$ and $127$, inclusive.
+
+```forge
+test expect {  
+  r_adderCorrect: {req_adderCorrect} for 6 FA, 1 RCA, 8 Int is theorem
+}
+```
+
+However, this requirement fails&mdash;Forge finds a counterexample. 
+
+**Exercise:** What's wrong? Is the adder broken, or might our property be stated incorrectly?
+
+<details>
+<summary>Think, then click!</summary>
+
+We forgot to take carrying into account! Any time a full adder carries a bit, it's dropped by the left-hand side of the above equation. 
+
+Notice how even if the model (or system) is correct, sometimes the property itself is wrong. Always be skeptical about your properties, just like you're skeptical about your model.
+</details>
+
+---
+
+Here's another attempt:
+
+```forge
+pred req_adderCorrect {
+  (rca and assignPlaces) implies {
+    all fa: FA | { 
+        -- Include carrying, both for input and output. The _total_ output's true value is equal to
+        -- the the sum of the total input's true value.
+
+        -- output value bit + output carry bits; note carry value is *2 (and there may not be a "next adder")
+        add[trueValue[fa.s, Helper.place[fa]], 
+            multiply[trueValue[fa.cout, Helper.place[fa]], 2]] 
+        = 
+        -- input a bit + input b bit + input carry bit
+        add[trueValue[fa.a, Helper.place[fa]],     
+            trueValue[fa.b, Helper.place[fa]],    
+            trueValue[fa.cin, Helper.place[fa]]]  
+        -- Notice: I don't use trailing comments much on lines, because I want to be able to easily paste 
+        -- these into the evaluator.
+    }
+  }
+}
+```
+
+Now when we run the check, it passes. There's just one problem&mdash;it only passes _eventually_. The verification step took over a minute on my laptop! That's rather slow for a model this size. 
+
+### Optimizing Verification
+
+When this sort of unexpected slowdown happens, it's often because we've given the solver too much freedom, causing it to explore a much larger search space than it should have to. This is especially pronounced when we expect an "unsatisfiable" result&mdash;then, the solver really does need to explore _everything_ before concluding that no, there are no solutions. We're in that situation here, since we're hoping there are no counter-examples to correctness. 
+
+**Exercise:** What did we leave the solver to figure out on its own, that we maybe could give it some help with?
 
 <details>
 <summary>Think, then click!</summary>
@@ -263,8 +388,55 @@ There are at least two things.
 
 </details>
 
-These both present opportunities for optimization! For now, let's just tackle the first one: we need to somehow give Forge a specific ordering on the adders. 
+---
 
-**FILL: `is plinear` -- not `linear`. What it does, why we don't do it in a constraint (no way to name specific atoms outside an example yet...)**
+These both present opportunities for optimization! For now, let's just tackle the first one: we need to somehow give Forge a specific ordering on the adders, rather than letting the solver explore all possible orderings. E.g., maybe we want a series of atoms `FA0`, `FA1`, ..., `FA5`, which ordering `RCA.nextAdder` respects. 
 
-Now Forge finishes the check in under a second on my laptop. Eliminating symmetries can make a huge difference! 
+We could try to express this as a constraint: 
+
+```forge
+pred orderingOnAdders {
+  some disj fa0, fa1, fa2, fa3, fa4, fa5: FA | {
+    RCA.firstAdder = fa0
+    RCA.nextAdder[fa0] = fa1 
+    RCA.nextAdder[fa1] = fa2
+    RCA.nextAdder[fa2] = fa3 
+    RCA.nextAdder[fa3] = fa4 
+    RCA.nextAdder[fa4] = fa5 
+  }
+}
+```
+
+However, this won't be very effective. 
+
+**Exercise:** Why won't adding `orderingOnAdders` to our set of constraints actually help much, if at all? 
+
+<details>
+<summary>Think, then click!</summary>
+
+Because all of that is already implied by the other constraints we have. It's true that sometimes rephrasing a constraint like this can have a big impact on performance if the solver can figure out how to use it well, but in this case the problem is one of symmetries; the solver would _just keep checking all possibilities_ for the `fa0`, `fa1`, etc. variables anyway. 
+
+Fortunately, there's a much better option. 
+
+</details>
+
+---
+
+Recall that Forge works by searching for satisfying instances within some large possibility space, and that this space is restricted by the bounds given. The search process is run by a sophisticated solver, but the problem that the solver itself gets looks nothing like Forge. The process of solving a Forge problem thus has three separate stages: 
+* express the solution space in a form the solver understands, which is usually a large set of boolean variables; 
+* convert the constraints into a form the solver understands, which needs to be in terms of the converted solution-space variables; and only then
+* invoke the solver on the converted problem.
+
+Adding constraints will affect the later steps, but we'd love to give hints to the translator even earlier in the process. We'll talk more about exactly how this works later, but for now, we'll add a _bounds annotation_ to our run: that the `nextAdder` field is _partial-linear_, or `nextAdder is plinear`. Linearity means that the atoms which `nextAdder` maps should be pre-arranged in a fixed order before they get to the solver at all. Partial linearity means that the ordering may not use all of the potential atoms. 
+
+```forge
+test expect {  
+  r_adderCorrect: {req_adderCorrect} for 6 FA, 1 RCA, 8 Int for {nextAdder is plinear} is theorem
+}
+```
+
+This wasn't hard to add: it's just another `{}`-delimited instruction that you can add to any `run`, `test`, etc. command. Now Forge finishes the check in under a second on my laptop. Eliminating symmetries can make a huge difference! 
+
+~~~admonish warning title="Bounds vs. Constraints"
+Notice that the bounds annotation is grouped after the numeric bounds, _not_ with the constraints. This is because the two are separate. If we had tried to put `nextAdder is plinear` in as a constraint in our predicate, we would have gotten an error, because Forge doesn't know how to interpret it as a constraint, only how to use it to shape the solution space passed to the solver.
+~~~

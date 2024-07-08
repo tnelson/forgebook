@@ -25,6 +25,8 @@ There might be many things! One particular idea is that, if the input list has o
 
 </details>
 
+---
+
 There isn't always an easy-to-extract property for every unit test. But this idea&mdash;encoding _goals_ instead of specific behaviors&mdash;forces us to start thinking critically about _what exactly we want_ from a system and helps us to express it in a way that others (including, perhaps, LLMs) can better use. It's only a short hop from there to some of the real applications we talked about last time, like verifying firewalls or modeling the Java type system.
 
 ~~~admonish note title="Sometimes, you can test exhaustively!"
@@ -56,6 +58,8 @@ Wait -- you found a different path? G to D to B to E?
 And another path? G to H to F to E?
 </details>
 
+---
+
 If we add a traditional test case corresponding to _one_ of the correct answers, our test suite will falsely raise alarms for correct implementations that happen to find different answers. In short, we'll be over-fitting our tests to @italic{one specific implementation}: ours. But there's a fix. Maybe instead of writing:
 
 `shortest(GRAPH, G, E) == [(G, A), (A, B), (B, E)]`
@@ -77,6 +81,8 @@ There are at least two problems. First, we might have missed some possible solut
     
 </details>
 
+---
+
 This problem -- multiple correct answers -- occurs in every part of Computer Science. Once you're looking for it, you can't stop seeing it. Most graph problems exhibit it. Worse, so do most optimization problems. Unique solutions are convenient, but the universe isn't built for our convenience. 
 
 **Exercise:** What's the solution? If _test cases_ won't work, is there an alternative? (Hint: instead of defining correctness bottom-up, by small test cases, think top-down: can we say what it __means__ for an implementation to be correct, at a high level?)
@@ -91,6 +97,8 @@ In the cheapest-path case, we can notice that the costs of all cheapest paths ar
 which is now robust against multiple implementations of `cheapest`.
     
 </details>
+
+---
 
 
 This might be something you were taught to do when implementing cheapest-path algorithms, or it might be something you did on your own, unconsciously. (You might also have been told to ignore this problem, or not told about it at all...) We're not going to stop there, however.
@@ -108,6 +116,8 @@ We also need to confirm that the path returned by `cheapest` is indeed a path in
 
 </details>
 
+---
+
 **Exercise:** Now take that list of goals, and see if you can outline a function that tests for it. Remember that the function should take the problem input (in this case, a graph and the source and destination vertices) and the output (in this case, a path). You might generate something like this pseudocode:
 
 <details>
@@ -123,6 +133,8 @@ isValid : input: (graph, vertex, vertex), output: list(vertex) -> bool
 ```
 
 </details>
+
+---
 
 This style of testing is called Property-Based Testing (PBT). When we're using a trusted implementation&mdash;or some other artifact&mdash;to either evaluate the output or to help generate useful inputs, it is also a variety of Model-Based Testing (MBT). 
 

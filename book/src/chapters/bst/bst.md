@@ -314,6 +314,8 @@ This constraint only applies for pairs of _non-root_ nodes. That is, any two non
 
 </details>
 
+---
+
 In modeling, it's common for there to be a few ways to fix problems like this. We could go back and edit the constraint we wrote before, or we could write a new constraint to handle roots. In _this_ case, let's edit the original. We said that any two non-roots have a common ancestor. Why did we say "non-root"? Because if one of the nodes happened to be a root, it would have no such ancestors. 
 
 What if we allowed the node itself to count as the common ancestor? Then we would have two obligations (as before), but each would have another way to become true. 

@@ -14,7 +14,7 @@
 # Modeling Static Scenarios
 - [Tic-Tac-Toe](./chapters/ttt/ttt.md)             
 - [Binary Search Trees](./chapters/bst/bst.md)     
-- [Ripple-Carry Adder (TODO: FINISH VERIFICATION PROSE, PICTURES)](./chapters/adder/rca.md)   
+- [Ripple-Carry Adder](./chapters/adder/rca.md)   
 - [Q&A: Static Modeling](./chapters/qna/static.md) 
 
 <!-- - The challenge of testing

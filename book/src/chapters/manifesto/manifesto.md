@@ -62,6 +62,8 @@ Humans tend to be very bad at reasoning by hypotheticals. There's a temptation t
 
 </details>
 
+---
+
 Now imagine a puzzle with a thousand of these unknowns. A thousand boolean variables means $2^{1000}$ cases to reason through. Want to use a computer yet?
 
 <!-- ### Reasoning about knowledge

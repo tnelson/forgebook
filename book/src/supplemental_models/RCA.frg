@@ -170,7 +170,7 @@ example example1_as_example is {rca} for {
 
 /////////////////////////////////////////////////////////////////////
 
--- run {rca}
+-- run {rca} for exactly 4 FA
 
 
 
@@ -179,6 +179,8 @@ example example1_as_example is {rca} for {
 
 
 
+/////////////////////////////////////////////////////////////////////
+// Verification: does the ripple-carry adder work?
 /////////////////////////////////////////////////////////////////////
 
 // To help ease verification, augment instances with place-values of each full adder
@@ -199,7 +201,6 @@ pred assignPlaces {
 }
 
 fun trueValue[b: Bool, placeValue: Int]: one Int {
-  -- TODO: for efficiency, would it be better to just use 0/1, not Bool?
   (b = True) => placeValue else 0
 }
 
