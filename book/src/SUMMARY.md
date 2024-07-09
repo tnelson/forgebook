@@ -5,8 +5,8 @@
 <!-- "prefix chapters"; cannot be nested -->
 
 # Preamble: Beyond Testing
+- [What good is this book?](./chapters/manifesto/job.md) 
 - [Logic for Systems](./chapters/manifesto/manifesto.md)
-- [What good is this book? (TODO: pull some context from paper)](./chapters/manifesto/job.md) 
 - [From Tests to Properties](./chapters/properties/pbt.md)
 
 <!-- # What do tic-tac-toe, binary trees, and operating systems have in common? -->

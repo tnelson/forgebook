@@ -4,11 +4,11 @@
 Everybody has endless demands on their time. If you're a student, you might be deciding which classes to take. There's never enough time to take them all, so you need to prioritize based on expected value. If you're a professional, you're deciding how to best use your limited "free" time to learn new skills and stay current. Either way, you're probably wondering: **What good is this book?** (And if you aren't asking that, you ought to be.)
 
 You need many different skills for a successful career. This book won't teach you how to work with other people, or manage your tasks, or give and receive feedback. It won't teach you to program either; there are plenty of other books for that. Instead, this book will teach you:
-* how to think more richly about what really matters about a system; 
+* how to think more richly about what matters about a system; 
 * how to better express what you want from it;
 * how to more thoroughly evaluate what a system actually does give you; and
-* how to use constraints and constraint solvers in your work.
-It will also give you a set of baseline skills that will aid you in using any further formal-methods techniques you might encounter in your work, such as [advanced type systems](https://rust-book.cs.brown.edu), [static verification](https://dafny.org), [theorem proving](https://lean-lang.org), and more. 
+* how to use constraints and constraint solvers in your work (because we'll use them as tools to help us out).
+It will also give you a set of baseline skills that will aid you in using any further formal-methods techniques you might encounter in your work, such as [advanced type systems](https://rust-book.cs.brown.edu), [program verification](https://dafny.org), [theorem proving](https://lean-lang.org), and more. 
 
 ### Modeling: What really matters?
 
@@ -67,7 +67,9 @@ And all that's even before we consider more heavyweight methods, like model chec
 
 ### Formalism Isn't Absolute
 
-The word "formal" has accumulated some unfortunate connotations: pedantry, stuffiness, ivory-tower snootiness, being an [architecture astronaut](https://en.wikipedia.org/wiki/Architecture_astronaut), etc. The truth is that formalism is a sliding scale. We can take what we need and leave the rest. What really matters is the ability to precisely express your goals, and the ability to take advantage of that precision. 
+The word "formal" has accumulated some unfortunate connotations: pedantry, stuffiness, ivory-tower snootiness, being an [architecture astronaut](https://en.wikipedia.org/wiki/Architecture_astronaut), etc. The truth is that formalism is a sliding scale. *We can take what we need and leave the rest.* What really matters is the ability to precisely express your goals, and the ability to take advantage of that precision. 
+
+In fact, formalism powers many _software tools_ that help us to reason about the systems we create. In the next section, we'll start sketching what that means for us as engineers and humans.
 
 <!-- You might not be used to thinking of programming as a "formal" activity, but it is. A programming language is a formal artifact: it has a precise meaning, usually defined in a detailed specification that few people need to read fully. Some factors are often left unspecified, and thus "implementation dependent", which is one reason why the difference between specification and implementation is more fluid than you might think.  -->
 
