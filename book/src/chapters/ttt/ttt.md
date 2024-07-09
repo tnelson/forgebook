@@ -200,6 +200,8 @@ The `run` command tells Forge to search for an _instance_ satisfying the given c
 run { some b: Board | wellformed[b]} 
 ```
 
+(If you're curious about _how_ Forge finds solutions, you can find a brief sketch in [the Q&A for this chapter](../qna/static.md).)
+
 When we click the play button in the VSCode extension, the engine solves the constraints and produces a satisfying instance,  (Because of differences across solver versions, hardware, etc., it's possible you'll see a different instance than the one shown here.) A browser window should pop up with a visualization. You can also run `racket <filename.frg>` in the terminal, although we recommend the VSCode extension. 
 
 

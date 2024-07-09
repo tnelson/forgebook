@@ -1,14 +1,31 @@
 # Anticipated Questions: Static Models
 
-### A Visual Sketch of How Forge Searches
+### What Happens When Forge Searches? 
 
-Suppose we're using Forge to search for family trees. There are infinitely many potential family tree instances, but Forge needs to work with a finite search space. This is where the bounds of a `run` come in; they limit the set of instances Forge will even consider. Constraints you write are _not yet involved_ at this point.
+Our first `run` command in Forge was from [tic-tac-toe](../ttt/ttt.md): `run { some b: Board | wellformed[b]}`.
 
-Once the bounded search space has been established, Forge uses the constraints you write to find satisfying instances within the bounded search space.
+How did Forge actually run the search? Surely it isn't checking all possible boards _one at a time_; that wouldn't scale at all, and we need to scale in order to model and reason about real systems. No; Forge can efficiently search much larger problem spaces than this.  
 
-![](https://i.imgur.com/eQ76Hv8.png)
+Let's step through _how_ Forge solves a problem. First, there's a space of potential solutions that it considers. Using the default engine, this space is finite&mdash;although possibly enormous. There are $3^9 = 19683$ 3-by-3 tic-tac-toe boards, which isn't too bad. But a 4-by-4 board would have $3^{16} = 430,467,213$ possibilities, and real systems might have more possible states than electrons in the observable universe. So we'd better be doing something smarter than checking one instance at a time.
 
-The engine uses bounds and constraints very differently, and inferring constraints is often less efficient than inferring bounds. But the engine treats them differently, which means sometimes the distinction leaks through.
+The bounds of the space to search is set by the `run` command. In this case, no bounds were given, so defaults were used: instances may contain *up to 4 atoms of each top-level `sig` type*, and the integers $-8$ through $7$ (inclusive) but no more. We can adjust that bound by adding instructions, e.g., `run { some b: Board | wellformed[b]} for exactly 2 Board` will only seek instances where there are 2 `Board` atoms. 
+
+The bounds describe the search space. This space is populated with instances, some of which satisfy the constraints being run and some of which don't. In principle, there exist other instances too&mdash;entirely outside the space being searched! E.g., if we said to search up to 4 `Board` atoms, an instance with 100 such atoms might (or might not) satisfy our constraints, but wouldn't be considered in the search:
+
+**(Fill: Inkscape space, partitioned into T and F, with extra instances outside)**
+
+Once this space is defined, **and only then**, a sophisticated constraint-solving engine&mdash;a boolean "SAT" or "SMT" solver&mdash;takes charge. The engine uses techniques like backtracking and heuristics to try to avoid unnecessary work in solving the problem. 
+
+~~~admonish note title="CSCI 1710"
+If you're in CSCI 1710, one of your assignments will be to _build_ such a constraint solver, and even to see how it performs "plugged in" to Forge and solving real `run` commands you write. 
+~~~
+
+
+<!-- ![](https://i.imgur.com/eQ76Hv8.png) -->
+
+#### Performance Implications
+
+As you may have seen in the ripple-carry adder section, these two phases of solving work very differently, and  letting the solver infer constraints is often less efficient than giving it tighter bounds, because the latter restricts the overall space to be searched a priori. Some optimization techniques in Forge need to be explicitly applied in the first phase, because the solver engine itself splits the two phases apart. 
 
 ### "Nulls" in Forge
 
@@ -58,7 +75,7 @@ The keyword `some` is used in 2 different ways in Forge:
 
 Don't be afraid to use both; they're both quite useful! But remember the difference. 
 
-### Implies vs. Such That
+### Guarding Quantifiers; Implies vs. "Such That"
 
 You can read `some row : Int | ...` as "There exists some integer `row` such that ...". The transliteration isn't quite as nice for `all`; it's better to read `all row : Int | ...` as "In all integer `row`s, it holds that ...". 
 
@@ -76,15 +93,15 @@ Crucially, **you cannot write a Forge constraint that quantifies over _instances
 
 ### One Versus Some
 
-The `one` quantifier is for saying "there exists a UNIQUE ...". As a result, there are hidden constraints embedded into its use. `one x: A | myPred[x]` really means, roughly, `some x: A | myPred[x] and all x2: A | not myPred[x]`. This means that interleaving `one` with other quantifiers can be subtle; for that reason, we won't use it except for very simple constraints.
+The `one` quantifier is for saying "there exists a UNIQUE ...". As a result, there are hidden constraints embedded into its use. `one x: A | myPred[x]` really means, roughly, `some x: A | { myPred[x] and all x2: A | { x2 != a implies not myPred[x]}}`. This means that interleaving `one` with other quantifiers can be subtle; for that reason, we strongly suggest _not_ using `one` as a quantifier except for very simple constraints. (Using it as a multiplicity, like saying `one Tim.office` is fine.)
 
-If you use quantifiers other than `some` and `all`, beware. They're convenient, but various issues can arise.
+<!-- If you use quantifiers other than `some` and `all`, beware. They're convenient, but various issues can arise. -->
 
 ### Testing Predicate Equivalence
 
-Checking whether or not two predicates are _equivalent_ is the core of quite a few Forge applications---and a great debugging technique sometimes. 
+Checking whether or not two predicates are _equivalent_ is the core of quite a few Forge applications---and a great debugging technique sometimes. (We saw this very briefly for binary trees, but it's worth repeating.)
 
-How do you do it? Like this:
+How do you check for predicate equivalence? Like this:
 
 ```alloy
 pred myPred1 {
@@ -96,8 +113,6 @@ pred myPred2 {
 assert myPred1 is necessary for myPred2
 assert myPred2 is necessary for myPred1
 ```
-
-**(TODO: confirm assertions explained and introduced already)**
 
 If you get an instance where the two predicates aren't equivalent, you can use the Sterling evaluator to find out **why**. Try different subexpressions, discover which is producing an unexpected result! E.g., if we had written (forgetting the `not`):
 
@@ -111,7 +126,7 @@ One of the assertions would fail, yielding an instance in Sterling you could use
 
 #### Satisfiability Testing and a Pitfall
 
-We haven't used the `test expect` syntax for much yet, but it's quite powerful. Here it lets us express a fairly common mistake that new Forge users can make. Here is a test block with 2 tests in it. Both of them may look like they are comparing `myPred1` and `myPred2` for equivalence:
+The `test expect` syntax lets you check for satisfiability directly. This is quite powerful, and lets us illustrate a fairly common mistake. Here is a test block with 2 tests in it. Both of them may look like they are comparing `myPred1` and `myPred2` for equivalence:
 
 ```alloy
 test expect {
@@ -122,12 +137,12 @@ test expect {
     } is unsat
 
     -- incorrect: "it's possible to satisfy what i think always holds"
-    -- Forge tries to find an instance where myPred1 and myPred2 agree
+    -- Forge tries to find an instance where myPred1 and myPred2 happen to agree
     p1eqp2_B: {
         myPred1 iff myPred2
     } is sat
 }
 ```
 
-These two tests do not express the same thing! One asks Forge to find an instance where the predicates are not equivalent. If it can find one, we know they aren't, and can see why. The other test asks Forge to find an instance where they _are_ equivalent. But that's what we're hoping holds in _all_ instances, not just a single one!
+These two tests do not express the same thing! One asks Forge to find an instance where the predicates are not equivalent. If it can find such an instance, we know the predicates are not equivalent, and can see why by viewing the intance. The other test asks Forge to find an arbitrary instance where they _are_ equivalent. But that needn't be true in _all_ instances, just the one that Forge finds. 
 
