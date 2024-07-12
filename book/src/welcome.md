@@ -19,7 +19,31 @@ Each chapter contains a variety of examples: data structures, puzzles, algorithm
 ---
 
 ### Navigating the Book Site
+
 With JavaScript enabled, the table of contents (to the left, by default) will allow you to select a specific section of this book. Likewise, the search bar (enabled via the "Toggle Searchbar" icon) should allow you to search for arbitrary alphanumeric phrases in the full text; unfortunately, non alphanumeric operators are not supported by search at present.
+
+```admonish hint title="Table of Contents, Theme, and Search"
+The three buttons for popping out the table of contents, changing the color theme, and searching are in the upper-left corner of this page, by default. If you do not see them, please ensure that JavaScript is enabled.
+
+<center>
+If the table of contents isn't open, click this button:
+<label id="sidebar-toggle-alternate" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents (Alternate Button)" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+
+The table of contents for the Forge documentation is expandable. Once it is open, click the ❱ icons to expand individual sections and subsections to browse more easily! 
+
+To change the color theme of the page, click this button:
+<button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme (Alternate Button)" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+
+To search, click this button:
+<button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar (Alternate Button)" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+</center>
+```
 
 ---
 
