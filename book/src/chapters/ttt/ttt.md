@@ -213,7 +213,7 @@ When we click the play button in the VSCode extension, the engine solves the con
  -->
 
 ~~~admonish warning title="Running Forge on Windows"
-If you're running on Windows, the Windows-native `cmd` and PowerShell terminals will not properly load Forge's visualizer. Instead, we suggest using one of many other options on Windows that we've tested and know to work: the VSCode extension (available on the VSCode Marketplace), DrRacket, Git `bash`, Windows Subsystem for Linux, or Cygwin.
+If you're running on Windows, the Windows-native `cmd` and PowerShell terminals will not properly load Forge's visualizer. Instead, we suggest using one of many other options on Windows that we've tested and know to work: the VSCode extension (available on the VSCode Marketplace), DrRacket, Git for Windows (e.g., `git bash`), Windows Subsystem for Linux, or Cygwin.
 ~~~
 
 ---
