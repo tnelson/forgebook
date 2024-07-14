@@ -23,9 +23,9 @@ Air resistance! Friction! We can still get a reasonable approximation for many p
 
 </details>
 
-## Systems vs. Models (and Implementations)
+## What is a "System"? (Models vs. Implementations)
 
-When we say "systems" in this module, we mean the term broadly. A distributed system (like [replication in MongoDB](https://github.com/visualzhou/mongo-repl-tla)) is a system, but so are user interfaces and hardware devices like CPUs and insulin pumps. Git is a system for version control. The web stack, cryptographic protocols, chemical reactions, the rules of sports and games&mdash;these are all systems too!
+When we say "systems" in this book, we mean the term broadly. A distributed system (like [replication in MongoDB](https://github.com/visualzhou/mongo-repl-tla)) is a system, but so are user interfaces and hardware devices like CPUs and insulin pumps. Git is a system for version control. The web stack, cryptographic protocols, chemical reactions, the rules of sports and games&mdash;these are all systems too!
 
 To help build intuition, let's work with a simple system: the game of [tic-tac-toe](https://en.wikipedia.org/wiki/Tic-tac-toe) (also called noughts and crosses). There are _many_ implementations of this game, including [this one](https://csci1710.github.io/2023/examples/ttt.py) that Tim wrote for these notes in Python. And, of course, these implementations often have corresponding test suites, like [this (incomplete) example](https://csci1710.github.io/2023/examples/test_ttt.py).
 
@@ -248,9 +248,11 @@ Here, we see `Board3` because the solver had a few options to pick from: we neve
 
 ### Reflection: Implementation vs. Model
 
-So far we've just modeled boards, not full games. But we can still contrast our work here against the implementation of tic-tac-toe shared above. We might ask:
-* How do the data-structure choices, and type declarations, in the implementation compare with the model?
-* Is there an implementation that matches what we just did? (The program's purpose isn't to _generate boards_, but to play games!)
+So far we've just modeled boards, not full games. But we can still contrast our work here against the Python _implementation_ of tic-tac-toe shared above. 
+
+**Exercise:** How do the data-structure choices, and type declarations, in the implementation compare with the essence of the game as reflected in the model? What is shared, and what is different? 
+
+Spend a minute identifying at least one commonality and at least one difference, then move on.
 
 ## Domain Predicates
 
