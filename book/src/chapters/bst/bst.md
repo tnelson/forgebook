@@ -60,7 +60,7 @@ What makes a binary tree a binary tree? We might start by saying that:
 * it's _single-tree-shaped_: there are no cycles and all nodes have at most one parent node; and 
 * it's _connected_: all non-root nodes have a common ancestor. 
 
-It's sometimes useful to write domain predicates early, and then use them to define wellformedness more clearly. For example, it might be useful to write a helper that describes what it means for a node to be a root node:
+It's sometimes useful to write domain predicates early, and then use them to define wellformedness more clearly. For example, it might be useful to write a helper that describes what it means for a node to be a _root_ node, i.e., the common ancestor of every node in the tree:
 
 ```forge,runnable
 ~#lang forge/froglet
@@ -76,7 +76,15 @@ pred isRoot[n: Node] {
 }
 ```
 
-Then we'll use the `isRoot` helper in our `wellformed` predicate. But to write this predicate, there's a new challenge. We'll need to express constraints like "no node can reach itself via `left` or `right` fields". So far we've only spoken of a node's _immediate left or right child_. Instead, we now need a way to talk about _reachability_ over any number of `left` or `right` fields. Forge provides a helper, `reachable`, that makes this straightforward:
+Then we'll use the `isRoot` helper in our `wellformed` predicate. But to write this predicate, there's a new challenge. We'll need to express constraints like "no node can reach itself via `left` or `right` fields". So far we've only spoken of a node's _immediate left or right child_. Instead, we now need a way to talk about _reachability_ over any number of `left` or `right` fields. Forge provides a helper, `reachable`, that makes this straightforward.
+
+~~~admonish tip title="The `reachable` built-in" 
+The built-in `reachable` predicate returns true if and only if its first argument is reachable from its second argument, via all of the remaining arguments. Thus, `reachable[n1, anc, left, right]` means: "`anc` can reach `n1` via some sequence of `left` and `right` fields."
+
+For reasons we'll explore later, `reachable` can be subtle; if you're curious now, see the [Static Models Q&A](../qna/static.md) for a discussion of this. 
+~~~
+
+Using `reachable`, we can now write:
 
 ```forge,editable
 pred wellformed {
@@ -94,12 +102,6 @@ pred wellformed {
     not ((n1.left = n3 or n1.right = n3) and (n2.left = n3 or n2.right = n3))
 }
 ```
-
-~~~admonish tip title="The `reachable` built-in" 
-The built-in `reachable` predicate returns true if and only if its first argument is reachable from its second argument, via all of the remaining arguments. Thus, `reachable[n1, anc, left, right]` means: "`anc` can reach `n1` via some sequence of `left` and `right` fields."
-
-For reasons we'll explore later, `reachable` can be subtle; if you're curious now, see the [Static Models Q&A](../qna/static.md) for a discussion of this. 
-~~~
 
 ## Write an example or two
 
