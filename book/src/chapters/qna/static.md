@@ -39,10 +39,10 @@ Suppose I add this predicate to our `run` command in the tic-tac-toe model:
 ```alloy
 pred myIdea {
     -- no 2 locations can share the same mark
-    all row1, col1, row2, col2: Int | 
-        (row1 != row2 or col1 != col2) implies
-            Board.board[row1][col1] != 
-            Board.board[row2][col2]
+    all rowA, colA, rowB, colB: Int | 
+        (rowA != rowB or colA != colB) implies
+            Board.board[rowA][colA] != 
+            Board.board[rowB][colB]
 }
 ```
 
@@ -53,13 +53,7 @@ I'm trying to express that every entry in the board is different. This should ea
 
 It's very likely this predicate would _not_ be satisfied by the empty board. Why?
     
-Because `none` equals itself! We can check this:
-    
-```alloy
-test expect {
-    nullity: {none != none} is unsat
-} 
-```    
+*Because `none` equals itself*, and it's the value in each location of the board before `X` or `O` move there. 
     
 Thus, when you're writing constraints like the above, you need to watch out for `none`: the value for _every_ cell in the initial board is equal to the value for _every_ other cell!
 </details>

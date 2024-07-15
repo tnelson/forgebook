@@ -153,7 +153,13 @@ Notice that, rather than describing a process that produces a well-formed board,
 
 Since a predicate is just a function that returns true or false, depending on its arguments and whichever instance Forge is looking at, we can write tests for it the same way we would for any other boolean-valued function. But even if we're not testing, it can be useful to write a small number of examples, so we can build intuition for what the predicate means.
 
-We'll write two examples in Forge:
+In Forge, `example`s are automatically run whenever your model executes. They describe basic intent about a given predicate; in this case, let's write two examples in Forge:
+* A board where `X` has moved 3 times in valid locations, and so ought to be considered well formed. 
+* A board where a player has moved in an invalid location, and shouldn't be considered well formed. 
+
+Notice that we're not making judgements about the rules being obeyed yet&mdash;just about whether our `wellformed` predicate is behaving the way we expect. And the `wellformed` predicate isn't aware of things like "taking turns" or "stop after someone has won", etc. It just knows about the valid indexes being `0`, `1`, and `2`.
+
+We'll write those two examples in Forge:
 
 ```forge,editable
 -- Helper to make these examples easier to write
@@ -161,12 +167,13 @@ pred all_wellformed { all b: Board | wellformed[b]}
 
 -- all_wellformed should be _true_ for the following instance
 example firstRowX_wellformed is {all_wellformed} for {
-  Board = `Board0                 -- backquote labels atoms
+  Board = `Board0                 -- backquote labels specific atoms
   X = `X      O = `O              -- examples must define all sigs
-  Player = X + O                  
-  `Board0.board = (0, 0) -> `X +  -- examples must define all fields
-                  (0, 1) -> `X +  -- here, the partial function for 
-                  (0, 2) -> `X    -- the board (empty squares remain empty)
+  Player = X + O                  -- only two kinds of player
+  `Board0.board = (0, 0) -> `X +  -- the partial function for the board's
+                  (0, 1) -> `X +  -- contents (unmentioned squares must 
+                  (0, 2) -> `X    -- remain empty, because we used "=" to say
+                                  -- "here's the function for `board0")
 }
 
 -- all_wellformed should be _false_ for the following instance
@@ -179,8 +186,6 @@ example off_board_not_wellformed is {not all_wellformed} for {
                   (0, 2) -> `X 
 }
 ```
-
-In Forge, `example`s are automatically run whenever your model executes. They describe basic intent about a given predicate; in this case, we're testing that a board where `X` has moved 3 times in valid locations is considered well formed. In contrast, if `X` has moved in an invalid location, it won't be considered well formed. Again, we're not making judgements about the rules being obeyed yet&mdash;just about whether our _model_ is conforming to how we've encoded the game, using `0`, `1`, and `2` as the only valid indexes.
 
 ~~~admonish warning title="Test in both directions"
 Notice that we've got a test thats a _positive_ example and another test that's a _negative_ example. We want to make sure to exercise both cases, or else "always true" or "always" false could pass our suite. 
@@ -274,17 +279,18 @@ pred XTurn[s: Board] {
 }
 ```
 
-The `{row, col: Int | ...}` syntax means a set comprehension, and describes the set of row-column pairs where the board contains `X` (or `O`). The `#` operator gives the size of these sets, which we then compare.
+Here, we're measuring the size of 2 sets. The `{row, col: Int | ...}` syntax is called a _set comprehension_. A set comprehension defines a set. We're defining the set of row-column pairs where the board contains one of the player marks. The `#` operator gives the size of these sets, which we then compare.
 
-**Exercise:** Is it enough to say that `OTurn` is the negation of `XTurn`? 
+**Exercise:** Is it enough to say that `OTurn` is the negation of `XTurn`? That is, we could write: `pred OTurn[s: Board] { not XTurn[s: Board]}`. This seems reasonable enough; why might we _not_ want to write this?
 
 <details>
 <summary>Think, then click!</summary>
 
-No! At least not in the model as currently written. If you're curious to see why, run the model and look at the instances produced. Instead, we need to say something like this:
+Because we defined X's turn to be when the number of X's and O's on the board are in balance. So any _other_ board would be O's turn, including ones that ought to be illegal, once we start defining moves of the game. Instead, let's say something like this:
 
 ```forge,editable
 pred OTurn[s: Board] {
+  -- It's O's turn if X has moved once more often than O has
   #{row, col: Int | s.board[row][col] = X} =
   add[#{row, col: Int | s.board[row][col] = O}, 1]
 }

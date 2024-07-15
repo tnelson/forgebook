@@ -327,8 +327,17 @@ pred req_adderCorrect_wrong {
 
 And then we'll use it in a test. It's vital that we have a high-enough bitwidth, so that Forge can count up to the actual expected result, without overflowing. Forge `int`s are signed, so we actually need a bigger bit-width than the number of full adders. If we have, say, 6 full adders, we might end up producing a 7-bit output (with carrying). A 7-bit value can conservatively hold up to $2^7 - 1 = 127$. To count up to that high, we need to use _8_ bits in Forge, giving the solver all the numbers between $-128$ and $127$, inclusive.
 
+~~~admonish tip title="Directly testing satisfiability"
+So far, we've only seen `example`s and `assert`ions. Both of these are built using Forge's basic satisfiability checking. We can access this directly using the `test expect` feature. You can write that a run:
+* should have instances (i.e., be satisfiable): `is sat`;
+* should not have instances (i.e., be unsatisfiable, within the bounds given): `is unsat`; or
+* should have no counterexample instances (within the bounds given): `is theorem`.
+~~~
+
 ```forge
+-- Ask Forge to check the satisfiability of something...
 test expect {  
+  -- Is it _always_ true, up to these bounds, that `req_adderCorrect` always holds?
   r_adderCorrect: {req_adderCorrect} for 6 FA, 1 RCA, 8 Int is theorem
 }
 ```
