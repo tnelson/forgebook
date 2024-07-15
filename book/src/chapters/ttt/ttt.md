@@ -50,8 +50,8 @@ When we're first writing a model, we'll start with **5 steps**. For each step, I
   - For tic-tac-toe: they might be the 3-by-3 board and the `X` and `O` marks that go in board locations. 
   - For a binary search tree: they might be the tree nodes and their left and right children. 
 - What makes an instance of these datatypes **well formed**? That is, what conditions are needed for them to not be garbage? 
-  - For tic-tac-toe, we might require that the indexes used are between `0` and `2`, since the board is 3-by-3. 
-  - For a binary search tree, we might require that every node has at most one left child, at most one right child, a unique parent, ...
+  - For tic-tac-toe, we might require that the indexes used are between `0` and `2`, since the board is 3-by-3. (We could just as easily use `1`, `2`, and `3`. I picked `0` as the starting point out of habit, because list indexes start from `0` in the programming languages I tend to use.)
+  - For a binary search tree, we might require that every node has at most one left child, at most one right child, a unique parent, and so on.
 - What's a small **example** of how these datatypes can be instantiated?
   - For tic-tac-toe, the empty board would be an example. So would the board where `X` moves first into the middle square.
   - For a binary search tree, this might be a tree with only one node, or a 3-node tree where the root's left and right children are leaves. 
@@ -121,12 +121,6 @@ a table of (`Int`, `Int`, `Player`) tuples for each `Board`. We'll see how to wo
 These definitions sketch the overall shape of a board: players, marks on the board, and so on. But not all boards that fit the definition will be valid. For example:
 * Forge integers aren't true mathematical integers, but are bounded by a bitwidth we give whenever we run the tool. So we need to be careful here. We want a classical 3-by-3 board with indexes of (say) `0`, `1`, and `2`, not a board where (e.g.) row `-5`, column `-1` is a valid location. 
 
-~~~admonish note title="Why start with 0?" 
-
-We could just as easily use `1`, `2`, and `3` as our indexes. I picked `0` as the starting point out of habit, because list indexes start from `0` in the programming languages I tend to use.
-
-~~~
-
 We'll call these _well-formedness_ constraints. They aren't innately enforced by our `sig` declarations, but we'll almost always want Forge to enforce them, so that it doesn't find "garbage instances". Let's write a _wellformedness predicate_:
 
 ```forge,editable
@@ -145,7 +139,7 @@ Forge treats either `--` or `//` as beginning a line-level comment, and `/* ... 
 ~~~
 
 This predicate is true of any `Board` if and only if the above 2 constraints are satisfied. Let's break down the syntax: 
-* Constraints can quantify over a domain. E.g.,`all row, col: Int | ...` says that for any pair of integers (up to the given bidwidth), the following condition (`...`) must hold. Forge also supports, e.g., existential quantification (`some`), but we don't need that yet. We also have access to standard boolean operators like `or`, `implies`, etc. 
+* Constraints can quantify over a domain. E.g.,`all row, col: Int | ...` says that for any pair of integers (up to the given bitwidth), the following condition (`...`) must hold. Forge also supports, e.g., existential quantification (`some`), but we don't need that yet. We also have access to standard boolean operators like `or`, `implies`, etc. 
 * _Formulas_ in Forge always evaluate to a boolean; _expressions_ evaluate to sets. For example,
     * the _expression_ `b.board[row][col]` evaluates to the `Player` (if any) with a mark at location (`row`, `col`) in board `b`; but
     * the _formula_ `no b.board[row][col]` is true if and only if there is no such `Player``.

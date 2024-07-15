@@ -28,7 +28,7 @@ If you're in CSCI 1710, one of your assignments will be to _build_ such a constr
 
 #### Performance Implications
 
-As you may have seen in the ripple-carry adder section, these two phases of solving work very differently, and  letting the solver infer constraints is often less efficient than giving it tighter bounds, because the latter restricts the overall space to be searched a priori. Some optimization techniques in Forge need to be explicitly applied in the first phase, because the solver engine itself splits the two phases apart. 
+As you may have seen in the ripple-carry adder section, these two phases of solving work very differently, and  letting the solver infer constraints is often less efficient than giving it tighter bounds, because the latter restricts the overall space to be searched beforehand. Some optimization techniques in Forge need to be explicitly applied in the first phase, because the solver engine itself splits the two phases apart. 
 
 ### "Nulls" in Forge
 
@@ -38,6 +38,7 @@ Suppose I add this predicate to our `run` command in the tic-tac-toe model:
 
 ```alloy
 pred myIdea {
+    -- no 2 locations can share the same mark
     all row1, col1, row2, col2: Int | 
         (row1 != row2 or col1 != col2) implies
             Board.board[row1][col1] != 
@@ -74,7 +75,7 @@ This is why it's often advisible to qualify your use of `reachable`. E.g., I cou
 
 The keyword `some` is used in 2 different ways in Forge:
 * it's a _quantifier_, as in `some b: Board, p: Player | winner[s, p]`, which says that somebody has won in some board (and gives us a name for that board, and also for the winner); and
-* it's a _multiplicity operator_, as in `some Board.board[1][1]`, which says only that the middle cell of the board is populated.
+* it's a _multiplicity operator_, as in `some Board.board[1][1]`, which says only that the middle cell of the board is populated (recall that the board indexes are `0`, `1`, and `2`).
 
 Don't be afraid to use both; they're both quite useful! But remember the difference. 
 
@@ -92,40 +93,61 @@ If you want to _further restrict_ the values used in an `all`, you'd use `implie
 
 Forge searches for instances that satisfy the constraints you give it. Every `run` in Forge is about _satisfiability_; answering the question "Does there exist an instance, such that...". 
 
-Crucially, **you cannot write a Forge constraint that quantifies over _instances_ themselves**. You can ask Forge "does there exist an instance such that...", which is pretty flexible on its own. E.g., if you want to check that something holds of _all_ instances, you can ask Forge to find counterexamples. This is how `assert ... is necessary for ...` is implemented, and how the examples from last week worked.
+Crucially, **you cannot write a Forge constraint that quantifies over _instances_ themselves**. You can ask Forge "does there exist an instance such that...", which is pretty flexible on its own. E.g., if you want to check that something holds of _all_ instances, you can ask Forge to find counterexamples. This exactly what `assert ... is necessary for ...` does; it searches for counterexample instances.
 
-### One Versus Some
-
-The `one` quantifier is for saying "there exists a UNIQUE ...". As a result, there are hidden constraints embedded into its use. `one x: A | myPred[x]` really means, roughly, `some x: A | { myPred[x] and all x2: A | { x2 != a implies not myPred[x]}}`. This means that interleaving `one` with other quantifiers can be subtle; for that reason, we strongly suggest _not_ using `one` as a quantifier except for very simple constraints. (Using it as a multiplicity, like saying `one Tim.office` is fine.)
-
-<!-- If you use quantifiers other than `some` and `all`, beware. They're convenient, but various issues can arise. -->
-
-### Testing Predicate Equivalence
+### Tip: Testing Predicate Equivalence
 
 Checking whether or not two predicates are _equivalent_ is the core of quite a few Forge applications---and a great debugging technique sometimes. (We saw this very briefly for binary trees, but it's worth repeating.)
 
-How do you check for predicate equivalence? Like this:
+How do you check for predicate equivalence? Well, suppose we tried to write a predicate in two different ways, like this:
 
 ```alloy
 pred myPred1 {
     some i1, i2: Int | i1 = i2
 }
 pred myPred2 {
-    not all i2, i1: Int | i1 != i2
+    not all ii, i2: Int | i1 != i2
 }
 assert myPred1 is necessary for myPred2
 assert myPred2 is necessary for myPred1
 ```
 
-If you get an instance where the two predicates aren't equivalent, you can use the Sterling evaluator to find out **why**. Try different subexpressions, discover which is producing an unexpected result! E.g., if we had written (forgetting the `not`):
+These `assert` statements will pass, because the two predicates _are_ logically equivalent. But if we had written (forgetting the `not`):
 
 ```alloy
 pred myPred2 {
-    all i2, i1: Int | i1 != i2
+    all ii, i2: Int | i1 != i2
 }
 ```
 
-One of the assertions would fail, yielding an instance in Sterling you could use the evaluator with.
+One of the assertions would fail, yielding an instance in Sterling you could use the evaluator with. If you get an instance where the two predicates aren't equivalent, you can use the Sterling evaluator to find out **why**. Try different subexpressions, discover which is producing an unexpected result! 
+
+### One Versus Some
+
+Classical logic provides the `some` and `all` quantifiers, but Forge also gives you `no`, `one` and `lone`. The `no` quantifier is fairly straightforward: if I write `no row, col: Int | Board.board[row][col] = X`, it's equivalent to `all row, col: Int | Board.board[row][col] != X`. That is, `X` hasn't yet put a mark on the board. 
+
+The `one` quantifier is for saying "there exists a UNIQUE ...". As a result, there are hidden constraints embedded into its use. `one row: Int | Board.board[row][0] = X` really means, roughly, `some row: Int | { Board.board[row][0] = X and all row2: Int | { row2 != row implies Board.board[row][0] != X}}`: there is _some_ row where `X` has moved in the first column, but _only one such row_. The `lone` quantifier is similar, except that instead of saying "exactly one", it says "either one or none". 
+
+This means that interleaving `one` or `lone` with other quantifiers can be subtle. Consider what happens if I write `one row, col: Int | Board.board[row][col] = X`. This means that there is exactly one square on the board where `X` has moved. But what about `one row: Int | one col: Int | Board.board[row][col] = X`? 
+
+**Exercise:** Test this out using Forge! Try running: 
+
+```
+run { not { 
+      (one row, col: Int | Board.board[row][col] = X) iff
+      (one row: Int | one col: Int | Board.board[row][col] = X)
+}}
+```
+You'll get an instance showing you that the two aren't equivalent. What's the problem?
+
+<details>
+<summary>Think, then click!</summary>
+
+The problem is that `one row, col: Int | ...` says that there exists one unique _pair_ of indexes, but `one row: Int | one col: Int | ...` says that there exists one unique _index_ such that there exists one unique _index_... These are not the same.
+
+</details>
+
+Because thinking through `one` and `lone` quantifiers can be subtle, we strongly suggest _not_ using them except for very simple constraints. (Using them as a multiplicity, like saying `one Tim.office` is fine.) 
 
 #### Satisfiability Testing and a Pitfall
 
