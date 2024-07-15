@@ -546,7 +546,7 @@ No, for at least two reasons:
 
 **TODO: should this be a separate section?**
 
-Let's turn to a programming problem. Suppose that we've just been asked to write the `add` method for a linked list class in Java. The code involves a `start` reference to the first node in the list, and every node has a `next` reference (which may be null). 
+Let's turn to a _programming_ problem. Suppose that we've just been asked to write the `add` method for a linked list class in Java. The code involves a `start` reference to the first node in the list, and every node has a `next` reference (which may be null). 
 
 Here's what we hope is a _property of linked lists_: **the last node of a non-empty list always has `null` as its value for `next`**. 
 
@@ -563,32 +563,30 @@ Because that would just be asking Forge to find us instances full of good states
 
 </details>
 
-This simple example illustrates a **central challenge in software and hardware verification**. Given a discrete-event model of a system, how can we check whether all reachable states satisfy some property? You might have heard properties like this called _invariants_ of the system.
+This illustrates a **central challenge in software and hardware verification**. Given a discrete-event model of a system, how can we check whether all reachable states satisfy some property? You might have heard properties like this called _invariants_ of the system.
 
 One way to solve the problem _without_ the limitation of bounded-length traces goes something like this:
 * Step 1: Ask whether any starting states are bad states. If not, then at least we know that executions with no moves obey our invariant. (It's not much, but it's a start. It's also easy for Forge to check.)
 * Step 2: Ask whether it's possible, in any good state, to transition to a bad state. 
  
-**TODO BARRIER**
-
 Consider what it means if both checks pass. We'd know that runs of length $0$ cannot involve a bad state. And since we know that good states can't transition to bad states, runs of length $1$ can't involve bad states either. And for the same reason, runs of length $2$ can't involve bad states, nor games of length $3$, and so on.
 
 ### How do we write this in Forge?
 
-Not just Forge, but any other solver-based tool, including those used in industry! 
+This technique isn't only applicable in Forge. It's used in many other solver-based tools, including those used in industry. And modeling linked lists in Forge is very doable, but more complicated than I'd like to do at this point. So we'll demonstrate the idea on the tic-tac-toe model. 
 
-Modeling linked lists in Forge is very doable, but more complicated than I'd like to try to do in 10 minutes of class. So let's do this with the tic-tac-toe model for today. A `balanced` state is a good state.
- 
-This assertion checks for counterexamples to the first component: are there any bad states that are also starting states?
+**Step 1: are there any bad states that are also starting states?**
 
 ```alloy
 assert all b: Board | initial[b] is sufficient for balanced[b]
   for 1 Board, 3 Int
 ```
 
-Notice that we didn't _need_ to use the `next is linear` annotation, because we're not asking for traces at all. We've also limited our scope to exactly 1 Board. We also don't need 4 integer bits; 3 suffices. This should be quite efficient. It should also pass, because the empty board isn't unbalanced.
+Notice that we didn't _need_ to use the `next is linear` annotation, because we're not asking for traces at all. We've also limited our scope to exactly 1 Board. We also don't need 4 integer bits; 3 suffices. This should be quite efficient. It should also pass, because the empty board isn't unbalanced. 
 
-Now we can ask: are there any transitions from a good state to a bad state? Again, we only need 2 boards for this to make sense.
+**Step 2: are there any transitions from a good state to a bad state?**
+
+Again, we don't need a full trace for this to work. We only need 2 boards: the pre-state and post-state of the transition:
 
 ```alloy
 pred moveFromBalanced[pre: Board, row, col: Int, p: Player, post: board] {
@@ -600,23 +598,13 @@ assert all pre, post: Board, row, col: Int, p: Player |
     for 2 Board, 3 Int
 ```
 
-If both of these pass, we've just shown that bad states are impossible to reach via valid moves of the system. Does this technique always work? We'll find out next time.
+If both of these pass, we've just shown that bad states are impossible to reach via valid moves of the system.
 
-### Aside: Performance 
-
+~~~admonish note title="Aside: Performance"
 That second step is still pretty slow on my laptop: around 10 or 11 seconds to yield `UNSAT`. Can we give the solver any help? Hint: **is the set of possible values for `pre` bigger than it really needs to be?**
 
 <details>
 <summary>Think, then click!</summary>
     
-If we assume the `pre` board is well-formed, we'll exclude transitions involving invalid boards. There are still a lot of these, even at `3 Int`, since row and column indexes will range from `-4` to `3` (inclusive).
-    
-But is it really _safe_ to assert `wellformed[pre]`? Good question! Is there a way we could check?
-    
-</details>
-
-
-
-
-
-In the next section, we'll return to binary search trees to create a stateful model of an _algorithm_.
+If we assume the `pre` board is well-formed, we'll exclude transitions involving invalid boards. There are a lot of these, even at `3 Int`, since row and column indexes will range from `-4` to `3` (inclusive). We could do this either by asserting `wellformed[pre]` or by refining the bounds we give Forge.
+~~~
