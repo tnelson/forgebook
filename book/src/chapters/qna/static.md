@@ -165,3 +165,36 @@ test expect {
 
 These two tests do not express the same thing! One asks Forge to find an instance where the predicates are not equivalent. If it can find such an instance, we know the predicates are not equivalent, and can see why by viewing the intance. The other test asks Forge to find an arbitrary instance where they _are_ equivalent. But that needn't be true in _all_ instances, just the one that Forge finds. 
 
+### Quantifiers and Performance
+
+Forge works by converting your model into a boolean satisfiability problem. That is, it builds a boolean circuit where inputs making the circuit true satisfy your model. But boolean circuits don't have a notion of quantifiers, so they need to be compiled out.
+
+The compiler has a lot of clever tricks to make this fast, but if it can't apply those tricks, it uses a basic idea: an `all` is just a big `and`, and a `some` is just a big `or`. This very simple conversion process increases the size of the circuit exponentially in the depth of quantification. 
+
+Let's look at an example of why this matters. Here is a reasonable way to approach writing a predicate for a model solving the 8-queens problem, where Forge is searching for how to place 8 queens on a chessboard such that none of them can attack the other:
+
+```forge
+pred notAttacking {
+  -- For every pair of queens
+  all disj q1, q2 : Queen | {
+    -- There's somewhere to put them: (r1,c1) and (r2,c2)
+    some r1, c1, r2, c2: Int | {
+      // ... such that (r1,c1) and (r2,c2) aren't on a shared line of attack
+    } } }
+```
+
+The problem is: there are 8 queens, and 16 integers. It turns out this is a pathological case for the compiler, and it runs for a really long time. In fact, it runs for a long time even if we reduce the scope to 4 queens! The default `verbosity` option shows the blowup here, in `time-ranslation, which gives the number of milliseconds used to convert the model to a boolean circuit:
+
+```
+:stats ((size-variables 410425) (size-clauses 617523) (size-primary 1028) (time-translation 18770) (time-solving 184) (time-building 40)) :metadata ())
+#vars: (size-variables 410425); #primary: (size-primary 1028); #clauses: (size-clauses 617523)        
+Transl (ms): (time-translation 18770); Solving (ms): (time-solving 184)
+```
+
+Ouch! To avoid this blowup, we might try a different approach that uses fewer quantifiers. In fact, *we can write the constraint without referring to specific queens at all, just 4 integers representing the positions. 
+
+```admonish hint title="How?"
+Does the identity of the queens matter at all, beyond their location?
+```
+
+If you encounter bad performance from Forge, check for this sort of unnecessary nested quantifier use. It can often be fixed by reducing quantifier nesting, or by narrowing the scope of what's being quantified over.

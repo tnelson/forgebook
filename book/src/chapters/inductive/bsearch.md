@@ -1,54 +1,9 @@
-# 2023.10,11: Counterexamples To Induction
+# Counterexamples To Induction
 
 You'll need [this exercise template](./binarysearch_template.frg) for these notes, which cover 3 class sessions. The completed version, complete with in-class comments, is [here](./binarysearch_inclass.frg).
 
 We prototyped some confidence tests about the `reachable` predicate ([livecode file](./testing_reachable.frg)).
 
-~~~admonish warning title="CSCI 1710: curiosity modeling ideas"
-Curiosity modeling signups are going out soon. [Read over others' ideas! Post your own!](https://edstem.org/us/courses/54376/discussion/4325962) 
-~~~
-
-~~~admonish warning title="CSCI 1710: endorsed Ed posts"
-
-I endorse public posts where there's an answer I think could be broadly useful. For example, these (as of today) are useful for physical keys:
-
-* [Physical Keys Testing with Booleans](https://edstem.org/us/courses/54376/discussion/4318621)
-* [How should I interpret the diagram](https://edstem.org/us/courses/54376/discussion/4318146)
-~~~
-
-## Forge Performance
-
-Some of you encountered bad Forge performance in the n-queens lab. I think it's useful to discuss the problem briefly. Forge works by converting your model into a boolean satisfiability problem. That is, it builds a boolean circuit where inputs making the circuit true satisfy your model. But boolean circuits don't understand quantifiers, and so it needs to compile them out. 
-
-The compiler has a lot of clever tricks to make this fast, and we'll talk about some of them around mid-semester. But if it can't apply those tricks, it uses a basic idea: an `all` is just a big `and`, and a `some` is just a big `or`. And this very simply conversion process increases the size of the circuit exponentially in the depth of quantification. 
-
-Here is a perfectly reasonable and correct way to approach part of this week's lab:
-
-```alloy
-pred notAttacking {
-  all disj q1, q2 : Queen | {
-    some r1, c1, r2, c2: Int | {
-      // ...
-    } } }
-```
-
-The problem is: there are 8 queens, and 16 integers. It turns out this is a pathological case for the compiler, and it runs for a really long time. In fact, it runs for a long time even if we reduce the scope to 4 queens. The default `verbosity` option shows the blowup here, in "translation":
-
-```
-:stats ((size-variables 410425) (size-clauses 617523) (size-primary 1028) (time-translation 18770) (time-solving 184) (time-building 40)) :metadata ())
-#vars: (size-variables 410425); #primary: (size-primary 1028); #clauses: (size-clauses 617523)        
-Transl (ms): (time-translation 18770); Solving (ms): (time-solving 184)
-```
-
-The `time-translation` figure is the number of milliseconds used to convert the model to a boolean circuit. Ouch!
-
-Instead, we might try a different approach that uses fewer quantifiers. In fact, *we can write the constraint without referring to specific queens at all -- just 4 integers*. 
-
-```admonish hint title="How?"
-Does the identity of the queens matter at all, if they are in different squares?
-```
-
-If you encounter bad performance from Forge, this sort of branching blowup is a common cause, and can often be fixed by reducing quantifier nesting, or by narrowing the scope of what's being quantified over.
 
 ## Induction
 
