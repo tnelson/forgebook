@@ -37,7 +37,7 @@
     - algorithms differ, specification is forever (random search vs bounded-exhaustive search vs proof vs…) -->
 
 # Discrete Event Systems
-- [Events and Traces: T.T.T. Games (EDITING)](./chapters/ttt/ttt_games.md)
+- [Transitions, Traces, and Verification](./chapters/ttt/ttt_games.md)
 - [Counterexamples to Induction: Binary Search on Arrays (EDIT)](./chapters/inductive/bsearch.md)
 - [BSTs: Recursive Descent (EDIT)](./chapters/bst/descent.md)
 - [Validating Models (FILL)](./chapters/validation/validating_events.md) 
