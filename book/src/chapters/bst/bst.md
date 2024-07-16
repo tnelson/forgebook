@@ -455,4 +455,4 @@ The `v1_is_strong` test passes. The `run` command produces an instance (actually
 This simple technique really is powerful. You might use it to check whether two versions of the same constraint are equivalent when debugging or optimizing your model. **We'll use this idea in a few examples later, too.**
 ~~~
 
-We'll come back to binary search trees soon, in chapter [FILL], to see how the different invariants impact the algorithm for searching the tree.
+We'll return to binary search trees soon, to model how the recursive descent search works. That will let us see how the different invariants impact the correctness of search. But first, let's get a bit more experience with Forge.

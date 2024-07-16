@@ -45,14 +45,12 @@
 
 # Modeling Relationships 
 - [Relational Forge, Modeling Logic (EDIT)](./chapters/relations/modeling-booleans-1.md)
-- [Reachability](./chapters/relations/reachability.md)
-- [Modeling Mutal Exclusion](./chapters/relations/sets-induction-mutex.md)
-- [Beyond Assertions](./chapters/relations/sets-beyond-assertions.md)
+- [Transitive Closure (EDIT)](./chapters/relations/reachability.md)
+- [Modeling Mutal Exclusion (EDIT)](./chapters/relations/sets-induction-mutex.md)
+- [Going Beyond Assertions](./chapters/relations/sets-beyond-assertions.md)
 - [Reference-Counting Memory Management (FILL)]()
-
-- [Validating Relational Models (FILL)]()
 - [Comparing Prim's and Dijkstra's Algorithms (FILL from model)]()
-- [How does Forge Work?](./chapters/solvers/bounds_booleans_how_forge_works.md)
+- [How does Forge Work? (EDIT)](./chapters/solvers/bounds_booleans_how_forge_works.md)
 - [Q&A: Relations]() 
 
 <!-- ## Atoms from bits (Relational Forge)
@@ -73,13 +71,12 @@
  -->
 
 # Temporal Specification
-- [Safety and Liveness](./chapters/temporal/liveness_and_lassos.md)
-- [Temporal Forge 1](./chapters/temporal/temporal_operators.md)
-- [Temporal Forge 2](./chapters/temporal/temporal_operators_2.md)
-- [Obligations and the Past](./chapters/temporal/obligations_past.md)
-- [Modeling Mutual Exclusion](./chapters/temporal/fixing_lock_temporal.md)
-- [Validation: Temporal Pitfalls]()
-- [Q&A: Temporal Logic]() 
+- [Safety and Liveness (EDIT)](./chapters/temporal/liveness_and_lassos.md)
+- [Temporal Forge 1 (EDIT)](./chapters/temporal/temporal_operators.md)
+- [Temporal Forge 2 (EDIT)](./chapters/temporal/temporal_operators_2.md)
+- [Obligations and the Past (EDIT)](./chapters/temporal/obligations_past.md)
+- [Mutual Exclusion, Revisited (EDIT)](./chapters/temporal/fixing_lock_temporal.md)
+- [Q&A: Temporal Logic and Modeling Pitfalls (FILL)]() 
 
 <!--  
 ## Tomorrow and Tomorrow and Tomorrow (Temporal Forge)

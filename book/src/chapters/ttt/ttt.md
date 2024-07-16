@@ -135,7 +135,7 @@ pred wellformed[b: Board] {
 ```
 
 ~~~admonish tip title="Comments in Forge"
-Forge treats either `--` or `//` as beginning a line-level comment, and `/* ... */` as denoting a block comment. This is different from the Python code we saw in the last section! In Forge, `#` has meaning.
+Forge treats either `--` or `//` as beginning a line-level comment, and `/* ... */` as denoting a block comment. This is different from the Python code we saw in the last section! In Forge, `#` has a different meaning.
 ~~~
 
 This predicate is true of any `Board` if and only if the above 2 constraints are satisfied. Let's break down the syntax: 

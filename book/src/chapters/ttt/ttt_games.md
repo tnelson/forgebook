@@ -137,38 +137,38 @@ one sig Game {
   -- What state does the game start in?
   initialState: one Board,
   -- How does the game evolve from state to state?
-  next: pfunc Board -> Board
+  nextState: pfunc Board -> Board
 }
 
 pred traces {
     -- The trace starts with an initial state
     starting[Game.initialState]
-    no sprev: Board | Game.next[sprev] = Game.initialState
+    no sprev: Board | Game.nextState[sprev] = Game.initialState
     -- Every transition is a valid move
-    all s: Board | some Game.next[s] implies {
+    all s: Board | some Game.nextState[s] implies {
       some row, col: Int, p: Player |
-        move[s, row, col, p, Game.next[s]]
+        move[s, row, col, p, Game.nextState[s]]
     }
 }
 ```
 
-By itself, this wouldn't be quite enough; we might see a bunch of disjoint traces. We could add more constraints manually, but there's a better option: tell Forge, at `run`time, that `next` represents a linear ordering on states. This is similar to what we did back in the [ripple-carry adder](../adder/rca.md):
+By itself, this wouldn't be quite enough; we might see a bunch of disjoint traces. We could add more constraints manually, but there's a better option: tell Forge, at `run`time, that `nextState` represents a linear ordering on states. This is similar to what we did back in the [ripple-carry adder](../adder/rca.md):
 
 ```alloy
-run { traces } for {next is linear}
+run { traces } for {nextState is linear}
 ```
 
-It's worth recalling what's happening here. The phrase `next is linear` isn't a _constraint_; it's a separate annotation given to Forge alongside a `run` or a test. Never put such an annotation in a constraint block; Forge won't understand it. These annotations narrow Forge's _bounds_ (the space of possible worlds to check) before the solver begins its work.
+It's worth recalling what's happening here. The phrase `nextState is linear` isn't a _constraint_; it's a separate annotation given to Forge alongside a `run` or a test. Never put such an annotation in a constraint block; Forge won't understand it. These annotations narrow Forge's _bounds_ (the space of possible worlds to check) before the solver begins its work.
 
 In general, Forge syntax allows such annotations _after_ numeric bounds. E.g., if we wanted to see full games, rather than unfinished game prefixes (the default bound on any sig, including `Board`, is up to 4) we could have asked:
 
 ```alloy
 run {
   traces
-} for exactly 10 Board for {next is linear}
+} for exactly 10 Board for {nextState is linear}
 ```
 
-You might notice that because of this, some traces are excluded. That's because `next is linear` forces exact bounds on `Board`. This is in contrast to `plinear`, which we used for the ripple-carry adder, and which didn't force exact bounds. Use whichever of the two is more appropriate to your needs.
+You might notice that because of this, some traces are excluded. That's because `nextState is linear` forces exact bounds on `Board`. This is in contrast to `plinear`, which we used for the ripple-carry adder, and which didn't force exact bounds. Use whichever of the two is more appropriate to your needs.
 
 ## The Evaluator
 
@@ -194,7 +194,7 @@ Recall that we just ran this command:
 run {
   wellformed
   traces
-} for exactly 10 Board for {next is linear}
+} for exactly 10 Board for {nextState is linear}
 ```
 
 ~~~admonish note title="Nothing without a command"
@@ -255,14 +255,14 @@ We also need to edit the `traces` predicate to allow `doNothing` to take place:
 pred traces {
     -- The trace starts with an initial state
     starting[Game.initialState]
-    no sprev: Board | sprev.next = Game.initialState
+    no sprev: Board | Game.nextState[sprev] = Game.initialState
     -- Every transition is a valid move
-    all s: Board | some Game.next[s] implies {
+    all s: Board | some Game.nextState[s] implies {
       some row, col: Int, p: Player | {
-        move[s, row, col, p, Game.next[s]] 
+        move[s, row, col, p, Game.nextState[s]] 
       }
       or
-      doNothing[s, Game.next[s]]      
+      doNothing[s, Game.nextState[s]]      
     } 
 }
 ```
@@ -324,11 +324,11 @@ run {
   -- "let" lets us locally define an expression, which can
   -- be good for clarity in the model!
   -- here we say that X first moved in the middle
-  let second = Trace.next[Trace.initialState] |
+  let second = Game.nextState[Game.initialState] |
     second.board[1][1] = X
   -- ...but X didn't win
   all s: State | not winner[s, X]
-} for exactly 10 State for {next is linear}
+} for exactly 10 State for {nextState is linear}
 ```    
     
 </details>
@@ -342,7 +342,7 @@ pred xWins {
   all s: State | not winner[s, X]
 }
 assert moveInMiddle is sufficient for xWins 
-  for exactly 10 State for {next is linear}
+  for exactly 10 State for {nextState is linear}
 ```
 
 ---
