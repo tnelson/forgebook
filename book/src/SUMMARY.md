@@ -38,7 +38,7 @@
 
 # Discrete Event Systems
 - [Transitions, Traces, and Verification](./chapters/ttt/ttt_games.md)
-- [Counterexamples to Induction: Binary Search on Arrays (EDIT)](./chapters/inductive/bsearch.md)
+- [Counterexamples to Induction](./chapters/inductive/bsearch.md)
 - [BSTs: Recursive Descent (EDIT)](./chapters/bst/descent.md)
 - [Validating Models (FILL)](./chapters/validation/validating_events.md) 
 - [Q&A: Event Systems (FILL/ADAPT)](./chapters/qna/events.md) 

@@ -30,6 +30,11 @@ If you're in CSCI 1710, one of your assignments will be to _build_ such a constr
 
 As you may have seen in the ripple-carry adder section, these two phases of solving work very differently, and  letting the solver infer constraints is often less efficient than giving it tighter bounds, because the latter restricts the overall space to be searched beforehand. Some optimization techniques in Forge need to be explicitly applied in the first phase, because the solver engine itself splits the two phases apart. 
 
+<!-- ### How does `reachable` work? 
+
+We prototyped some confidence tests about the `reachable` predicate ([livecode file](./testing_reachable.frg)). -->
+
+
 ### "Nulls" in Forge
 
 In Forge, there is a special value called `none`. It's analogous (but not exactly the same!) to a `None` in languages like Python.
