@@ -39,19 +39,9 @@
 # Discrete Event Systems
 - [Transitions, Traces, and Verification](./chapters/ttt/ttt_games.md)
 - [Counterexamples to Induction](./chapters/inductive/bsearch.md)
-- [BSTs: Recursive Descent (EDIT)](./chapters/bst/descent.md)
-- [Validating Models (FILL)](./chapters/validation/validating_events.md) 
+- [BSTs: Recursive Descent (FILL/ADAPT)](./chapters/bst/descent.md)
+- [Validating Models (FILL/ADAPT)](./chapters/validation/validating_events.md) 
 - [Q&A: Event Systems (FILL/ADAPT)](./chapters/qna/events.md) 
-
-<!-- correspondence??? -->
-
-   <!-- - Froglet: binary search on array model
-        - Preservation of invariant
-        - Preservation fails: binary search is broken (if the array is too big – see Bloch’s post)
-        - Enrichment of invariant -->
-
-<!-- can we trust the model?
-        - vacuity, other pitfalls in verification -->
 
 # Modeling Relationships 
 - [Relational Forge, Modeling Logic (EDIT)](./chapters/relations/modeling-booleans-1.md)
