@@ -11,9 +11,23 @@ To understand an RCA, let's first think about adding together a pair of one-bit 
 |           1 |           0 |          1 |          
 |           1 |           1 |          2 |          
 
-But, wait a moment. If we're building this into a circuit, and these inputs and outputs are single bits, we can't return `2` as the result. Similarly to how we might manually add `9` and `19` on paper, carrying a `1` in the `10`s place, to get `28`...
+But, wait a moment. If we're building this into a circuit, and these inputs and outputs are single bits, we can't return `2` as the result. Similarly to how we might manually add `12345` and `67890` on paper, carrying a `1` in a few places...
 
-**(TODO: insert picture of the addition-on-paper)**
+<center><img width="50%" src="./Addition.png" style="background-color:white"/></center>
+
+
+Notice how, on paper, we sweep from right to left. That is, we handle the least-significant digits first. 
+
+**Exercise:** Why is that? (Your first answer may be: "Because that's how you do it." But hold yourself to a higher standard. Was there a good reason to start on the right, and move left, rather than the other way around?)
+
+<details>
+<summary>Think, then click!</summary>
+
+Carrying! If we started to the left, we'd give answers for those digits prematurely. (To see this, try doing the above arithmetic by hand again, but starting on the left and moving right. You'll need to carry, as before, but it will be _too late!_)
+
+</details>
+
+---
 
 We need to carry a bit with value `1` in the `2s` place.
 
