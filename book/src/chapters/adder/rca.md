@@ -32,7 +32,7 @@ Exactly how we build that circuit is outside the scope of this example. Generall
 
 Now the question is: how do we build an adder that can handle numbers of the sizes that real computers use: 8-bit, 32-bit, or even 64-bit values? The answer is that we'll chain together multiple adder circuits like the above, letting the carry bits "ripple" forward as an extra, 3rd input to all the adders except the first one. E.g., if we were adding together a pair of 4-bit numbers&mdash;4 and 5, say&mdash;we'd chain together 4 adders like so:
 
-<center><img width="70%" src="./rca.svg"/></center>
+<center><img width="70%" src="./rca.svg" style="background-color:white"/></center>
 
 Notice that each full adder accepts _3_ input bits, just like in the above table: 
 - a bit from the first number;
