@@ -30,11 +30,18 @@ Suppose we've built a circuit like the above; this is called a _full adder_ (FA)
 Exactly how we build that circuit is outside the scope of this example. Generally, we build them with logic gates: tiny devices that implement boolean operators like "and", "not", etc. 
 ~~~
 
-**(TODO: insert picture of a single adder doing this: 2 inputs, 2 outputs)**
+Now the question is: how do we build an adder that can handle numbers of the sizes that real computers use: 8-bit, 32-bit, or even 64-bit values? The answer is that we'll chain together multiple adder circuits like the above, letting the carry bits "ripple" forward as an extra, 3rd input to all the adders except the first one. E.g., if we were adding together a pair of 4-bit numbers&mdash;4 and 5, say&mdash;we'd chain together 4 adders like so:
 
-Now the question is: how do we build an adder that can handle numbers of the sizes that real computers use: 8-bit, 32-bit, or even 64-bit values? The answer is that we'll chain together multiple adder circuits like the above, letting the carry bits "ripple" forward as an extra, 3rd input to all the adders except the first one. E.g., if we were adding together 4-bit numbers, we'd chain together 4 adders like so:
+<center><img width="70%" src="./rca.svg"/></center>
 
-**(TODO: insert picture of a chain of 4 adders, with a concrete input and outputs)**
+Notice that each full adder accepts _3_ input bits, just like in the above table: 
+- a bit from the first number;
+- a bit from the second number; and
+- a carry bit.
+
+Each full adder has _2_ output bits:
+- the value at this bit (1s place, 2s place, etc.); and 
+- the carry bit, if applicable.
 
 Our task here is to model this circuit in Forge, and confirm that it actually works correctly. 
 
