@@ -67,11 +67,11 @@ If you've studied physics or electrical engineering, you might also see that thi
 
 ## Datatypes
 
-We'll start by defining the boolean data type&mdash;true and false&mdash;for the wire values.
+We'll start by defining a data type&mdash;`Digit`&mdash;for the wire values, which can be either `T` or `F` (short for "true" and "false"; you can also think of these as representing "1" and "0" or "high" and "low").
 
 ```forge,editable
-abstract sig Bool {}
-one sig True, False extends Bool {}
+abstract sig Digit {}
+one sig T, F extends Digit {}
 ```
 
 Then we'll define a `sig` for full adders, which will be chained together to form the ripple-carry adder. We'll give each full adder fields representing its input bits and output bits:
@@ -79,18 +79,20 @@ Then we'll define a `sig` for full adders, which will be chained together to for
 ```forge,editable
 sig FA { 
   -- input and output bits 
-  a, b: one Bool,  
+  a, b: one Digit,  
   -- input carry bit
-  cin: one Bool,
+  cin: one Digit,
   -- output value
-  s: one Bool,
+  s: one Digit,
   -- output carry bit 
-  cout: one Bool
+  cout: one Digit
 }
 ```
 
-~~~admonish warning title="Bool is not boolean!"
-Beware confusing the `Bool` sig we created (which is a definition in our model and denotes a set of `Bool` atoms), with the result of evaluating Forge constraints. Forge doesn't "know" anything special about `Bool`; it's just another datatype. **If we write something like `(some FA) = True`, Forge will give an error message.** This is because, to Forge, `True` is just another value we defined in the model. Instead, we write just `(some FA)`. This will come up again as we continue to develop the model. 
+~~~admonish warning title="`Digit` is not the same as boolean!"
+Beware confusing the `Digit` sig we created, and the `T` and `F` values in it, with the result of evaluating Forge constraints. Forge doesn't "know" anything special about `T` or `F`; `Digit` is just another datatype. **If we write something like `(some FA) = T`, Forge will give an error message.** This is because, to Forge, `True` is just another value we defined in the model. Instead, we write just `(some FA)` to say "there is some full adder in the instance". 
+
+This will come up again as we continue to develop the model. 
 ~~~
 
 Finally, we'll define the ripple-carry adder chain:
@@ -139,7 +141,7 @@ Just like `pred`icates can be used as boolean-valued helpers, `fun`ctions can ac
 
 ```forge
 // Helper function: what is the output bit for this full adder?
-fun adder_S_RCA[f: one FA]: one Bool  {
+fun adder_S_RCA[f: one FA]: one Digit  {
   // What expression should we put here?
 } 
 ```
@@ -154,20 +156,20 @@ We'll use Forge's `let` construct to make it easier to write the value for each 
 
 ```forge
 // Helper function: what is the output bit for this full adder?
-fun adder_S_RCA[f: one FA]: one Bool  {
-  // Note: "True" and "False" are values in the model, we cannot use them as Forge formulas.
-  let A = (f.a = True), B = (f.b = True), CIN = (f.cin = True) |
+fun adder_S_RCA[f: one FA]: one Digit  {
+  // "T" and "F" are values, we cannot use them as Forge formulas.
+  let A = (f.a = T), B = (f.b = T), CIN = (f.cin = T) |
 	 ((A and B and CIN) or 
     (A and (not B) and (not CIN)) or 
     ((not A) and B and (not CIN)) or 
     ((not A) and (not B) and CIN))
-	 	  =>   True 
-      else False
+	 	  =>   T
+      else F
 } 
 ```
 
 ~~~admonish tip title="Couldn't we have just used a `pred` here?"
-It might be a bit strange to write a helper function that returns a `Bool`, rather than a predicate directly. We could make a `pred` work, but we'd still have to eventually use `True` and `False` somewhere, since they are the values that the output bits can take on. 
+It might be a bit strange to write a helper function that returns a `Digit`, rather than a predicate directly. We could make a `pred` work, but we'd still have to eventually use `T` and `F` somewhere, since they are the values that the output bits can take on. 
 ~~~
 
 ### When is an adder's carry bit set to true? 
@@ -176,14 +178,14 @@ This one is quite similar. The carry bit is set to true if and only if 2 or 3 of
 
 ```forge
 // Helper function: what is the output carry bit for this full adder?
-fun adder_cout_RCA[f: one FA]: one Bool {
+fun adder_cout_RCA[f: one FA]: one Digit {
  let A = (f.a = True), B = (f.b = True), CIN = (f.cin = True) |
      ((not A and B and CIN) or 
       (A and not B and CIN) or 
       (A and B and not CIN) or 
       (A and B and CIN)) 
-	      =>   True 
-        else False
+	      =>   T
+        else F
 } 
 ```
 
@@ -326,8 +328,8 @@ When you have quantification and helper fields, you can often avoid needing real
 We'll add a helper function for convenience later:
 
 ```forge
-fun trueValue[b: Bool, placeValue: Int]: one Int {
-  (b = True) => placeValue else 0
+fun trueValue[b: Digit, placeValue: Int]: one Int {
+  (b = T) => placeValue else 0
 }
 ```
 
