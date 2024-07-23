@@ -90,7 +90,7 @@ sig FA {
 ```
 
 ~~~admonish warning title="`Digit` is not the same as boolean!"
-Beware confusing the `Digit` sig we created, and the `T` and `F` values in it, with the result of evaluating Forge constraints. Forge doesn't "know" anything special about `T` or `F`; `Digit` is just another datatype. **If we write something like `(some FA) = T`, Forge will give an error message.** This is because, to Forge, `True` is just another value we defined in the model. Instead, we write just `(some FA)` to say "there is some full adder in the instance". 
+Beware confusing the `Digit` sig we created, and the `T` and `F` values in it, with the result of evaluating Forge constraints. Forge doesn't "know" anything special about `T` or `F`; `Digit` is just another datatype. **If we write something like `(some FA) = T`, Forge will give an error message.** This is because, to Forge, `T` is just another value we defined in the model. Instead, we write just `(some FA)` to say "there is some full adder in the instance". 
 
 This will come up again as we continue to develop the model. 
 ~~~
@@ -179,7 +179,7 @@ This one is quite similar. The carry bit is set to true if and only if 2 or 3 of
 ```forge
 // Helper function: what is the output carry bit for this full adder?
 fun adder_cout_RCA[f: one FA]: one Digit {
- let A = (f.a = True), B = (f.b = True), CIN = (f.cin = True) |
+ let A = (f.a = T), B = (f.b = T), CIN = (f.cin = T) |
      ((not A and B and CIN) or 
       (A and not B and CIN) or 
       (A and B and not CIN) or 
@@ -328,21 +328,21 @@ When you have quantification and helper fields, you can often avoid needing real
 We'll add a helper function for convenience later:
 
 ```forge
-fun trueValue[b: Digit, placeValue: Int]: one Int {
+fun actualValue[b: Digit, placeValue: Int]: one Int {
   (b = T) => placeValue else 0
 }
 ```
 
 ### The Requirement
 
-Let's try to express our requirement that the adder is correct. Again, we'll phrase this as: for every full adder, the true  value of its output is the sum of the true values of its inputs (where "true value" means the value of the boolean, taking into account its position). We might produce something like this:
+Let's try to express our requirement that the adder is correct. Again, we'll phrase this as: for every full adder, the true value of its output is the sum of the true values of its inputs (where "true value" means the value of the boolean, taking into account its position). We might produce something like this:
 
 ```forge
 pred req_adderCorrect_wrong {
   (rca and assignPlaces) implies {
     all fa: FA | { 
-        trueValue[fa.s, Helper.place[fa]] = add[trueValue[fa.a, Helper.place[fa]], 
-                                                trueValue[fa.b, Helper.place[fa]]]
+        actualValue[fa.s, Helper.place[fa]] = add[actualValue[fa.a, Helper.place[fa]], 
+                                                  actualValue[fa.b, Helper.place[fa]]]
     }
   }
 }
@@ -389,13 +389,13 @@ pred req_adderCorrect {
         -- the the sum of the total input's true value.
 
         -- output value bit + output carry bits; note carry value is *2 (and there may not be a "next adder")
-        add[trueValue[fa.s, Helper.place[fa]], 
-            multiply[trueValue[fa.cout, Helper.place[fa]], 2]] 
+        add[actualValue[fa.s, Helper.place[fa]], 
+            multiply[actualValue[fa.cout, Helper.place[fa]], 2]] 
         = 
         -- input a bit + input b bit + input carry bit
-        add[trueValue[fa.a, Helper.place[fa]],     
-            trueValue[fa.b, Helper.place[fa]],    
-            trueValue[fa.cin, Helper.place[fa]]]  
+        add[actualValue[fa.a, Helper.place[fa]],     
+            actualValue[fa.b, Helper.place[fa]],    
+            actualValue[fa.cin, Helper.place[fa]]]  
         -- Notice: I don't use trailing comments much on lines, because I want to be able to easily paste 
         -- these into the evaluator.
     }
