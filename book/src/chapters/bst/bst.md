@@ -1,18 +1,16 @@
 # Intro to Modeling Systems (Part 2: BSTs)
 
-Now that we've written our first model&mdash;tic-tac-toe boards&mdash;let's switch to something a bit more serious: binary search trees. A binary search tree (BST) is a binary tree with an added property about its structure that allows it to efficiently answer many search queries related to the values it stores.
+Now that we've written our first model&mdash;tic-tac-toe boards&mdash;let's switch to something a bit more serious: binary search trees. A binary search tree (BST) is a binary tree with an added property about its structure that allows it to efficiently answer many search queries related to the values it stores. Here's an example, drawn by hand:
 
-Here's an example, drawn by hand:
-
-**TODO: image**
+<!-- sips -s format png Bintree.pdf --out BinTree.png  -->
 
 <center>
-<img alt="a hand-drawn binary search tree" src="./hand_bst_example.png" width=50%/>
+<img alt="a hand-drawn binary search tree" src="./Bintree.png" width=40%/>
 </center>
 
-Each node of the tree holds some value that the tree supports searching for. We'll call this value the search key, or just the _key_ for each node. 
+Each node of the tree holds some value that the tree supports searching for. We'll call this value the search key, or just the _key_ for each node. The common ancestor of every node in the tree is called the _root_. 
 
-This is obviously a _binary tree_, since it is a tree where every node has at most 2 children. What makes it a binary _search_ tree is the invariant that every node $N$ obeys: 
+This is obviously a _binary tree_, since it is a tree where every node has *at most* 2 children. What makes it a binary _search_ tree is the invariant that every node $N$ obeys: 
 * all left-descendants of $N$ have a key less than $N$'s key; and 
 * all right-descendants of $N$ have a key greater than or equal to $N$'s key.
 
