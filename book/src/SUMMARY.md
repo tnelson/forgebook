@@ -45,7 +45,7 @@
 
 # Modeling Relationships 
 - [Relational Forge, Modeling Logic](./chapters/relations/modeling-booleans-1.md)
-- [Transitive Closure (EDIT)](./chapters/relations/reachability.md)
+- [Transitive Closure](./chapters/relations/reachability.md)
 - [Modeling Mutal Exclusion (EDIT)](./chapters/relations/sets-induction-mutex.md)
 - [Going Beyond Assertions](./chapters/relations/sets-beyond-assertions.md)
 - [Reference-Counting Memory Management (FILL)]()
