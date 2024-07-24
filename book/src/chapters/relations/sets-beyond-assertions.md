@@ -1,18 +1,6 @@
 # Going Beyond Assertions
 
-~~~admonish tip title="CSCI 1710: Homeworks"
-I'm super happy with the curiosity-modeling work I've seen overall! 
-
-Forge 3 goes out today. Forge 3 is a continuation of the garbage-collection lab; we ask you to model more advanced kinds of garbage collection that are actually able to collect unreachable memory, rather than just memory with a `0` reference count. Many of you won't have seen these algorithms yet. That's OK---whether or not you've seen them, you can learn useful things about them via modeling.
-~~~
-
-~~~admonish tip title="CSCI 1710: Toadus Ponens"
-We'll start class today with a presentation on Toadus Ponens on the upcoming homework. Please see the lecture capture for the details; Siddhartha Prasad will be showing the tool in more detail.
-~~~
-
-## Setting The Stage: States and Reachability
-
-Last time we were modeling this simplified (and perhaps buggy) mutual-exclusion protocol: 
+In the last section, we were modeling this simplified (and perhaps buggy) mutual-exclusion protocol: 
 
 ```
 while(true) { 
@@ -25,7 +13,11 @@ while(true) {
 }
 ```
 
-**Aside:** I'm going to use the terms "process" and "thread" interchangably for this model. The difference is vital when programming, but not important for our purposes today.  
+~~~admonish note title="Thread vs. Process"
+I'm going to use the terms "process" and "thread" interchangably for this model. The difference is vital when programming, but it's not important for our purposes today.  
+~~~
+
+**BARRIER**
 
 If there are 3 locations, and 2 flag values, then every process has $3 \times 2 = 6$ possible states. If 2 processes are executing this loop, there are $6^2 = 6 \times 6 = 36$ possible states overall in the system. 
 

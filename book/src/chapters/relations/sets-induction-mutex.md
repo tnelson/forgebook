@@ -1,9 +1,5 @@
 # More Sets and Induction (Mutual Exclusion)
 
-Livecode: [here](./mutex.frg).
-
-## Modeling A Mutual-Exclusion Protocol
-
 If you have two independent threads of execution running concurrently, many subtle bugs can manifest. For instance, if both threads can write to the same region of memory, they might overlap their writes. A great example of this is simply incrementing a counter. In most computer systems, an operation like:
 
 ```java
@@ -19,7 +15,7 @@ is not atomic by itself. Thus, the following sequence of operations would be pro
 * Thread 2: write the new value to `counter`
 because then the counter's value is only `1` higher than its original value.
 
-We often call the property that such traces can't exist _mutual exclusion_, and the piece of code that shouldn't ever be run by 2 threads at once the _critical section_.  Today we'll model a very simple approach to mutual-exclusion. (It turns out *not* to work, but it's one of the first "bad" solutions you'd see in a course like CSCI 1760.)
+We often call the property that such traces can't exist _mutual exclusion_, and the piece of code that shouldn't ever be run by 2 threads at once the _critical section_.  Today we'll model a very simple approach to mutual-exclusion&mdash;which turns out *not* to work, but is a first step on the way to something that does.
 
 The idea comes from how we as humans negotiate access to a shared resource like the spoken-communication channel in a meeting. If we want to talk, we raise our hand. 
 
@@ -27,14 +23,16 @@ The idea comes from how we as humans negotiate access to a shared resource like 
 
 Consider the pseudocode below, and imagine it running on two separate threads of execution. I've marked _program locations_ in square brackets---note how they correspond to the spaces in between lines of code executing.
 
+**TODO: incorporate Pamela's comments on this; return to validation**
+
 ```java
 while(true) { 
-    // [state: disinterested]
+    // [state: uninterested]
     this.flag = true;
     // [state: waiting]
     while(other.flag == true);    
     // [state: in-cs]    
-    run_critical_section_code(); // we don't care about details
+    run_critical_section_code(); // does whatever; we don't care about details
     this.flag = false;    
 }
 ```
@@ -104,7 +102,7 @@ pred delta[pre: State, post: State] {
 }
 ```
 
-We won't create a `Trace` sig or `traces` predicate at all. We're going to do everything with induction today!
+We won't create a `Trace` sig or `traces` predicate at all, because we're going to apply induction rather than trace generation. 
 
 ### Model Validation
 
@@ -124,11 +122,11 @@ test expect {
 }
 ```
 
-In a real modeling situation, we would _absolutely_ add more checks. In fact, we might regret not testing more...
+In a real modeling situation, we would _absolutely_ add more checks. Even here, we might regret not testing more...
 
 ### Does Mutual Exclusion Hold?
 
-Before we run Forge, ask yourself whether the algorithm above guarantees mutual exclusion. (It certainly has another kind of error, but we'll get to that later. Focus on this one property.)
+Before we run Forge, ask yourself whether the algorithm above guarantees mutual exclusion. (It certainly has another kind of error, but we'll get to that later. Focus on this one property for now.)
 
 It seems reasonable that the property holds. But if we try to use the inductive approach to prove that:
 
@@ -143,7 +141,8 @@ pred startGoodTransition[s1, s2: State] {
 }
 assert all s: State | init[s] is sufficient for good[s] for exactly 1 State
 assert all pre, post: State | startGoodTransition[pre, post] is sufficient for good[post] for exactly 2 State
-    
+```
+
 The inductive case _fails_. Let's see what the counterexample is:
 
 ```alloy
@@ -155,32 +154,32 @@ The inductive case _fails_. Let's see what the counterexample is:
     } for exactly 2 State
 ```
 
-Yields:
-
-![](https://i.imgur.com/UFREBrD.png)
-
-or, in the table view:
+Yields, in the table view:
 
 ![](https://i.imgur.com/tJsdyDV.png)
 
-Notice that neither process has raised its flag in either state. This seems suspicious, and might remind you of the binary-search model from before long weekend. This is another such situation.
+Notice that neither process has raised its flag in either state. This seems suspicious, and might remind you of the binary-search model, where the `good` predicate wasn't strong enough to be inductive, but the counterexample Forge found wasn't actually reachable. This is another such situation.
 
 ### Refresher: Enriching The Invariant
 
-This counterexample shows that the property we wrote _isn't inductive_. But it might still an invariant of the system---it's just that Forge has found an unreachable prestate. To prevent that, we'll add more conditions to the `good` predicate (recall: we call this _enriching the invariant_; it's a great demo of something apparently paradoxical: _proving something stronger can be easier_). Let's say that, in order for a process to be in the critical section, its flag needs to be true:
+This counterexample shows that the property we wrote _isn't inductive_. But it might still an invariant of the system&mdash;it's just that Forge has found an unreachable prestate. To prevent that, we'll add more conditions to the `good` predicate (recall: we call this _enriching the invariant_; it's a great demo of something apparently paradoxical: _proving something stronger can be easier_). Let's _also_ say that, in order for a process to be in the critical section, its flag needs to be true:
 
 ```alloy
 pred good2[s: State] {
-    all p: Process | s.loc[p] = InCS implies p in s.flags        
+    -- enrichment: if in CS, flag must be raised
+    all p: Process | s.loc[p] = InCS implies p in s.flags  
+    -- original: mutual exclusion      
     #{p: Process | s.loc[p] = InCS} <= 1        
 }
 ```
 
-But the inductive case still fails! Let's enrich again. The flag _also_ has to be raised if a process is waiting for its counterpart's flag to become false:
+We re-run this, and the inductive case still fails! Look closely at the counterexample. The problem now is that the flag _also_ has to be raised if a process is `Waiting`.
 
 ```alloy
 pred good3[s: State] {
+    -- enrichment: if in CS or Waiting, flag must be raised
     all p: Process | (s.loc[p] = InCS or s.loc[p] = Waiting) implies p in s.flags    
+    -- original: mutual exclusion
     #{p: Process | s.loc[p] = InCS} <= 1        
 }
 ```
@@ -189,7 +188,7 @@ pred good3[s: State] {
 Notice again that we're only strengthening the thing we're trying to prove---_not_ altering the model itself in any way. 
 ~~~
 
-At this point, the inductive check passes. We've just shown that this algorithm satisfies mutual exclusion.
+At this point, the inductive check passes. **We've just shown that this algorithm satisfies mutual exclusion.** It might not give us some other properties we want, but this one is guaranteed.
 
 ### Validating the Check
 
@@ -209,8 +208,4 @@ test expect {
 }
 ```
 
-Fortunately, these both pass.
-
-## In-Class Exercise
-
-The link is [here](https://forms.gle/mXYkYvjGZqhMP6KF9). 
+Fortunately, these both pass. So far, so good. 
