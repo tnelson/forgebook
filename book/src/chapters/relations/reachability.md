@@ -1,7 +1,5 @@
 # Relations and Reachability
 
-**TODO: define "relation"**
-
 <!-- ~~~admonish note title="Brown CSCI 1710"
 
 * Hopefully everyone has been making good progress with Curiosity Modeling! I'm seeing a lot of awesome questions on Ed and at hours. 
@@ -152,6 +150,80 @@ Formally, `->` is the cross-product operation on sets.
 
 You'll see this apparently double-meaning when using `in` and `=`, too: singletons are single-element sets, where the element is a one-column tuple.
 ~~~
+
+
+## What is Dot, Really? 
+
+In Relational Forge, the dot operator is called _relational join_. The expression `A.B` combines two arbitrary relations `A` and `B` by seeking out rows with common values in their rightmost (in `A`) and leftmost (in `B`) columns. Concretely, if `A` is an $n$-ary relation, and `B` is $m$-ary, then `A.B` equals the $n+m-2$-ary relation:
+
+$$\{a_1, ..., a_{n-1}, b_2, ..., b_m \;| \;\exists x \;|\; (a_1, ..., a_{n-1}, x) \in A \text{ and } (x, b_2, ..., b_m) \in B\}$$
+
+That's a lot, so let's work through some examples. Suppose that we have the following relation for the `friend` field of `Person`:
+
+| column 1  |  column 2 | 
+|---------- | --------- |
+| `Tim`     | `Person0` |
+| `Tim`     | `Person1` |
+| `Person0` | `Person1` | 
+| `Person0` | `Tim`     | 
+| `Person1` | `Person0` | 
+| `Person1` | `Person2` |
+| `Person1` | `Tim`     | 
+| `Person2` | `Person1` | 
+| `Person2` | `Nim`     | 
+| `Nim`     | `Person2` |
+
+We know that join can often work like field access. So we'd expect `Tim.friend` to produce a set containing `Person0` and `Person1`. Why? Because we see `Tim` in the _left_ column of 2 rows, and the _right_ columns of those rows contain `Person0` and `Person1`. 
+
+But what about each of the following?
+
+~~~admonish tip title="Try the evaluator!"
+To build intuition for `.`, try expressions like this in the evaluator!
+~~~
+
+**Exercise:** `friend.Tim`
+
+<details>
+<summary>Think, then click!</summary>
+
+Here we run the same process that gave us a value for `Tim.friend`, but in reverse. Which rows do we see `Tim` in the _right_ column? 
+
+Because `friend` is symmetric, it's the same: `friend.Tim` is the same as `Tim.friend`, a set containing `Person0` and `Person1`. 
+
+</details>
+
+**Exercise:** `friend.friend`
+
+Before trying to compute the value, first answer: what is the arity of `friend.friend`?
+
+<details>
+<summary>Think, then click!</summary>
+
+Well, `frend` has arity `2`, and a join subtracts one column from each side. So we expect `friend.friend` to have arity `1+1=2`. 
+
+</details>
+
+Now, what's the value?
+
+**TODO: insert picture**
+
+<details>
+<summary>Think, then click!</summary>
+
+
+(TODO: picture)
+
+</details>
+
+**Exercise:** `Tim.Tim`
+
+<details>
+<summary>Think, then click!</summary>
+
+This will give an error because the result has arity `0`. 
+
+</details>
+
 
 ## How Reachability Works
 
