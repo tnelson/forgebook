@@ -28,7 +28,7 @@ If you're in CSCI 1710, one of your assignments will be to _build_ such a constr
 
 #### Performance Implications
 
-As you may have seen in the ripple-carry adder section, these two phases of solving work very differently, and  letting the solver infer constraints is often less efficient than giving it tighter bounds, because the latter restricts the overall space to be searched beforehand. Some optimization techniques in Forge need to be explicitly applied in the first phase, because the solver engine itself splits the two phases apart. 
+As you may have seen in the ripple-carry adder section, these two phases of solving work very differently, and  letting the solver infer constraints is often less efficient than giving it tighter bounds, because the latter restricts the overall space to be searched beforehand. Some optimization techniques in Forge need to be explicitly applied in the first phase, because the solver engine itself splits the two phases apart. For more on this, read [the upcoming Q&A section for traces and events](../qna/events.md).
 
 <!-- ### How does `reachable` work? 
 

@@ -44,14 +44,14 @@
 - [Q&A: Event Systems (FILL/ADAPT)](./chapters/qna/events.md) 
 
 # Modeling Relationships 
-- [Relational Forge, Modeling Logic (EDIT)](./chapters/relations/modeling-booleans-1.md)
+- [Relational Forge, Modeling Logic](./chapters/relations/modeling-booleans-1.md)
 - [Transitive Closure (EDIT)](./chapters/relations/reachability.md)
 - [Modeling Mutal Exclusion (EDIT)](./chapters/relations/sets-induction-mutex.md)
 - [Going Beyond Assertions](./chapters/relations/sets-beyond-assertions.md)
 - [Reference-Counting Memory Management (FILL)]()
 - [Comparing Prim's and Dijkstra's Algorithms (FILL from model)]()
 - [How does Forge Work? (EDIT)](./chapters/solvers/bounds_booleans_how_forge_works.md)
-- [Q&A: Relations]() 
+<!-- - [Q&A: Relations]()  -->
 
 <!-- ## Atoms from bits (Relational Forge)
  
