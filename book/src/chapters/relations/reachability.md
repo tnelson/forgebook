@@ -178,44 +178,68 @@ We know that join can often work like field access. So we'd expect `Tim.friend` 
 But what about each of the following?
 
 ~~~admonish tip title="Try the evaluator!"
-To build intuition for `.`, try expressions like this in the evaluator!
+To build intuition for `.`, try expressions like this in the evaluator after reading the following examples.
 ~~~
 
-**Exercise:** `friend.Tim`
-
-<details>
-<summary>Think, then click!</summary>
+#### `friend.Tim`
 
 Here we run the same process that gave us a value for `Tim.friend`, but in reverse. Which rows do we see `Tim` in the _right_ column? 
 
+<center><img width="40%" src="./Join2.png" style="background-color:white"/></center>
+
 Because `friend` is symmetric, it's the same: `friend.Tim` is the same as `Tim.friend`, a set containing `Person0` and `Person1`. 
 
-</details>
+---
 
-**Exercise:** `friend.friend`
+#### `friend.friend`
 
-Before trying to compute the value, first answer: what is the arity of `friend.friend`?
+Before trying to compute the value, first answer: 
 
-<details>
-<summary>Think, then click!</summary>
-
-Well, `frend` has arity `2`, and a join subtracts one column from each side. So we expect `friend.friend` to have arity `1+1=2`. 
-
-</details>
-
-Now, what's the value?
-
-**TODO: insert picture**
+**Exercise:** What is the arity of `friend.friend`?
 
 <details>
 <summary>Think, then click!</summary>
 
-
-(TODO: picture)
+Well, `friend` has arity `2`, and a join subtracts one column from each side. So we expect `friend.friend` to have arity `1+1=2`. 
 
 </details>
 
-**Exercise:** `Tim.Tim`
+Now, what's the value? Start by looking for matches. Here are some of them (the ones on `Person0`): 
+
+<center><img width="40%" src="./Join3.png" style="background-color:white"/></center>
+
+Continuing, we'll find matches on `Person1`, `Tim`, and others. Because some people have a lot of friends, the graph is getting difficult to read, but notice what's happening: we're identifying _matching pairs of rows_ in each relation.
+
+<center><img width="40%" src="./Join4.png" style="background-color:white"/></center>
+
+Finally, we generate a new row in the result for every pair of matching rows, deleting the inner columns we matched on: `Tim->Person1` is in the result because `Tim->Person0` is in `friends` (the left-hand side of the join) and `Person0->Person1` is in `friends` (the right-hand side of the join). We'll get one row for every match (but we won't keep duplicates):
+
+| column 1  |  column 2 | 
+|---------- | --------- |
+| `Tim`     | `Person1` |
+| `Tim`     | `Person2` |
+| `Tim`     | `Tim`     |
+| `Person0` | `Person0` | 
+| `Person0` | `Person1` | 
+| `Person0` | `Person2` | 
+| `Person0` | `Tim`     | 
+| `Person1` | `Person0` | 
+| `Person1` | `Person1` | 
+| `Person1` | `Tim`     |
+| `Person1` | `Nim`     | 
+| `Person2` | `Person0` | 
+| `Person2` | `Person2` | 
+| `Person2` | `Tim`     | 
+| `Nim`     | `Nim`     |
+| `Nim`     | `Person2` |
+
+**This is the set of _friend-of-friend_ relationships.** If we computed `friend.friend.friend`, we'd get the _friend-of-friend-of-friend_ relationships, and so on.
+
+**TODO: double-check this**
+
+---
+
+**Exercise:** What about `Tim.Tim`?
 
 <details>
 <summary>Think, then click!</summary>
