@@ -50,8 +50,8 @@
 - [Going Beyond Assertions](./chapters/relations/sets-beyond-assertions.md)
 - [Reference-Counting Memory Management (FILL; low priority)]()
 - [Comparing Prim's and Dijkstra's Algorithms (FILL from model; low priority)]()
-- [How does Forge Work? (EDIT; high priority)](./chapters/solvers/bounds_booleans_how_forge_works.md)
-<!-- - [Q&A: Relations]()  -->
+- [How does Forge Work?](./chapters/solvers/bounds_booleans_how_forge_works.md)
+- [Q&A: Relations](./chapters/qna/relations.md) 
 
 <!-- ## Atoms from bits (Relational Forge)
  
@@ -71,12 +71,12 @@
  -->
 
 # Temporal Specification
-- [Safety and Liveness (EDIT)](./chapters/temporal/liveness_and_lassos.md)
-- [Temporal Forge 1 (EDIT)](./chapters/temporal/temporal_operators.md)
-- [Temporal Forge 2 (EDIT)](./chapters/temporal/temporal_operators_2.md)
-- [Obligations and the Past (EDIT)](./chapters/temporal/obligations_past.md)
-- [Mutual Exclusion, Revisited (EDIT)](./chapters/temporal/fixing_lock_temporal.md)
-- [Q&A: Temporal Logic and Modeling Pitfalls (FILL)]() 
+- [Liveness and Lassos](./chapters/temporal/liveness_and_lassos.md)
+- [Temporal Forge 1 (EDIT; high priority)](./chapters/temporal/temporal_operators.md)
+- [Temporal Forge 2 (EDIT; high priority)](./chapters/temporal/temporal_operators_2.md)
+- [Obligations and the Past (EDIT; high priority)](./chapters/temporal/obligations_past.md)
+- [Mutual Exclusion, Revisited (EDIT; high priority)](./chapters/temporal/fixing_lock_temporal.md)
+- [Q&A: Temporal Logic and Modeling Pitfalls (FILL; med priority)]() 
 
 <!--  
 ## Tomorrow and Tomorrow and Tomorrow (Temporal Forge)
