@@ -109,4 +109,4 @@ The `badLasso` predicate wouldn't hold true if the system allowed `ProcessA` to 
 
 That sounds like a lot of work: we'd need to identify the sub-sequence of states representing the cycle and properly apply the constraint to only those states. More importantly, it sounds really easy to get this wrong if we write it ourselves, at this low level of abstraction, because the specifics might change as the model evolves. 
 
-Maybe there's a better way.
+There's a better way. Forge has another language level&mdash;Temporal forge&mdash;that provides all of this automatically. 

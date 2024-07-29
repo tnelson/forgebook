@@ -72,8 +72,8 @@
 
 # Temporal Specification
 - [Liveness and Lassos](./chapters/temporal/liveness_and_lassos.md)
-- [Temporal Forge 1 (EDIT; high priority)](./chapters/temporal/temporal_operators.md)
-- [Temporal Forge 2 (EDIT; high priority)](./chapters/temporal/temporal_operators_2.md)
+- [Temporal Forge](./chapters/temporal/temporal_operators.md)
+- [Linear Temporal Logic (EDIT; high priority)](./chapters/temporal/temporal_operators_2.md)
 - [Obligations and the Past (EDIT; high priority)](./chapters/temporal/obligations_past.md)
 - [Mutual Exclusion, Revisited (EDIT; high priority)](./chapters/temporal/fixing_lock_temporal.md)
 - [Q&A: Temporal Logic and Modeling Pitfalls (FILL; med priority)]() 
