@@ -157,3 +157,6 @@ You can use the navigation arrows, or click on specific states to move the visua
 
 Theming works as normal, as do custom visualizers (although read the documentation if you're writing your own visualizer; there are some small changes like using `instances` instead of `instance` to access data). 
 
+### So what's missing?
+
+_Do not_ try to use `example` in temporal mode. The `example` and `inst` constructs define bounds for _all states at once_ in Temporal forge. While `inst` can still be very useful for optimization, `example` will prevent anything it binds from ever changing in the trace, which isn't very useful for test cases. Instead, use constraints.

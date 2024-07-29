@@ -1,11 +1,11 @@
 # Obligations and The Past
 
-~~~admonish hint title="Temporal Forge Reminders"
+<!-- ~~~admonish hint title="Temporal Forge Reminders"
 * Remember the definition of "configuration": the value of all relations that aren't marked `var`. Thus, if you click the Sterling button that asks for a _new configuration_, the solver will always find a new trace that varies on one or more of those relations. This is useful when you want to see different temporal behavior, but not vary the constants.
 * _Do not_ try to use `example` in temporal mode. For reasons we'll get to soon (when we talk about how Forge works) `example` and `inst` constrain _all states_ in temporal mode, and so an example will prevent anything it binds from ever changing in the trace.
 ~~~
 
-The in-class exercise is [here](https://docs.google.com/forms/d/e/1FAIpQLSemtfAG44sxqkRSS4imTcGC1LVwcHgJWOrgrHp3wXyLbuMAZw/viewform?usp=sf_link). The livecode is the same model we've been working on: the [locking algorithm](./mutex_temporal.frg), and the (new) [traffic lights example](./traffic.frg).
+The in-class exercise is [here](https://docs.google.com/forms/d/e/1FAIpQLSemtfAG44sxqkRSS4imTcGC1LVwcHgJWOrgrHp3wXyLbuMAZw/viewform?usp=sf_link). The livecode is the same model we've been working on: the [locking algorithm](./mutex_temporal.frg), and the (new) [traffic lights example](./traffic.frg). -->
 
 ## Reminder: Priming for "next state" expressions
 
