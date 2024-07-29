@@ -1,5 +1,7 @@
 # Peterson Lock and Fairness
 
+**TN BARRIER**
+
 Let's fix the broken locking algorithm we modeled before. We'll also talk about improving testing, modeling pitfalls, etc. as we go along. The livecode will be in [peterson.frg](./peterson.frg).
 
 ## Fixing Deadlock
