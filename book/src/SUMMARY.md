@@ -39,18 +39,18 @@
 # Discrete Event Systems
 - [Transitions, Traces, and Verification](./chapters/ttt/ttt_games.md)
 - [Counterexamples to Induction](./chapters/inductive/bsearch.md)
-- [BSTs: Recursive Descent (FILL/ADAPT)](./chapters/bst/descent.md)
-- [Validating Models (FILL/ADAPT)](./chapters/validation/validating_events.md) 
-- [Q&A: Event Systems (FILL/ADAPT)](./chapters/qna/events.md) 
+- [BSTs: Recursive Descent (FILL/ADAPT; high priority)](./chapters/bst/descent.md)
+- [Validating Models (FILL/ADAPT; med priority)](./chapters/validation/validating_events.md) 
+- [Q&A: Event Systems (FILL/ADAPT; med priority)](./chapters/qna/events.md) 
 
 # Modeling Relationships 
 - [Relational Forge, Modeling Logic](./chapters/relations/modeling-booleans-1.md)
 - [Transitive Closure](./chapters/relations/reachability.md)
 - [Modeling Mutal Exclusion](./chapters/relations/sets-induction-mutex.md)
 - [Going Beyond Assertions](./chapters/relations/sets-beyond-assertions.md)
-- [Reference-Counting Memory Management (FILL)]()
-- [Comparing Prim's and Dijkstra's Algorithms (FILL from model)]()
-- [How does Forge Work? (EDIT)](./chapters/solvers/bounds_booleans_how_forge_works.md)
+- [Reference-Counting Memory Management (FILL; low priority)]()
+- [Comparing Prim's and Dijkstra's Algorithms (FILL from model; low priority)]()
+- [How does Forge Work? (EDIT; high priority)](./chapters/solvers/bounds_booleans_how_forge_works.md)
 <!-- - [Q&A: Relations]()  -->
 
 <!-- ## Atoms from bits (Relational Forge)
