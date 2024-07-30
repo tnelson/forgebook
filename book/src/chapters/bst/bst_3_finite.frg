@@ -116,6 +116,8 @@ pred traces {
         descendLeft [s, Search.nextState[s]] or 
         descendRight[s, Search.nextState[s]]
     }
+    -- All SearchStates are used
+    SearchState in Search.initialState.*(Search.nextState)
 }
 
 -- BASIC VALIDATION
@@ -129,7 +131,11 @@ test expect {
     init_sat: {some s: SearchState | init[s]} for 7 Node is sat
 }
 
-run {binary_tree and traces} for exactly 7 Node, 5 SearchState for {nextState is plinear}
+run {
+  binary_tree 
+  traces
+  some s: SearchState | s.current.key = Search.target or no (s.current.left + s.current.right)
+} for exactly 7 Node, 5 SearchState for {nextState is plinear}
 
 -- Let's look at traces of the search using each version of the invariant. 
 -- If you use the custom visualizer, *visited* nodes will have a red border, 

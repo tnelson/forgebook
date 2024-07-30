@@ -137,9 +137,41 @@ If we run `bst_descent.js` for this instance, it will draw the tree and highligh
 
 **TODO fill: how to run? Did we describe this already?**
 
+This is easier to read, but also a little worrying: we see two nodes visited, and they aren't directly connected! 
 
-### Different Invariants 
+**Exercise:** What's going on? (Hint: examine the table view. How many search states are there? Are they all in the trace?)
 
+<details>
+<summary>Think, then click!</summary>
+
+The problem is that we allowed `SearchState` atoms to exist without being used in the trace. The visualizer script is highlighting a node that _any_ `SearchState` uses. So we have two options: 
+* change the visualizer script to only look at states reachable from the first one; or
+* add a constraint that forces all `SearchState` atoms to be used. 
+
+We'll go for the second fix, adding this line to the `traces` predicate:
+
+```forge
+-- All SearchStates are used
+SearchState in (Search.initialState + Search.initialState.^(Search.nextState))
+```
+
+</details>
+
+Ok, that's better, but we still aren't seeing a _complete_ descent. To fix that, we'll say that, eventually, the descent either reaches bottom or a node with the target value:
+
+```alloy
+run {
+  binary_tree 
+  traces
+  some s: SearchState | s.current.key = Search.target or no (s.current.left + s.current.right)
+} for exactly 7 Node, 5 SearchState for {nextState is plinear}
+```
+
+That's more like it. But what about the invariants? So far, the tree being searched isn't necessarly a binary _search_ tree.
+
+### Trying Different Invariants 
+
+**TODO: finish this**
 
 -- Let's look at traces of the search using each version of the invariant. 
 -- If you use the custom visualizer, *visited* nodes will have a red border, 
