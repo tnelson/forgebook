@@ -28,7 +28,7 @@ one sig Search {
     target: one Int, -- the target of the search (never changes)
     -- The first state and successor-state function for this trace
     initialState: one SearchState,
-    nextState: pfunc Board -> Board 
+    nextState: pfunc SearchState -> SearchState
 }
 ```
 
@@ -84,6 +84,22 @@ pred descendRight[pre, post: SearchState] {
 
 ---
 
+Let's do some basic validation:
+
+```forge
+test expect {
+    -- let's check that these two transitions are mutually-exclusive
+    r_l_together: {some s: SearchState | {descendLeft[s] and descendRight[s]}} for 7 Node is unsat
+    -- let's check that transitions are all possible to execute
+    r_sat: {some s: SearchState | descendRight[s]} for 7 Node is sat
+    l_sat: {some s: SearchState | descendLeft[s]} for 7 Node is sat
+    -- initial state is satisfiable
+    init_sat: {some s: SearchState | init[s]} for 7 Node is sat
+}
+```
+
+---
+
 Now we'll combine these predicates into one that defines the entire recursive descent. The shape of this predicate is somewhat boilerplate; soon we'll see how to get rid of it entirely. For now, we'll just copy from the tic-tac-toe example and make small, local changes. Namely:
 * we called the trace sig `Search`, not `Game`;
 * we called the state sig `SearchState`, not `Board`; and 
@@ -91,8 +107,10 @@ Now we'll combine these predicates into one that defines the entire recursive de
 
 ```forge
 pred traces {
+    -- the graph is well-formed to begin with
+    binary_tree
     -- The trace starts with an initial state
-    starting[Search.initialState]
+    init[Search.initialState]
     no sprev: SearchState | Search.nextState[sprev] = Search.initialState
     -- Every transition is a valid move
     all s: SearchState | some Search.nextState[s] implies {
@@ -105,7 +123,53 @@ pred traces {
 Let's run it!
 
 ```forge
-run {traces} for exactly 7 Node
+run {traces} for exactly 7 Node, 5 SearchState for {nextState is plinear}
 ```
 
-**TODO ....*
+The output may initially be overwhelming: by default, it will show _all_ the atoms in the world and their relationships, including each `SearchState`. You could stay in the default visualizer and mitigate the problem a _little_ by clicking on "Theme" and then "Add Projection" for `SearchState`. The problem is that this hides the `current` node indicator for the current state, since the current state becomes implicit. 
+
+Instead, let's use a custom visualization. There are multiple options included with this book:
+* [`bst.js`](./bst.js), which visualizes the tree itself, without any regard to the descent. This is useful for debugging the basic tree model and the invariants themselves.
+* [`bst_descent.js`](./bst_descent.js), which visualizes the _descent_ in one picture. 
+* (Don't run this yet!) `bst_temporal.js`, which visualizes a Temporal Forge version of the model, which we'll get to soon.
+
+If we run `bst_descent.js` for this instance, it will draw the tree and highlight the path taken in the recursive descent. A node with the target key will have a thick border. A node that's visited in the descent will have a red border. So a correct descent should never show a node with a thick border that isn't red. 
+
+**TODO fill: how to run? Did we describe this already?**
+
+
+### Different Invariants 
+
+
+-- Let's look at traces of the search using each version of the invariant. 
+-- If you use the custom visualizer, *visited* nodes will have a red border, 
+-- and *target* node(s) will have a thick border.
+
+-- We'll make this a bit more interesting, and tell Forge:
+--   + not to show us immediate success/failure traces; and
+--   + to show us traces where the target is present in the tree
+// run {
+//   some Node             -- non-empty tree
+//   binary_search_tree_v1 -- use first invariant version
+//   searchTrace           -- do a search descent
+//   not stop              -- don't *immediately* succeed 
+//   not next_state stop   -- don't succeed in 1 descent, either
+//   SearchState.target in Node.key -- the target is present
+// } for exactly 8 Node
+// -- And the same using version 2:
+// run {
+//   some Node             -- non-empty tree
+//   binary_search_tree_v2 -- use second invariant version
+//   searchTrace           -- do a search descent
+//   not stop              -- don't *immediately* succeed 
+//   not next_state stop   -- don't succeed in 1 descent, either
+//   SearchState.target in Node.key -- the target is present
+// } for exactly 8 Node    -- don't *immediately* succeed 
+
+// -- Use "Next Config" to move to a different tree example.
+// -- One of the two should eventually produce an instance witnessing the _failure_ of 
+// -- binary search: a target in the tree that is never found.
+
+// ----------------------------------------------------------------------------------
+
+

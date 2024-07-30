@@ -5,6 +5,7 @@
   Tim, 2024
 
   Note assumption: this model doesn't take duplicate entries into account.
+  This version is the _finite trace_ model, not the _temporal forge_ model.
 */
 
 sig Node {
@@ -35,6 +36,11 @@ pred req_unique_root {
     one root: Node | 
       all other: Node-root | other in descendantsOf[root]}}
 assert binary_tree is sufficient for req_unique_root for 5 Node  
+
+pred isRoot[n: Node] {
+  -- a node is a root if it has no ancestor
+  no n2: Node | n = n2.left or n = n2.right
+}
 
 ---------------------------------------------------------------------------------
 
@@ -75,29 +81,12 @@ one sig Search {
     target: one Int, -- the target of the search (never changes)
     -- The first state and successor-state function for this trace
     initialState: one SearchState,
-    nextState: pfunc Board -> Board 
+    nextState: pfunc SearchState -> SearchState
 }
-
-// pred traces {
-//     -- The trace starts with an initial state
-//     starting[Game.initialState]
-//     no sprev: Board | Game.next[sprev] = Game.initialState
-//     -- Every transition is a valid move
-//     all s: Board | some Game.next[s] implies {
-//       some row, col: Int, p: Player |
-//         move[s, row, col, p, Game.next[s]]
-//     }
-// }
-
-
 
 -- Initial-state predicate for the search
 pred init[s: SearchState] {    
-    -- Start at the root of the tree.
-    -- This formulation relies on uniqueness of the root, enforced elsewhere
-    //s.current = {n: Node | all other: Node-n | other in n.^(left+right)}
     isRoot[s.current]
-    -- No constraints on the target value
 }
 
 -- Transition predicates: descend from the current node into one of its children.
@@ -115,32 +104,32 @@ pred descendRight[pre, post: SearchState] {
   -- ACTION
   post.current = pre.current.right
 }
--- Transition predicate: found target or a leaf; either way the search is over.
-// pred stop[pre, post: SearchState] {
-//   -- GUARD 
-//   Search.target = pre.current.key or 
-//   (Search.target > pre.current.key and no pre.current.right) or 
-//   (Search.target < pre.current.key and no pre.current.left)
-//   -- ACTION (frame: do nothing)
-//   post.current = pre.current
-// }
 
--- VALIDATION
+pred traces {
+    -- The trace starts with an initial state
+    init[Search.initialState]
+    no sprev: SearchState | Search.nextState[sprev] = Search.initialState
+    -- Every transition is a valid move
+    -- Every transition is a recursive step. Note that we don't need a "do nothing"
+    -- transition here! (Why not?)
+    all s: SearchState | some Search.nextState[s] implies {
+        descendLeft [s, Search.nextState[s]] or 
+        descendRight[s, Search.nextState[s]]
+    }
+}
+
+-- BASIC VALIDATION
 test expect {
-    -- let's check that these 3 transitions are mutually-exclusive
-    r_l_together: {eventually {descendLeft and descendRight}} for 7 Node is unsat
-//    l_stop_together: {eventually {descendLeft and stop}} for 7 Node is unsat
-//    r_stop_together: {eventually {descendRight and stop}} for 7 Node is unsat
-    -- let's check that these 3 are all possible to execute
-    r_sat: {eventually descendRight} for 7 Node is sat
-    l_sat: {eventually descendLeft} for 7 Node is sat
-//    stop_sat: {eventually stop} for 7 Node is sat
+    -- let's check that these two transitions are mutually-exclusive
+    r_l_together: {some s1,s2: SearchState | {descendLeft[s1, s2] and descendRight[s1, s2]}} for 7 Node is unsat
+    -- let's check that transitions are all possible to execute
+    r_sat: {some s1,s2: SearchState | descendRight[s1, s2]} for 7 Node is sat
+    l_sat: {some s1,s2: SearchState | descendLeft[s1, s2]} for 7 Node is sat
+    -- initial state is satisfiable
+    init_sat: {some s: SearchState | init[s]} for 7 Node is sat
 }
 
-pred searchTrace {
-  init
-  always {descendLeft or descendRight or stop}
-}
+run {binary_tree and traces} for exactly 7 Node, 5 SearchState for {nextState is plinear}
 
 -- Let's look at traces of the search using each version of the invariant. 
 -- If you use the custom visualizer, *visited* nodes will have a red border, 
@@ -149,26 +138,26 @@ pred searchTrace {
 -- We'll make this a bit more interesting, and tell Forge:
 --   + not to show us immediate success/failure traces; and
 --   + to show us traces where the target is present in the tree
-run {
-  some Node             -- non-empty tree
-  binary_search_tree_v1 -- use first invariant version
-  searchTrace           -- do a search descent
-  not stop              -- don't *immediately* succeed 
-  not next_state stop   -- don't succeed in 1 descent, either
-  SearchState.target in Node.key -- the target is present
-} for exactly 8 Node
--- And the same using version 2:
-run {
-  some Node             -- non-empty tree
-  binary_search_tree_v2 -- use second invariant version
-  searchTrace           -- do a search descent
-  not stop              -- don't *immediately* succeed 
-  not next_state stop   -- don't succeed in 1 descent, either
-  SearchState.target in Node.key -- the target is present
-} for exactly 8 Node    -- don't *immediately* succeed 
+// run {
+//   some Node             -- non-empty tree
+//   binary_search_tree_v1 -- use first invariant version
+//   searchTrace           -- do a search descent
+//   not stop              -- don't *immediately* succeed 
+//   not next_state stop   -- don't succeed in 1 descent, either
+//   SearchState.target in Node.key -- the target is present
+// } for exactly 8 Node
+// -- And the same using version 2:
+// run {
+//   some Node             -- non-empty tree
+//   binary_search_tree_v2 -- use second invariant version
+//   searchTrace           -- do a search descent
+//   not stop              -- don't *immediately* succeed 
+//   not next_state stop   -- don't succeed in 1 descent, either
+//   SearchState.target in Node.key -- the target is present
+// } for exactly 8 Node    -- don't *immediately* succeed 
 
--- Use "Next Config" to move to a different tree example.
--- One of the two should eventually produce an instance witnessing the _failure_ of 
--- binary search: a target in the tree that is never found.
+// -- Use "Next Config" to move to a different tree example.
+// -- One of the two should eventually produce an instance witnessing the _failure_ of 
+// -- binary search: a target in the tree that is never found.
 
-----------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------
