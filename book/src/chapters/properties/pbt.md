@@ -185,11 +185,9 @@ There are PBT libraries for most every popular language. In this book, we'll be 
 
 ~~~admonish note title="CSCI 1710: LLMs and Testing"
 
-We're all going to be using LLMs to generate code in the future. But (like humans) LLMs aren't infallable. Knowing how to test will be even more important than ever. That's why your first homework in 1710 starts by asking you to generate code using an LLM of your choice, such as ChatGPT. Then, you'll use property-based testing to assess its correctness. 
+If you're in CSCI 1710, your first homework starts by asking you to generate code using an LLM of your choice, such as ChatGPT. Then, you'll use property-based testing to assess its correctness.  To be clear, **you will not be graded on the correctness of the code you prompt an LLM to generate**. Rather, you will be graded on how good your property-based testing is. 
 
-To be clear, **you will not be graded on the correctness of the code you prompt an LLM to generate**. Rather, you will be graded on how good your property-based testing is. 
-
-Later in the semester, you'll be using PBT again to test more complex software.
+Later in the semester, you'll be using PBT again to test more complex software!
 ~~~
 
 Now let's use Hypothesis to test at least one of those properties. We'll start with this [template](./pbt.py):
