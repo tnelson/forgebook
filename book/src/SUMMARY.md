@@ -48,8 +48,7 @@
 - [Transitive Closure](./chapters/relations/reachability.md)
 - [Modeling Mutual Exclusion](./chapters/relations/sets-induction-mutex.md)
 - [Going Beyond Assertions](./chapters/relations/sets-beyond-assertions.md)
-- [Reference-Counting Memory Management (FILL; low priority)]()
-- [Comparing Prim's and Dijkstra's Algorithms (FILL from model; low priority)]()
+<!-- - [Reference-Counting Memory Management (FILL; low priority)]() -->
 - [How does Forge Work?](./chapters/solvers/bounds_booleans_how_forge_works.md)
 - [Q&A: Relations](./chapters/qna/relations.md) 
 
@@ -75,8 +74,8 @@
 - [Temporal Forge](./chapters/temporal/temporal_operators.md)
 - [Linear Temporal Logic](./chapters/temporal/temporal_operators_2.md)
 - [Obligations and the Past](./chapters/temporal/obligations_past.md)
-- [Mutual Exclusion, Revisited (EDIT; high priority)](./chapters/temporal/fixing_lock_temporal.md)
-- [Q&A: Temporal Logic and Modeling Pitfalls (FILL; med priority)]() 
+- [Mutual Exclusion, Revisited (EDIT; high priority with validation)](./chapters/temporal/fixing_lock_temporal.md)
+- [Q&A: Temporal Logic (FILL; any not covered before?)]() 
 
 <!--  
 ## Tomorrow and Tomorrow and Tomorrow (Temporal Forge)
@@ -103,11 +102,12 @@
   -->
 
 # Case Studies
-- [Model-Based ("Stateful") Testing (FILL)]()
-- [Concolic Execution (DEMO: KLEE)]()
-- [Policy and Network Analysis (DEMO: ABAC, Margrave, Zelkova)]()
-- [Crypto Protocol Analysis (DEMO: crypto lang, CPSA or other)]()
-- [Program Synthesis (DEMO: SSA synth, Sygus)]()
+- [Forge: Comparing Prim's and Dijkstra's Algorithms (FILL from model; low priority)]()
+- [Model-Based ("Stateful") Testing (nice-to-have priority)]()
+- [Industry: Concolic Execution (DEMO: KLEE)]()
+- [Forge+Industry: Policy and Network Analysis (DEMO: ABAC, Margrave, Zelkova)]()
+- [Forge+IndustryCrypto Protocol Analysis (DEMO: crypto lang, CPSA or other)]()
+<!-- - [Program Synthesis (DEMO: SSA synth, Sygus)]() -->
 
 <!-- ## Case Studies: Applications and Demos
 
