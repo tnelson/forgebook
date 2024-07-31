@@ -167,41 +167,81 @@ run {
 } for exactly 7 Node, 5 SearchState for {nextState is plinear}
 ```
 
-That's more like it. But what about the invariants? So far, the tree being searched isn't necessarly a binary _search_ tree.
+That's more like it. But what about the invariants? We only said `binary_tree` had to hold, which means that the tree being searched isn't necessarily a binary _search_ tree yet.
 
 ### Trying Different Invariants 
 
-**TODO: finish this**
+In our [original BST model](./bst.md), we'd sketched two different invariants:
 
--- Let's look at traces of the search using each version of the invariant. 
--- If you use the custom visualizer, *visited* nodes will have a red border, 
--- and *target* node(s) will have a thick border.
+**Version 1** (`invariant_v1`): For all nodes $N$:
+* all left-descendants of $N$ have a key less than $N$'s key; and 
+* all right-descendants of $N$ have a key greater than or equal to $N$'s key.
 
--- We'll make this a bit more interesting, and tell Forge:
---   + not to show us immediate success/failure traces; and
---   + to show us traces where the target is present in the tree
-// run {
-//   some Node             -- non-empty tree
-//   binary_search_tree_v1 -- use first invariant version
-//   searchTrace           -- do a search descent
-//   not stop              -- don't *immediately* succeed 
-//   not next_state stop   -- don't succeed in 1 descent, either
-//   SearchState.target in Node.key -- the target is present
-// } for exactly 8 Node
-// -- And the same using version 2:
-// run {
-//   some Node             -- non-empty tree
-//   binary_search_tree_v2 -- use second invariant version
-//   searchTrace           -- do a search descent
-//   not stop              -- don't *immediately* succeed 
-//   not next_state stop   -- don't succeed in 1 descent, either
-//   SearchState.target in Node.key -- the target is present
-// } for exactly 8 Node    -- don't *immediately* succeed 
+**Version 2** (`invariant_v2`): For all nodes $N$:
+* the left child of $N$ (if any) has a key less than $N$'s key; and 
+* the right child of $N$ (if any) has a key greater than or equal to $N$'s key.
 
-// -- Use "Next Config" to move to a different tree example.
-// -- One of the two should eventually produce an instance witnessing the _failure_ of 
-// -- binary search: a target in the tree that is never found.
+We were able to look at trees that met one invariant but not another, but now we can do something much more powerful: we can ask Forge to show us how the differing invariants affect the recursive descent on the tree! If an invariant is "wrong", surely it will cause the descent to fail in some way. Since we've already modeled the descent, this should be easy. Let's try it for `invariant_v2`:
 
-// ----------------------------------------------------------------------------------
+```forge
+run {
+  binary_tree     -- it must be a binary tree
+  all n: Node | invariant_v2[n]    -- additionally, the tree satisfies invariant version 1
+  Search.target in Node.key -- the target is present
+  traces          -- do a search descent
+  -- Finally, the trace finishes the search
+  some s: SearchState | s.current.key = Search.target or no (s.current.left + s.current.right)
+} for exactly 7 Node, 5 SearchState for {nextState is plinear}
+```
 
+This will show us instances of a descent for a tree following `invariant_v2`. To see descents for trees following the other invariant, just change `invariant_v2` to `invariant_v1`. If you look at a few instances for `invariant_v2`, you should notice that one of the invariants can make the descent fail: the tree contains the target, but it's never found. You'll see something like this: 
+
+<img alt="a binary tree following invariant 2, where the recursive descent fails to find the target" src="./bst_invar2_buggy.png" width=60%/>
+
+### Verifying BSTs
+
+Notice what just happened. We built up our structural model to contain a collection of related features, such as:
+* binary trees with numeric node values; 
+* multiple possible invariants for these trees to follow; and 
+* a recursive-descent algorithm on those binary trees.
+
+Before, we could only ask Forge to show us that the invariants were different, which wasn't very useful&mdash;at least not immediately. Then, in this section, we added a discrete event model of BST search atop the original, which gave us something more powerful: representations of how the different invariants might _impact_ the search algorithm. We can even verify that `invariant_v1` is correct (for reasonably-sized example trees). 
+
+**Exercise:** Do this now! Write either a `run` or `test expect` confirming that if `invariant_v1` holds for all nodes, then the recursive descent will be successful at finding a present target value. 
+
+<details>
+<summary>Think, then click!</summary>
+
+I'll write my version as a `run`, so we can better match the one above. 
+
+```forge
+run {
+  binary_tree    
+  all n: Node | invariant_v1[n]   
+  Search.target in Node.key
+  traces     
+  -- The trace finishes the search without finding the target
+  some s: SearchState | no (s.current.left + s.current.right)
+  no s: SearchState   | s.current.key = Search.target
+} for exactly 7 Node, 5 SearchState for {nextState is plinear}
+```
+
+</details>
+
+**Bonus Exercise:** Do the numeric bounds in the commands above seem OK to you? Is there any situation you might be worried about, beyond example trees that are bigger than 7 nodes?
+
+<details>
+<summary>Think, then click!</summary>
+
+Trees aren't always balanced. It's possible that there could be `7` nodes arranged like a linear list, with the target value at the bottom-most node. In this case, `5` states wouldn't be enough; Forge wouldn't ever even look for such a situation, because we said that the descent ended when it reached the bottom of the tree, and we lack the states to get there.
+
+This is a great example of how carefully considering bounds and exploring the structural model before doing more complex verification is vital. To really be complete for 7-node trees, we would need up to 7 `SearchState` atoms as well.
+
+</details>
+
+### Looking Ahead
+
+Of course, this is still a very simple model. Binary Search Trees are much less complicated than many other data structures, and even complex data structures are only part of a larger system. 
+
+**TODO: REMOVE RELATIONAL OPERATORS FROM MODEL! UNIFY WITH BST2**
 

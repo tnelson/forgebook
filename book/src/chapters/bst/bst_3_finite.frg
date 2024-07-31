@@ -1,4 +1,4 @@
-#lang forge
+#lang forge/bsl
 
 /*
   Model of binary search trees + descent
@@ -48,10 +48,15 @@ pred isRoot[n: Node] {
 -- One is correct, and the other is a common misunderstanding.
 
 pred invariant_v1[n: Node] {
-  -- "Every node's left-descendants..." via reflexive transitive closure
-  all d: n.left.*(left+right)  | d.key < n.key
-  -- "Every node's left-descendants..." via reflexive transitive closure
-  all d: n.right.*(left+right) | d.key > n.key
+  -- "Every node's left-descendants..." (if any)
+  some n.left => {
+    n.left.key < n.key
+    all d: Node | reachable[d, n.left, left, right] => d.key < n.key
+  }
+  some n.right => {
+    n.right.key < n.key
+    all d: Node | reachable[d, n.right, left, right] => d.key > n.key
+  }
 }
 pred binary_search_tree_v1 {
   binary_tree  -- a binary tree, with an added invariant
@@ -131,39 +136,28 @@ test expect {
     init_sat: {some s: SearchState | init[s]} for 7 Node is sat
 }
 
-run {
-  binary_tree 
-  traces
-  some s: SearchState | s.current.key = Search.target or no (s.current.left + s.current.right)
-} for exactly 7 Node, 5 SearchState for {nextState is plinear}
+// run {
+//   binary_tree 
+//   traces
+//   some s: SearchState | s.current.key = Search.target or no (s.current.left + s.current.right)
+// } for exactly 7 Node, 5 SearchState for {nextState is plinear}
 
 -- Let's look at traces of the search using each version of the invariant. 
 -- If you use the custom visualizer, *visited* nodes will have a red border, 
 -- and *target* node(s) will have a thick border.
 
--- We'll make this a bit more interesting, and tell Forge:
---   + not to show us immediate success/failure traces; and
---   + to show us traces where the target is present in the tree
-// run {
-//   some Node             -- non-empty tree
-//   binary_search_tree_v1 -- use first invariant version
-//   searchTrace           -- do a search descent
-//   not stop              -- don't *immediately* succeed 
-//   not next_state stop   -- don't succeed in 1 descent, either
-//   SearchState.target in Node.key -- the target is present
-// } for exactly 8 Node
-// -- And the same using version 2:
-// run {
-//   some Node             -- non-empty tree
-//   binary_search_tree_v2 -- use second invariant version
-//   searchTrace           -- do a search descent
-//   not stop              -- don't *immediately* succeed 
-//   not next_state stop   -- don't succeed in 1 descent, either
-//   SearchState.target in Node.key -- the target is present
-// } for exactly 8 Node    -- don't *immediately* succeed 
+run {
+  binary_tree     -- it must be a binary tree
+  all n: Node | invariant_v2[n]    -- additionally, the tree satisfies invariant version 1
+  Search.target in Node.key -- the target is present
+  traces          -- do a search descent
+  -- Finally, the trace finishes the search
+  some s: SearchState | {
+    s.current.key = Search.target 
+    or 
+    no (s.current.left + s.current.right)
+  }
+} for exactly 7 Node, 5 SearchState for {nextState is plinear}
 
-// -- Use "Next Config" to move to a different tree example.
-// -- One of the two should eventually produce an instance witnessing the _failure_ of 
-// -- binary search: a target in the tree that is never found.
 
 // ----------------------------------------------------------------------------------
