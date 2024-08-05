@@ -42,6 +42,8 @@ The examples don't stop: In security, a _threat model_ says what powers an attac
 
 > Since all models are wrong the scientist must be alert to what is importantly wrong. It is inappropriate to be concerned about safety from mice when there are tigers abroad.  
 
+**TODO: add citation**
+
 ### Specification: What do you want?
 
 Suppose that I want to store date-and-time values in a computer program. That's easy enough to say, right? But the devil is in the details: What is the layout of the data? Which fields will be stored, and which will be omitted? Which values are valid, and which are out of bounds? Is the format efficiently serializable? How far backward in time should the format extend, and [how far into the future should it reach](https://en.wikipedia.org/wiki/Year_2000_problem)?
