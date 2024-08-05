@@ -1,6 +1,6 @@
 # Going Beyond Assertions
 
-In the last section, we were modeling this simplified (and perhaps buggy) mutual-exclusion protocol: 
+In the [last section](./sets-induction-mutex.md), we were modeling this simplified (and perhaps buggy) mutual-exclusion protocol: 
 
 ```
 while(true) { 
@@ -108,7 +108,7 @@ Not by looking for a single "bad state". That won't suffice.
 
 ### Safety Versus Liveness: Intuition
 
-Notice the differences between these 3 properties. In particular, consider what a _full counterexample trace_ for each must look like, if we were inclined to produce one. 
+Notice the differences between these properties. In particular, consider what a _full counterexample trace_ for each must look like, if we were inclined to produce one. 
 * For mutual-exclusion and (in this formulation) deadlock-freedom, a counterexample trace could be finite. After some number of transitions, we'd reach a state where a deadlock or failure of mutual-exclusion has occurred. At that point, it's impossible for the system to recover; we've found an issue and the trace has served its purpose.
 * For a failure of non-starvation, on the other hand, no finite trace can suffice. It's always possible that just ahead, the system will suddenly recover and prevent a thread from being starved. So here, we need some notion of an _infinite counterexample trace_ such that some thread never, ever, gets access.
 
@@ -119,3 +119,7 @@ People often describe safety properties as "something bad never happens" and liv
 ~~~
 
 You'll usually find that a liveness property is more computationally complex to check. This doesn't mean that verifying liveness properties is always slower. It's just that we, and Forge, usually have to bring some additional tricks to bear. **In the context of a _finite_ state system, searching for an infinite counterexample amounts to looking for a reachable _cycle_ in the graph, rather than just a single bad state.**
+
+---
+
+We'll take a short break in the next section to say more about how Forge works. Then we'll return to the problem of defining infinite counterexample traces.

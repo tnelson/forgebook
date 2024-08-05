@@ -208,4 +208,4 @@ test expect {
 }
 ```
 
-Fortunately, these both pass. So far, so good. 
+Fortunately, these both pass. So far, so good. But does this algorithm do everything we want? 
