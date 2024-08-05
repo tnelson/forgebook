@@ -13,11 +13,15 @@ The book is organized into a series of short sections, each of which are grouped
 * **Chapter 4 (Modeling Relationships)** enriches the modeling language to support arbitrary relations between objects in the world.
 * **Chapter 5 (Temporal Specification)** covers temporal operators, which are commonly used in industrial modeling and specification, and how to use them. 
 * **Chapter 6 (Case Studies)** touches on some larger applications of lightweight formal methods. Some of these will involve large models written in Forge, and others will lean more heavily on industrial systems.
-* **Forge Documentation**
+* The **Forge Documentation**, which covers the syntax of the language more concisely and isn't focused on teaching.
 
 Each chapter contains a variety of examples: data structures, puzzles, algorithms, hardware concepts, etc. We hope that the diversity of domains covered means that everyone will see an example that resonates with them. Full language and tool documentation come _after_ the main body of the book. 
 
+#### Do More Than Read
 
+This book is example driven, and the examples are almost always built up from the beginning. The flow of the examples is deliberate, and might even take a "wrong turn" that is meant to teach a specific lesson before changing direction. If you try to read the book passively, you're likely to be very disappointed. 
+
+Instead, **follow along**, pasting each snippet of code or Forge model into the appropriate tool, and try it! Even try modifying it and see what happens. You'll get much more out of each section as a result. Forge especially is designed to aid experimentation. 
 
 ---
 

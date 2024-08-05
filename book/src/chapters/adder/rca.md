@@ -38,7 +38,7 @@ We need to carry a bit with value `1` in the `2s` place.
 |           1 |           0 |          1 |                         0 |
 |           1 |           1 |          0 |                         1 |
 
-Suppose we've built a circuit like the above; this is called a _full adder_ (FA).
+Suppose we've built a circuit like the above; this is called a _full adder_ (FullAdder).
 
 ~~~admonish note title="Building circuits"
 Exactly how we build that circuit is outside the scope of this example. Generally, we build them with logic gates: tiny devices that implement boolean operators like "and", "not", etc. 
@@ -77,20 +77,20 @@ one sig T, F extends Digit {}
 Then we'll define a `sig` for full adders, which will be chained together to form the ripple-carry adder. We'll give each full adder fields representing its input bits and output bits:
 
 ```forge,editable
-sig FA { 
-  -- input and output bits 
-  a, b: one Digit,  
+sig FullAdder { 
+  -- input value bits 
+  a_in, b_in: one Digit,  
   -- input carry bit
-  cin: one Digit,
-  -- output value
-  s: one Digit,
+  carry_in: one Digit,
+  -- output (sum) value
+  sum_out: one Digit,
   -- output carry bit 
-  cout: one Digit
+  carry_out: one Digit
 }
 ```
 
 ~~~admonish warning title="`Digit` is not the same as boolean!"
-Beware confusing the `Digit` sig we created, and the `T` and `F` values in it, with the result of evaluating Forge constraints. Forge doesn't "know" anything special about `T` or `F`; `Digit` is just another datatype. **If we write something like `(some FA) = T`, Forge will give an error message.** This is because, to Forge, `T` is just another value we defined in the model. Instead, we write just `(some FA)` to say "there is some full adder in the instance". 
+Beware confusing the `Digit` sig we created, and the `T` and `F` values in it, with the result of evaluating Forge constraints. Forge doesn't "know" anything special about `T` or `F`; `Digit` is just another datatype. **If we write something like `(some FullAdder) = T`, Forge will give an error message.** This is because, to Forge, `T` is just another value we defined in the model. Instead, we write just `(some FullAdder)` to say "there is some full adder in the instance". 
 
 This will come up again as we continue to develop the model. 
 ~~~
@@ -100,9 +100,9 @@ Finally, we'll define the ripple-carry adder chain:
 ~~~forge,editable
 one sig RCA {
   -- the first full adder in the chain
-  firstAdder: one FA,
+  firstAdder: one FullAdder,
   -- the next full adder in the chain (if any)
-  nextAdder: pfunc FA -> FA
+  nextAdder: pfunc FullAdder -> FullAdder
 }
 ~~~
 
@@ -118,18 +118,20 @@ What do we need to encode in a `wellformed` predicate? Right now, it seems that 
 
 ```forge,editable
 pred wellformed {
-  -- The RCA's firstAdder is "upstream" from all other FAs
-  all fa: FA | (fa != RCA.firstAdder) implies reachable[fa, RCA.firstAdder, RCA.nextAdder]
+  -- The RCA's firstAdder is "upstream" from all other FullAdders
+  all fa: FullAdder | (fa != RCA.firstAdder) implies reachable[fa, RCA.firstAdder, RCA.nextAdder]
   -- there are no cycles in the nextAdder function.
-  all fa: FA | not reachable[fa, fa, RCA.nextAdder]  
+  all fa: FullAdder | not reachable[fa, fa, RCA.nextAdder]  
 }
 ```
 
+Notice that we've used `implies` to limit the power of the `all` quantifier: it doesn't impose the reachability condition on _all_ `FullAdder`s, but rather than all of them except for `RCA.firstAdder`. This is a common pattern when you want to assert something is true, but only contingently. 
+
 ~~~admonish tip title="Case sensitivity and variable names"
-In our model so far, `FA` is the name of a datatype. When writing the constraints above, I said: "for every full adder..." and named this arbitrary adder `fa`. These two, `FA` and `fa` are different. For a start, `FA` is defined within the entire model, but `fa` is only defined within the scope of the `all` quantifier. 
+In our model so far, `FullAdder` is the name of a datatype. When writing the constraints above, I said: "for every full adder..." and named this arbitrary adder `fa`. These two, `FullAdder` and `fa` are different. For a start, `FullAdder` is defined within the entire model, but `fa` is only defined within the scope of the `all` quantifier. 
 ~~~
 
-We've used the `reachable` helper before, but it's worth mentioning again: `A` is reachable from `B` via _one or more applications_ of `f` if and only if `reachable[A, B, f]` is true. That "one or more applications" is important, and is why we needed to add the `(fa != RCA.firstAdder) implies` portion of the first constraint: `RCA.firstAdder` shouldn't be the successor of any full adder, and if it were its own successor, that would be a cycle in the line of adders. If we had left out the implication, and written just `all fa: FA | reachable[fa, RCA.firstAdder, RCA.nextAdder]`, `RCA.firstAdder` would need to have a predecessor, which would contradict the second constraint.
+We've used the `reachable` helper before, but it's worth mentioning again: `A` is reachable from `B` via _one or more applications_ of `f` if and only if `reachable[A, B, f]` is true. That "one or more applications" is important, and is why we needed to add the `(fa != RCA.firstAdder) implies` portion of the first constraint: `RCA.firstAdder` shouldn't be the successor of any full adder, and if it were its own successor, that would be a cycle in the line of adders. If we had left out the implication, and written just `all fa: FullAdder | reachable[fa, RCA.firstAdder, RCA.nextAdder]`, `RCA.firstAdder` would need to have a predecessor, which would contradict the second constraint.
 
 ## More Predicates
 
@@ -140,30 +142,37 @@ Before we write some examples for `wellformed`, let's also try to model how each
 Just like `pred`icates can be used as boolean-valued helpers, `fun`ctions can act as helpers for arbitrary return types. Let's try to write one that says what the _output_ bit should be for a specific full adder, given its input bits. 
 
 ```forge
-// Helper function: what is the output bit for this full adder?
-fun adder_S_RCA[f: one FA]: one Digit  {
-  // What expression should we put here?
+// Helper function: what is the output sum bit for this full adder?
+fun adder_S_RCA[f: one FullAdder]: one Digit  {
+  // Our job is to fill this in with an expression for the output sum bit
 } 
 ```
 
 Looking at the table above, the adder's output value is true if and only if an odd number of its 3 inputs is true. That gives us 4 combinations:
-* `A`, `B`, and `CIN`;
-* `A` only; 
-* `B` only; or
-* `C` only. 
+* `A`, `B`, and `CIN` (all 3 are true);
+* `A` only (1 is true); 
+* `B` only (1 is true); or
+* `CIN` only (1 is true). 
 
-We'll use Forge's `let` construct to make it easier to write the value for each of these wires, and then combine them using logical `or`. Notice that this is where we need to remember that the sig `True` is not a Forge formula yet; to make it into one, we need to explicitly test whether each value is equal to `True`:
+This is where we need to remember that the sig `T` is not a Forge formula yet; to make it into one, we need to explicitly test whether each value is equal to `T`. We'll use two new Forge constructs to write the function body:
+* The `let` construct makes it easier to write the value for each of these wires. A `let` looks similar to a quantifier, but it only introduces some local helper syntax. If I write `let A = (f.a_in = T) | ...`, I can then use `A` in place of the tedious `(f.a_in = T)`. 
+* Expression if-then-else lets us produce a value based on a condition, sort of like the `C ? X : Y` operator in languages like JavaScript. If I write something like `(A and B and C) => T else F` this evaluates to `T` whenever `A`, `B`, and `C` are all true, and `F` otherwise.
+
+Now we can write:
 
 ```forge
 // Helper function: what is the output bit for this full adder?
-fun adder_S_RCA[f: one FA]: one Digit  {
-  // "T" and "F" are values, we cannot use them as Forge formulas.
-  let A = (f.a = T), B = (f.b = T), CIN = (f.cin = T) |
-	 ((A and B and CIN) or 
-    (A and (not B) and (not CIN)) or 
-    ((not A) and B and (not CIN)) or 
-    ((not A) and (not B) and CIN))
+fun adder_S_RCA[f: one FullAdder]: one Digit  {
+  // "T" and "F" are values, we cannot use them as Forge formulas. 
+  let A = (f.a_in = T), B = (f.b_in = T), CIN = (f.carry_in = T) |
+   -- Expression if-then-else: if any of these conditions holds...
+	 ((     A  and      B  and      CIN)  or 
+    (     A  and (not B) and (not CIN)) or 
+    ((not A) and      B  and (not CIN)) or 
+    ((not A) and (not B) and      CIN))
+      -- ...then T...
 	 	  =>   T
+      -- ...otherwise F.
       else F
 } 
 ```
@@ -172,18 +181,31 @@ fun adder_S_RCA[f: one FA]: one Digit  {
 It might be a bit strange to write a helper function that returns a `Digit`, rather than a predicate directly. We could make a `pred` work, but we'd still have to eventually use `T` and `F` somewhere, since they are the values that the output bits can take on. 
 ~~~
 
+~~~admonish note title="Is the blank space in that example significant?"
+Nope. I added it for clarity, because it's much harder to read without the extra space to make it apparent where the `not`s are applied. Likewise, you don't need to wrap a negation in parentheses; I just think `(not A)` is clearer than `not A` in this sort of big expression.
+~~~
+
+~~~admonish tip title="Implies and expression if-then-else
+You can also write `implies` as `=>`. Indeed, the two keywords (`=>` and `implies`) are interchangeable in Forge! To avoid confusion, always ask yourself whether you are trying to identify a _thing_ in an instance, like a full-adder atom or an integer, or write a _constraint_ which may or may not be true in an instance.  
+~~~
+
 ### When is an adder's carry bit set to true? 
 
-This one is quite similar. The carry bit is set to true if and only if 2 or 3 of the adder's inputs are true. 
+This one is quite similar. The carry bit is set to true if and only if 2 or 3 of the adder's inputs are true:
+* `B` and `CIN` (2 are true);
+* `A` and `CIN` (2 are true); 
+* `C` and `CIN` (2 are true); or
+* `A`, `B`, and `CIN` (all 3 are true). 
+As before, we'll use `let` and expression if-then-else, and add (decorative) blank space to make the function more readable.
 
 ```forge
 // Helper function: what is the output carry bit for this full adder?
-fun adder_cout_RCA[f: one FA]: one Digit {
- let A = (f.a = T), B = (f.b = T), CIN = (f.cin = T) |
-     ((not A and B and CIN) or 
-      (A and not B and CIN) or 
-      (A and B and not CIN) or 
-      (A and B and CIN)) 
+fun adder_cout_RCA[f: one FullAdder]: one Digit {
+ let A = (f.a_in = T), B = (f.b_in = T), CIN = (f.carry_in = T) |
+     (((not A) and      B  and      CIN) or 
+      (     A  and (not B) and      CIN) or 
+      (     A  and      B  and (not CIN)) or 
+      (     A  and      B  and      CIN)) 
 	      =>   T
         else F
 } 
@@ -191,20 +213,29 @@ fun adder_cout_RCA[f: one FA]: one Digit {
 
 ### Adder Behavior
 
-Finally, what ought an adder's behavior to be? Well, we need to specify its output bits in terms of its input bits. We'll also add a constraint that says this adder's output carry bit flows into its successor's input carry bit.  
+Finally, what ought an adder's behavior to be? Well, we need to specify its output bits in terms of its input bits. We'll also add a constraint that says the full adders are connected in a line. More concretely, if there _is_ a successor, its input carry bit is equal to the current adder's output carry bit. Here's a picture of what we want to say:
+
+**TODO: fill picture**
+
+And here's the Forge predicate:
 
 ```forge
-pred fullAdderBehavior[f: FA] {
+pred fullAdderBehavior[f: FullAdder] {
   -- Each full adder's outputs are as expected
-  f.s = adder_S_RCA[f]
-  f.cout = adder_cout_RCA[f]
+  f.sum_out = adder_S_RCA[f]
+  f.carry_out = adder_cout_RCA[f]
   -- Full adders are chained appropriately
-  (some RCA.nextAdder[f]) implies (RCA.nextAdder[f]).cin = f.cout 
+  (some RCA.nextAdder[f]) implies (RCA.nextAdder[f]).carry_in = f.carry_out 
 }
 ```
 
-~~~admonish note title="Wouldn't it be better to put the carry-bit connection in `wellformed`?" 
-There's a strong argument for that. The way the wires are connected isn't really part of a single full adder's behavior in itself. If I were going to re-write this model, I would probably either move that line into `wellformed` or somewhere else that has responsibility for the connectivity of the full adders. 
+~~~admonish note title="Wouldn't it be better to put the carry-bit connection in `wellformed`, or somewhere else?" 
+That's a good point. The values of `f.sum_out` and `f.carry_out` are part of the full adder's behavior, but the way the wires are connected in `RCA.nextAdder` is not. 
+
+If I were going to re-write this model, I would probably move that line into somewhere that is responsible for _connecting_ the adders: perhaps a predicate for the ripple-carry adder. But I haven't done that&mdash;hoping to provoke just this question!
+
+The general design principle here is to think about _compositionality and reuse_: we'd like to be able to use the same predicates to reason about full adders by themselves, or what would happen if we connected them differently. As written, the `fullAdderBehavior` predicate doesn't allow for that; we'd have to refactor it. But I'll leave that as an exercise for now. 
+
 ~~~
 
 Finally, we'll make a predicate that describes the behavior of the overall ripple-carry adder: 
@@ -213,7 +244,7 @@ Finally, we'll make a predicate that describes the behavior of the overall rippl
 // Top-level system specification: compose preds above
 pred rca {  
   wellformed
-  all f: FA | fullAdderBehavior[f] 
+  all f: FullAdder | fullAdderBehavior[f] 
 }
 ```
 
@@ -232,11 +263,11 @@ Always try to write at least some positive _and_ negative examples.
 ```forge
 example twoAddersLinear is {wellformed} for {
   RCA = `RCA0 
-  FA = `FA0 + `FA1
+  FullAdder = `FullAdder0 + `FullAdder1
   -- Remember the back-tick mark here! These lines say that, e.g., for the atom `RCA0, 
-  -- its firstAdder field contains `FA0. And so on.
-  `RCA0.firstAdder = `FA0
-  `RCA0.nextAdder = `FA0 -> `FA1
+  -- its firstAdder field contains `FullAdder0. And so on.
+  `RCA0.firstAdder = `FullAdder0
+  `RCA0.nextAdder = `FullAdder0 -> `FullAdder1
 }
 ```
 
@@ -249,9 +280,9 @@ Because we are testing `wellformed`, we left out fields that didn't matter to th
 ```forge
 example twoAddersLoop is {not wellformed} for {
   RCA = `RCA0 
-  FA = `FA0 + `FA1
-  `RCA0.firstAdder = `FA0
-  `RCA0.nextAdder = `FA0 -> `FA1 + `FA1 -> `FA0
+  FullAdder = `FullAdder0 + `FullAdder1
+  `RCA0.firstAdder = `FullAdder0
+  `RCA0.nextAdder = `FullAdder0 -> `FullAdder1 + `FullAdder1 -> `FullAdder0
 }
 ```
 
@@ -260,7 +291,7 @@ example twoAddersLoop is {not wellformed} for {
 Let's have a look at a ripple-carry adder in action. We'll pick a reasonably small number of bits: 4. 
 
 ```forge
-run {rca} for exactly 4 FA
+run {rca} for exactly 4 FullAdder
 ```
 
 **(FILL: screenshot)**
@@ -290,11 +321,11 @@ When I'm expanding a model in this way, I like to augment instances with extra f
 Sometimes you'll hear this sort of new field or value referred to as a "ghost": it isn't real; it doesn't exist in the actual system.
 ~~~
 
-We could store this field in the `FA` sig, but let's keep the original unmodified, and instead add a `Helper` sig. This keeps the for-verification-only fields separate from the model of the system:
+We could store this field in the `FullAdder` sig, but let's keep the original unmodified, and instead add a `Helper` sig. This keeps the for-verification-only fields separate from the model of the system:
 
 ```forge
 one sig Helper {
-  place: func FA -> Int
+  place: func FullAdder -> Int
 }
 ```
 
@@ -317,7 +348,7 @@ pred assignPlaces {
   -- The least-significant bit is 2^0
   Helper.place[RCA.firstAdder] = 1
   -- Other bits are worth 2^(i+1), where the predecessor is worth 2^i.
-  all fa: FA | some RCA.nextAdder[fa] => {    
+  all fa: FullAdder | some RCA.nextAdder[fa] => {    
     Helper.place[RCA.nextAdder[fa]] = multiply[Helper.place[fa], 2]
   }
 }
@@ -340,9 +371,9 @@ Let's try to express our requirement that the adder is correct. Again, we'll phr
 ```forge
 pred req_adderCorrect_wrong {
   (rca and assignPlaces) implies {
-    all fa: FA | { 
-        actualValue[fa.s, Helper.place[fa]] = add[actualValue[fa.a, Helper.place[fa]], 
-                                                  actualValue[fa.b, Helper.place[fa]]]
+    all fa: FullAdder | { 
+        actualValue[fa.sum_out, Helper.place[fa]] = add[actualValue[fa.a_in, Helper.place[fa]], 
+                                                  actualValue[fa.b_in, Helper.place[fa]]]
     }
   }
 }
@@ -361,7 +392,7 @@ So far, we've only seen `example`s and `assert`ions. Both of these are built usi
 -- Ask Forge to check the satisfiability of something...
 test expect {  
   -- Is it _always_ true, up to these bounds, that `req_adderCorrect` always holds?
-  r_adderCorrect: {req_adderCorrect} for 6 FA, 1 RCA, 8 Int is theorem
+  r_adderCorrect: {req_adderCorrect} for 6 FullAdder, 1 RCA, 8 Int is theorem
 }
 ```
 
@@ -384,20 +415,18 @@ Here's another attempt:
 ```forge
 pred req_adderCorrect {
   (rca and assignPlaces) implies {
-    all fa: FA | { 
+    all fa: FullAdder | { 
         -- Include carrying, both for input and output. The _total_ output's true value is equal to
         -- the the sum of the total input's true value.
 
         -- output value bit + output carry bits; note carry value is *2 (and there may not be a "next adder")
-        add[actualValue[fa.s, Helper.place[fa]], 
-            multiply[actualValue[fa.cout, Helper.place[fa]], 2]] 
+        add[actualValue[fa.sum_out, Helper.place[fa]], 
+            multiply[actualValue[fa.carry_out, Helper.place[fa]], 2]] 
         = 
         -- input a bit + input b bit + input carry bit
-        add[actualValue[fa.a, Helper.place[fa]],     
-            actualValue[fa.b, Helper.place[fa]],    
-            actualValue[fa.cin, Helper.place[fa]]]  
-        -- Notice: I don't use trailing comments much on lines, because I want to be able to easily paste 
-        -- these into the evaluator.
+        add[actualValue[fa.a_in, Helper.place[fa]],     
+            actualValue[fa.b_in, Helper.place[fa]],    
+            actualValue[fa.carry_in, Helper.place[fa]]]  
     }
   }
 }
@@ -422,13 +451,13 @@ There are at least two things.
 
 ---
 
-These both present opportunities for optimization! For now, let's just tackle the first one: we need to somehow give Forge a specific ordering on the adders, rather than letting the solver explore all possible orderings. E.g., maybe we want a series of atoms `FA0`, `FA1`, ..., `FA5`, which ordering `RCA.nextAdder` respects. 
+These both present opportunities for optimization! For now, let's just tackle the first one: we need to somehow give Forge a specific ordering on the adders, rather than letting the solver explore all possible orderings. E.g., maybe we want a series of atoms `FullAdder0`, `FullAdder1`, ..., `FullAdder5`, which ordering `RCA.nextAdder` respects. 
 
 We could try to express this as a constraint: 
 
 ```forge
 pred orderingOnAdders {
-  some disj fa0, fa1, fa2, fa3, fa4, fa5: FA | {
+  some disj fa0, fa1, fa2, fa3, fa4, fa5: FullAdder | {
     RCA.firstAdder = fa0
     RCA.nextAdder[fa0] = fa1 
     RCA.nextAdder[fa1] = fa2
@@ -463,7 +492,7 @@ Adding constraints will affect the later steps, but we'd love to give hints to t
 
 ```forge
 test expect {  
-  r_adderCorrect: {req_adderCorrect} for 6 FA, 1 RCA, 8 Int for {nextAdder is plinear} is theorem
+  r_adderCorrect: {req_adderCorrect} for 6 FullAdder, 1 RCA, 8 Int for {nextAdder is plinear} is theorem
 }
 ```
 
