@@ -185,7 +185,7 @@ It might be a bit strange to write a helper function that returns a `Digit`, rat
 Nope. I added it for clarity, because it's much harder to read without the extra space to make it apparent where the `not`s are applied. Likewise, you don't need to wrap a negation in parentheses; I just think `(not A)` is clearer than `not A` in this sort of big expression.
 ~~~
 
-~~~admonish tip title="Implies and expression if-then-else
+~~~admonish tip title="Implies and expression if-then-else"
 You can also write `implies` as `=>`. Indeed, the two keywords (`=>` and `implies`) are interchangeable in Forge! To avoid confusion, always ask yourself whether you are trying to identify a _thing_ in an instance, like a full-adder atom or an integer, or write a _constraint_ which may or may not be true in an instance.  
 ~~~
 
@@ -235,7 +235,6 @@ That's a good point. The values of `f.sum_out` and `f.carry_out` are part of the
 If I were going to re-write this model, I would probably move that line into somewhere that is responsible for _connecting_ the adders: perhaps a predicate for the ripple-carry adder. But I haven't done that&mdash;hoping to provoke just this question!
 
 The general design principle here is to think about _compositionality and reuse_: we'd like to be able to use the same predicates to reason about full adders by themselves, or what would happen if we connected them differently. As written, the `fullAdderBehavior` predicate doesn't allow for that; we'd have to refactor it. But I'll leave that as an exercise for now. 
-
 ~~~
 
 Finally, we'll make a predicate that describes the behavior of the overall ripple-carry adder: 
