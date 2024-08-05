@@ -152,7 +152,10 @@ We'll go for the second fix, adding this line to the `traces` predicate:
 
 ```forge
 -- All SearchStates are used
-SearchState in (Search.initialState + Search.initialState.^(Search.nextState))
+all s: SearchState | { 
+  s = Search.initialState or 
+  reachable[s, Search.initialState, Search.nextState]
+}
 ```
 
 </details>
@@ -163,7 +166,7 @@ Ok, that's better, but we still aren't seeing a _complete_ descent. To fix that,
 run {
   binary_tree 
   traces
-  some s: SearchState | s.current.key = Search.target or no (s.current.left + s.current.right)
+  some s: SearchState | s.current.key = Search.target or (no s.current.left and no s.current.right)
 } for exactly 7 Node, 5 SearchState for {nextState is plinear}
 ```
 
@@ -187,7 +190,7 @@ We were able to look at trees that met one invariant but not another, but now we
 run {
   binary_tree     -- it must be a binary tree
   all n: Node | invariant_v2[n]    -- additionally, the tree satisfies invariant version 1
-  Search.target in Node.key -- the target is present
+  some n: Node | n.key = Search.target -- the target is present
   traces          -- do a search descent
   -- Finally, the trace finishes the search
   some s: SearchState | s.current.key = Search.target or no (s.current.left + s.current.right)
@@ -218,7 +221,7 @@ I'll write my version as a `run`, so we can better match the one above.
 run {
   binary_tree    
   all n: Node | invariant_v1[n]   
-  Search.target in Node.key
+  some n: Node | n.key = Search.target -- the target is present
   traces     
   -- The trace finishes the search without finding the target
   some s: SearchState | no (s.current.left + s.current.right)
@@ -242,6 +245,4 @@ This is a great example of how carefully considering bounds and exploring the st
 ### Looking Ahead
 
 Of course, this is still a very simple model. Binary Search Trees are much less complicated than many other data structures, and even complex data structures are only part of a larger system. 
-
-**TODO: REMOVE RELATIONAL OPERATORS FROM MODEL! UNIFY WITH BST2**
 

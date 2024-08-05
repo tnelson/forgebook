@@ -411,10 +411,16 @@ Notice that both are phrased in terms of single nodes, and should apply to all n
 
 ```forge,editable
 pred invariant_v1[n: Node] {
-  -- "Every node's left-descendants..." via reflexive transitive closure
-  all d: n.left.*(left+right)  | d.key < n.key
-  -- "Every node's left-descendants..." via reflexive transitive closure
-  all d: n.right.*(left+right) | d.key > n.key
+  -- "Every node's left-descendants..." (if any)
+  some n.left => {
+    n.left.key < n.key
+    all d: Node | reachable[d, n.left, left, right] => d.key < n.key
+  }
+  -- "Every node's right-descendants..." (if any)
+  some n.right => {
+    n.right.key < n.key
+    all d: Node | reachable[d, n.right, left, right] => d.key > n.key
+  }
 }
 pred binary_search_tree_v1 {
   binary_tree  -- a binary tree, with an added invariant
