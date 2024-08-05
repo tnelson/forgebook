@@ -109,6 +109,7 @@
 - [Forge+Industry: Policy and Network Analysis (DEMO: ABAC, Margrave, Zelkova)]()
 - [Forge+Industry: Crypto Protocol Analysis (DEMO: crypto lang, CPSA or other)]()
 - [Program Synthesis (DEMO: SSA synth, Sygus)]() 
+- [Further Reading](./further_reading.md)
 
 <!-- ## Case Studies: Applications and Demos
 
