@@ -51,7 +51,7 @@ Suppose that I want to store date-and-time values in a computer program. That's 
 And which calendar are we using, anyway? 
 
 ~~~admonish note title="Yes, that's a real question."
-If our programs are meant to work with dates prior to the 1600's, only their historical context can say whether they should be interpreted with the [Gregorian calendar](https://en.wikipedia.org/wiki/Gregorian_calendar) or the [Julian calendar](https://en.wikipedia.org/wiki/Julian_calendar). And that's just two possibilities!
+If our programs are meant to work with dates prior to the 1600's, only their historical context can say whether they should be interpreted with the [Gregorian calendar](https://en.wikipedia.org/wiki/Gregorian_calendar) or the [Julian calendar](https://en.wikipedia.org/wiki/Julian_calendar). And that's just two (Eurocentric) possibilities!
 ~~~
 
 If you're just building a food delivery app, you probably only need to think about some of these aspects of dates and times. If you're defining [an international standard](https://en.wikipedia.org/wiki/ISO_8601), you need to think about them all.
