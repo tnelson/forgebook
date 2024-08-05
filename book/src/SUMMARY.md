@@ -2,6 +2,7 @@
 <!-- # Logic for Systems: Lightweight Formal Methods for the Practical Engineer -->
 # Summary 
 [How to Read this book](./welcome.md)
+[TEMP: todos index](./todo.md)
 <!-- "prefix chapters"; cannot be nested -->
 
 # Preamble: Beyond Testing
@@ -74,8 +75,8 @@
 - [Temporal Forge](./chapters/temporal/temporal_operators.md)
 - [Linear Temporal Logic](./chapters/temporal/temporal_operators_2.md)
 - [Obligations and the Past](./chapters/temporal/obligations_past.md)
-- [Mutual Exclusion, Revisited (EDIT; high priority with validation)](./chapters/temporal/fixing_lock_temporal.md)
-- [Q&A: Temporal Logic (FILL; any not covered before?)]() 
+- [Mutual Exclusion, Revisited](./chapters/temporal/fixing_lock_temporal.md)
+<!-- - [Q&A: Temporal Logic (FILL; any not covered before?)]()  -->
 
 <!--  
 ## Tomorrow and Tomorrow and Tomorrow (Temporal Forge)
@@ -101,13 +102,13 @@
   - Validation (part 3): temporal pitfalls
   -->
 
-# Case Studies
+# Additional Examples, Case Studies, and Further Reading
 - [Forge: Comparing Prim's and Dijkstra's Algorithms (FILL from model; low priority)]()
 - [Model-Based ("Stateful") Testing (nice-to-have priority)]()
 - [Industry: Concolic Execution (DEMO: KLEE)]()
 - [Forge+Industry: Policy and Network Analysis (DEMO: ABAC, Margrave, Zelkova)]()
-- [Forge+IndustryCrypto Protocol Analysis (DEMO: crypto lang, CPSA or other)]()
-<!-- - [Program Synthesis (DEMO: SSA synth, Sygus)]() -->
+- [Forge+Industry: Crypto Protocol Analysis (DEMO: crypto lang, CPSA or other)]()
+- [Program Synthesis (DEMO: SSA synth, Sygus)]() 
 
 <!-- ## Case Studies: Applications and Demos
 
