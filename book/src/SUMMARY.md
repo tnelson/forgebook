@@ -166,10 +166,10 @@
   - Decidability, completeness, and incompleteness -->
 
 # Construction Storage
-- [unused 1](./chapters/solvers/cegis.md)
-- [unused 2](./chapters/solvers/dpll.md)
-- [unused 3](./chapters/solvers/resolution.md)
-- [unused 4](./chapters/solvers/smt.md)
+- [DPLL](./chapters/solvers/dpll.md)
+- [Propositional resolution](./chapters/solvers/resolution.md)
+- [(Rough) CEGIS](./chapters/solvers/cegis.md)
+- [(Rough) SMT](./chapters/solvers/smt.md)
 
 
 # Forge Documentation

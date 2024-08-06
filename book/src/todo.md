@@ -3,12 +3,15 @@
 ## Critical Path
 
 - integrate validation story (can adapt from slides with Pamela)
-- fix up docs, link to constructs as they are introduced
-- fill case studies (some just further reading)
+- clean up docs, link to constructs as they are introduced (how to do this smoothly in mdbook?); make sure search is functional for docs location
+- fill case studies (some are just further reading)
     - includes "capstone" distributed-systems example in Forge, Pamela's Chord model as even larger example.
+    - includes ABAC
 - Motivation: Why model if you have a code verifier? (there's more than code in the world; ease of getting _solutions_ rather than just _executions_)
-
-**Also, the title is way too grandiose.** We aren't actually yet giving much to the "working programmer" who expects code verification, code synthesis, etc. And I'd really like this to be accessible to people outside CS, to be honest.
+- "could add":
+  - traffic light example
+  - Q&A, especially about composition of models (Dijkstra, Prim)
+  - memory management is a homework, so didn't add it
 
 
 ## Lower-Priority, Higher-Cost 
