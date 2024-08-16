@@ -151,10 +151,14 @@ pred noLessUpToDateThan[moreOrSame: Server, baseline: Server] {
 > Once a candidate wins an election, it becomes leader. It then sends heartbeat messages to all of the other servers to establish its authority and prevent new elections.
 
 ```forge
+/** Server `s` is supported by a majority of the cluster.
+pred majorityVotes[s: Server] {
+    #{voter: Server | voter.votedFor = s} > divide[#Server, 2]
+}
 /** Server `s` wins the election. */
 pred winElection[s: Server] {
     -- GUARD: won the majority
-    #{voter: Server | voter.votedFor = s} > divide[#Server, 2]
+    majorityVotes[s]
     -- ACTION: become leader, send heartbeat messages
     s.role' = Leader 
     -- TODO: heartbeats
@@ -176,7 +180,39 @@ Raft uses random timeouts to reduce the chances of a failed election. If electio
 ```forge
 /** Nobody has won the election after some time. */
 pred haltElection[] {
-
+    -- GUARD: no server with the Candidate role has received a majority vote.
+    --   (There is no requirement that everyone has voted; indeed, that wouldn't 
+    --    work since the network might be broken, etc.)
+    no s: Server | s.role = Candidate and majorityVotes[s]
+    -- ACTION: each Candidate (not each server, necessarily) will increment their term
+    all c: Server | c.role = Candidate implies 
+      c.currentTerm' = add[c.currentTerm, 1]
+    -- ACTION: initiating another round of RequestVote
+    -- ... we can't model this yet: no message passing
 }
 ```
 
+Whew! That's a lot of constraints without ever running the model. We should do that now. But first, let's check in. What have we even accomplished? 
+  * We've forced ourselves to enumerate the sentences from the paper "in our own words" (and better, in less ambiguous language); 
+  * We've probably prompted ourselves to ask questions that we wouldn't just from reading the paper. For example, when I went through the predicates above, I had originally read the paper as saying "each server will time out and start a new election", not "each _candidate_". Writing it down made me notice my misunderstanding. 
+  * We've made a start at our formal model, and we can even run it. That we haven't modeled the "whole protocol" is not a concern at this point. We make incremental progress, which is the only way to make progress on a large model. 
+
+```forge
+pred electionSystemTrace {
+    init 
+    always { some s: Server | {
+        startElection[s]
+        or
+        (some c: Server | makeVote[s, c])
+        or 
+        winElection[s]
+        or
+        haltElection[]
+    }}
+}
+run electionSystemTrace 
+```
+
+Let's see what we get. 
+
+**NEXT: run it; probably typos, etc.**
