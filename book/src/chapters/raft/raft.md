@@ -54,6 +54,8 @@ In Raft, every node knows how many total servers there are in the cluster. This 
 A server can have one of three different roles. These are called "states" in the paper, but I find that a confusing term given just how many kinds of state there are here:
 
 ```forge
+#lang forge/temporal 
+
 abstract sig Role {}
 one sig Follower, Candidate, Leader extends Role {}
 ```
@@ -128,10 +130,10 @@ Ok, so should we immediately rush off to model message passing? I don't think so
 /** A server can vote for another server on request, 
     "on a first-come-first-served basis". */
 pred makeVote[voter: Server, c: Server] {
-    no s.votedFor -- GUARD: has not yet voted
+    no voter.votedFor -- GUARD: has not yet voted
     c.role = Candidate -- GUARD: election is running 
     noLessUpToDateThan[c, voter] -- GUARD: candidate is no less updated
-    s.votedfor' = c -- ACTION: vote for c
+    voter.votedFor' = c -- ACTION: vote for c
 }
 
 /** Does the first server have a log that is no less up-to-date than
@@ -143,6 +145,7 @@ pred noLessUpToDateThan[moreOrSame: Server, baseline: Server] {
     --   the log with the later term is more up-to-date.
     --   if the logs end with the same term, then the longer log is more up-to-date.
 }
+```
 
 #### Ending an Election
 
@@ -151,7 +154,7 @@ pred noLessUpToDateThan[moreOrSame: Server, baseline: Server] {
 > Once a candidate wins an election, it becomes leader. It then sends heartbeat messages to all of the other servers to establish its authority and prevent new elections.
 
 ```forge
-/** Server `s` is supported by a majority of the cluster.
+/** Server `s` is supported by a majority of the cluster. */
 pred majorityVotes[s: Server] {
     #{voter: Server | voter.votedFor = s} > divide[#Server, 2]
 }
@@ -170,6 +173,7 @@ pred winElection[s: Server] {
         f.currentTerm' = add[f.currentTerm, 1] 
     }
 }
+```
 
 > if many followers become candidates at the same time, votes could be split so that no candidate obtains a majority. When this happens, each candidate will time out and start a new election by incrementing its term and initiating another round of RequestVote RPCs.
 
@@ -179,7 +183,9 @@ Raft uses random timeouts to reduce the chances of a failed election. If electio
 
 ```forge
 /** Nobody has won the election after some time. */
-pred haltElection[] {
+pred haltElection {
+    -- GUARD: there is some Candidate -- i.e., there is an election running
+    some s: Server | s.role = Candidate
     -- GUARD: no server with the Candidate role has received a majority vote.
     --   (There is no requirement that everyone has voted; indeed, that wouldn't 
     --    work since the network might be broken, etc.)
@@ -207,7 +213,7 @@ pred electionSystemTrace {
         or 
         winElection[s]
         or
-        haltElection[]
+        haltElection
     }}
 }
 run electionSystemTrace 
@@ -215,4 +221,6 @@ run electionSystemTrace
 
 Let's see what we get. 
 
-**NEXT: run it; probably typos, etc.**
+**TODO: missing frame conditions in a few places (how hard would it be to just, like, add protection a la Alex's work?**
+
+
