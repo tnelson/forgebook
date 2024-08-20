@@ -124,9 +124,9 @@ If you write something like this:
 sig Person {spouse: lone Person}
 run { some p: Person | p.spouse}
 ```
-produces:
+produces (along with a filename, row, and column location):
 ```
-[/Users/tbn/repos/cs1710/newbook/book/src/translationCapacity.frg:3:23 (span 8)] some quantifier body expected a formula, got (join p (Relation spouse))
+some quantifier body expected a formula, got (join p (Relation spouse))
 ```
 In older versions of Forge, it would produce:
 ```
@@ -144,9 +144,9 @@ Likewise:
 sig Person {spouse: lone Person}
 run { all p1,p2: Person | p1.spouse = p2.spouse implies p2.spouse}
 ```
-results in:
+results in (along with a filename, row, and column location):
 ```
-[/Users/tbn/repos/cs1710/newbook/book/src/translationCapacity.frg:3:26 (span 39)] argument 2 of 2 to => had unexpected type. Expected boolean-valued formula, got (p2.spouse), which was atom- or set-valued expression.
+argument 2 of 2 to => had unexpected type. Expected boolean-valued formula, got (p2.spouse), which was atom- or set-valued expression.
 ```
 Older versions of Forge would produce something like:
 ```
