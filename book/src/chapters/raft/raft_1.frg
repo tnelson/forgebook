@@ -4,6 +4,12 @@
   Abstract model of leader election in the Raft protocol. 
 */
 
+/*option solver MiniSatProver
+option logtranslation 1
+option coregranularity 1
+option core_minimization rce
+*/
+
 abstract sig Role {}
 one sig Follower, Candidate, Leader extends Role {}
 
@@ -52,7 +58,7 @@ pred makeVote[voter: Server, c: Server] {
     all s: Server | {
         s.role' = s.role
         s.currentTerm' = s.currentTerm
-        s != voter => s.votedFor' = s.votedFor
+        (s != voter) => (s.votedFor' = s.votedFor)
     }
     
 }
@@ -102,6 +108,7 @@ pred haltElection {
     no s: Server | s.role = Candidate and majorityVotes[s]
     
     -- ACTION: each Candidate (not each server, necessarily) will increment their term
+    --    and clear their vote.
     all c: Server | { 
         c.role = Candidate => c.currentTerm' = add[c.currentTerm, 1]
                          else c.currentTerm' = c.currentTerm
@@ -115,16 +122,30 @@ pred haltElection {
 
 }
 
+pred election_doNothing {
+    -- ACTION: no change
+    role' = role
+    votedFor' = votedFor
+    currentTerm' = currentTerm
+}
+
 pred electionSystemTrace {
     init 
-    always { some s: Server | {
-        startElection[s]
+    always { 
+        (some s: Server | startElection[s])
         or
-        (some c: Server | makeVote[s, c])
+        (some s, c: Server | makeVote[s, c])
         or 
-        winElection[s]
+        (some s: Server | winElection[s])
         or
-        haltElection
-    }}
+        (haltElection)
+        or 
+        (election_doNothing)
+    }
 }
-run electionSystemTrace 
+
+run { 
+    electionSystemTrace 
+    eventually {some s: Server | winElection[s]}
+    #Server > 1
+}
