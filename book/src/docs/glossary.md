@@ -4,8 +4,6 @@
 
 This means that the backend solver process (Pardinus) has terminated early. Usually there is an error message, or at least some error state that is displayed. If you don't see anything, turn on `option verbosity 2`, which will echo back the info messages that Pardinus sends. 
 
-**TODO: pull in new Pardinus with echoing the actual parse errors**
-
 ### Arity too large
 
 You might see an info message like this:
