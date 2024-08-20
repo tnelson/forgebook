@@ -234,9 +234,9 @@
 
 - [Attribute-Based Access Control](./docs/dsl/abac.md)
 
-## Glossary of Terms and Errors
+## Glossary of Errors and Suggestions
 
-- [Glossary](./glossary.md)
+- [What should I do if...](./docs/glossary.md)
 
 
 <!-- ## Exercises

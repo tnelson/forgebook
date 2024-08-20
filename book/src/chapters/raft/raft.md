@@ -223,4 +223,7 @@ Let's see what we get.
 
 **TODO: missing frame conditions in a few places (how hard would it be to just, like, add protection a la Alex's work?**
 
+**TODO: add diffs from actual frg file**
+
+**TODO: do we want to add a "which transition indicator?"**
 

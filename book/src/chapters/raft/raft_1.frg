@@ -29,6 +29,13 @@ pred startElection[s: Server] {
     s.currentTerm' = add[s.currentTerm, 1] -- ACTION: increments term
     -- ACTION: issues RequestVote calls
     -- ... we can't model this yet: no message passing
+    
+    -- FRAME: role, currentTerm, votedFor for all other servers
+    all other: Server - s | {
+        other.votedFor' = other.votedFor
+        other.currentTerm' = other.currentTerm
+        other.role' = other.role
+    }
 }
 
 
@@ -38,7 +45,16 @@ pred makeVote[voter: Server, c: Server] {
     no voter.votedFor -- GUARD: has not yet voted
     c.role = Candidate -- GUARD: election is running 
     noLessUpToDateThan[c, voter] -- GUARD: candidate is no less updated
+
     voter.votedFor' = c -- ACTION: vote for c
+    -- FRAME role, currentTerm for voter
+    -- FRAME: role, currentTerm, votedFor for all others
+    all s: Server | {
+        s.role' = s.role
+        s.currentTerm' = s.currentTerm
+        s != voter => s.votedFor' = s.votedFor
+    }
+    
 }
 
 /** Does the first server have a log that is no less up-to-date than
@@ -62,9 +78,12 @@ pred winElection[s: Server] {
     majorityVotes[s]
     -- ACTION: become leader, send heartbeat messages
     s.role' = Leader 
+    s.currentTerm' = s.currentTerm
+    no s.votedFor' 
+
     -- TODO: heartbeats
     -- For now, we'll just advance their terms and cancel votes
-    -- directly, rather than using the network
+    -- directly as a FRAME, rather than using the network
     all f: Server - s | {
         f.role' = Follower
         no f.votedFor'
@@ -81,11 +100,19 @@ pred haltElection {
     --   (There is no requirement that everyone has voted; indeed, that wouldn't 
     --    work since the network might be broken, etc.)
     no s: Server | s.role = Candidate and majorityVotes[s]
+    
     -- ACTION: each Candidate (not each server, necessarily) will increment their term
-    all c: Server | c.role = Candidate implies 
-      c.currentTerm' = add[c.currentTerm, 1]
+    all c: Server | { 
+        c.role = Candidate => c.currentTerm' = add[c.currentTerm, 1]
+                         else c.currentTerm' = c.currentTerm
+        no c.votedFor'
+    }
     -- ACTION: initiating another round of RequestVote
     -- ... we can't model this yet: no message passing
+
+    -- FRAME: nobody's role changes
+    all c: Server | c.role' = c.role
+
 }
 
 pred electionSystemTrace {
