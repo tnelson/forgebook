@@ -48,6 +48,7 @@ pred startElection[s: Server] {
     "on a first-come-first-served basis". */
 pred makeVote[voter: Server, c: Server] {
     no voter.votedFor -- GUARD: has not yet voted
+    voter in Follower -- GUARD: avoid Leaders voting
     c.role = Candidate -- GUARD: election is running 
     noLessUpToDateThan[c, voter] -- GUARD: candidate is no less updated
 
@@ -120,6 +121,36 @@ pred haltElection {
 
 }
 
+/** If a candidate or leader discovers that its term is out of date, it immediately reverts to follower state. 
+    If the leader’s term (included in its RPC) is at least as large as the candidate’s current term, then the 
+    candidate recognizes the leader as legitimate and returns to follower state. 
+*/
+pred stepDown[s: Server] {
+    -- Two guard cases
+    {
+        -- GUARD: is leader, someone has a higher term (abstracted out message)
+        s.role in Leader
+        and
+        (some s2: Server-s | s2.currentTerm > s.currentTerm)
+    } or {
+        -- GUARD: is candidate, someone claims to be leader and has term no smaller
+        s.role in Candidate 
+        and 
+        (some s2: Server-s | s2.role = Leader and s2.currentTerm >= s.currentTerm)
+    }
+
+    -- ACTION: step down
+    s.role' = Follower
+    
+    -- FRAME: all others equal; s same currentTerm and votedfor.
+    all x: Server | {
+        x.currentTerm' = x.currentTerm
+        x.votedFor' = x.votedFor 
+        (x != s) => x.role' = x.role
+    }
+
+}
+
 /** Guardless no-op */
 pred election_doNothing {
     -- ACTION: no change
@@ -138,6 +169,8 @@ pred electionSystemTrace {
         (some s, c: Server | makeVote[s, c])
         or 
         (some s: Server | winElection[s])
+        or 
+        (some s: Server | stepDown[s])
         or
         (haltElection)
         or 
@@ -187,6 +220,7 @@ test expect {
     (some s: Server | startElection[s])
     next_state (haltElection)
   } is sat 
+  
 }
 
 -- Transition-system checks that are aware of the trace predicate, but focus on interplay/ordering 
@@ -213,7 +247,7 @@ test expect {
 -- Domain-specific checks involving the trace pred
 test expect {
   -- No server should ever transition directly from `Leader` to `Candidate`. 
-  {
+  no_direct_leader_to_candidate: {
     electionSystemTrace implies
     (all s: Server | {
       always {s.role = Leader implies s.role' != Candidate}

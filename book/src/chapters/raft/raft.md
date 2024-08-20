@@ -318,8 +318,37 @@ We could go on, but let's stop with these, since we're still working at a fairly
 
 ##### Problem: Only One Election 
 
-Our test for "It should be possible to witness two elections in a row." has failed. In retrospect, this isn't surprising: there is no transition that models a `Leader` _stopping_ its leadership. 
+Our test for "It should be possible to witness two elections in a row." has failed. In retrospect, this isn't surprising: there is no transition that models a `Leader` _stopping_ its leadership. I neglected to add a transition for this sentence in the paper: 
+
+> If a candidate or leader discovers that its term is out of date, it immediately reverts to follower state. 
+
+We'll add that now: 
+
+```forge
+/** If a candidate or leader discovers that its term is out of date, it immediately reverts to follower state. */
+pred stepDown[s: Server] {
+    -- GUARD: is leader or candidate
+    s.role in (Leader + Candidate)
+    -- GUARD: see a message with a higher term (abstracted!)
+    some s2: Server-s | s2.currentTerm > s.currentTerm
+
+    -- ACTION: step down
+    s.role' = Follower
+    
+    -- FRAME: all others equal; s same currentTerm and votedfor.
+    all x: Server | {
+        x.currentTerm' = x.currentTerm
+        x.votedFor' = x.votedFor 
+        (x != s) => x.role' = x.role
+    }
+}
+```
+
 
 
 **FILL: fix**
 
+
+STILL unsat. Why? Well, can it ever fire? (no) 
+
+The problem is that we have no way for a higher term number to be seen. There is not yet any notion of a network that could fail. Information is perfect. 
