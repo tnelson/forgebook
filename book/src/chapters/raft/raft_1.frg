@@ -44,7 +44,6 @@ pred startElection[s: Server] {
     }
 }
 
-
 /** A server can vote for another server on request, 
     "on a first-come-first-served basis". */
 pred makeVote[voter: Server, c: Server] {
@@ -60,7 +59,6 @@ pred makeVote[voter: Server, c: Server] {
         s.currentTerm' = s.currentTerm
         (s != voter) => (s.votedFor' = s.votedFor)
     }
-    
 }
 
 /** Does the first server have a log that is no less up-to-date than
@@ -122,6 +120,7 @@ pred haltElection {
 
 }
 
+/** Guardless no-op */
 pred election_doNothing {
     -- ACTION: no change
     role' = role
@@ -129,6 +128,8 @@ pred election_doNothing {
     currentTerm' = currentTerm
 }
 
+/** Allow arbitrary no-op ("stutter") transitions, a la TLA+. We'll either 
+    assert fairness, or use some other means to avoid useless traces. */ 
 pred electionSystemTrace {
     init 
     always { 
@@ -144,8 +145,100 @@ pred electionSystemTrace {
     }
 }
 
+/*
 run { 
     electionSystemTrace 
     eventually {some s: Server | winElection[s]}
     #Server > 1
+}
+*/
+
+-----------------------------
+-- VALIDATION
+-----------------------------
+
+-- Transition-system checks for combinations of transitions; no use of the trace pred yet.
+test expect {
+  -- All of these transitions (except the no-op) should be mututally exclusive. 
+  {eventually {some s1, s2, s3: Server | startElection[s1] and makeVote[s2, s3]}} is unsat
+  {eventually {some s1, s2: Server | startElection[s1] and winElection[s2]}} is unsat
+  {eventually {some s1: Server |     startElection[s1] and haltElection }} is unsat
+  {eventually {some s1, s2, s3: Server | makeVote[s1, s2] and winElection[s3]}} is unsat
+  {eventually {some s1, s2: Server |     makeVote[s1, s2] and haltElection}} is unsat
+  {eventually {some s1: Server |     winElection[s1] and haltElection}} is unsat
+  
+  -- It should be possible to execute all the transitions. We'll encode this as specific
+  -- orderings, rather than as 4 different "eventually transition_k" checks.
+  
+  -- Start -> Vote -> Win
+  {
+    (some s: Server | startElection[s])
+    next_state (some s1, s2: Server | makeVote[s1, s2])
+    next_state next_state (some s: Server | winElection[s])
+  } is sat 
+  -- Start -> Vote -> Halt 
+  {
+    (some s: Server | startElection[s])
+    next_state (some s1, s2: Server | makeVote[s1, s2])
+    next_state next_state (haltElection)
+  } is sat 
+  -- Start -> Halt
+  {
+    (some s: Server | startElection[s])
+    next_state (haltElection)
+  } is sat 
+}
+
+-- Transition-system checks that are aware of the trace predicate, but focus on interplay/ordering 
+-- of individual transitions.
+test expect {
+  -- Cannot Halt, Vote, or Win until started
+  {
+    electionSystemTrace implies
+    (some s: Server | winElection[s]) implies 
+    once (some s: Server | startElection[s])
+  } is theorem 
+  {
+    electionSystemTrace implies
+    (haltElection) implies 
+    once (some s: Server | startElection[s])
+  } is theorem 
+  {
+    electionSystemTrace implies
+    (some s1, s2: Server | makeVote[s1, s2]) implies 
+    once (some s: Server | startElection[s])
+  } is theorem 
+}
+
+-- Domain-specific checks involving the trace pred
+test expect {
+  -- No server should ever transition directly from `Leader` to `Candidate`. 
+  {
+    electionSystemTrace implies
+    (all s: Server | {
+      always {s.role = Leader implies s.role' != Candidate}
+    })} is theorem
+
+  -- It should be possible to witness two elections in a row.
+  { 
+    electionSystemTrace
+    eventually {
+        some s: Server | startElection[s] 
+        next_state eventually (some s2: Server | startElection[s2])
+    }
+  } is sat
+
+  -- It should be possible for two different servers to win elections in the same trace. 
+  {
+    electionSystemTrace
+    some disj s1, s2: Server | {
+        eventually s1.role = Leader 
+        eventually s2.role = Leader 
+    } } is sat
+
+  -- It should be invariant that there is only ever at most one `Leader`. 
+  {
+    electionSystemTrace implies
+    always {lone role.Leader}
+  } is theorem
 }

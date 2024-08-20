@@ -121,8 +121,14 @@ pred startElection[s: Server] {
     s.currentTerm' = add[s.currentTerm, 1] -- ACTION: increments term
     -- ACTION: issues RequestVote calls
     -- ... we can't model this yet: no message passing
-}
-```
+    
+    -- FRAME: role, currentTerm, votedFor for all other servers
+    all other: Server - s | {
+        other.votedFor' = other.votedFor
+        other.currentTerm' = other.currentTerm
+        other.role' = other.role
+    }
+}```
 
 Ok, so should we immediately rush off to model message passing? I don't think so, we'd like to focus on the essence of leader election. So, instead, we'll have a transition that represents another server receiving that voting request, but guard it differently:
 
@@ -133,7 +139,15 @@ pred makeVote[voter: Server, c: Server] {
     no voter.votedFor -- GUARD: has not yet voted
     c.role = Candidate -- GUARD: election is running 
     noLessUpToDateThan[c, voter] -- GUARD: candidate is no less updated
+
     voter.votedFor' = c -- ACTION: vote for c
+    -- FRAME role, currentTerm for voter
+    -- FRAME: role, currentTerm, votedFor for all others
+    all s: Server | {
+        s.role' = s.role
+        s.currentTerm' = s.currentTerm
+        (s != voter) => (s.votedFor' = s.votedFor)
+    }
 }
 
 /** Does the first server have a log that is no less up-to-date than
@@ -154,7 +168,7 @@ pred noLessUpToDateThan[moreOrSame: Server, baseline: Server] {
 > Once a candidate wins an election, it becomes leader. It then sends heartbeat messages to all of the other servers to establish its authority and prevent new elections.
 
 ```forge
-/** Server `s` is supported by a majority of the cluster. */
+/** Server `s` is supported by a majority of the cluster.*/
 pred majorityVotes[s: Server] {
     #{voter: Server | voter.votedFor = s} > divide[#Server, 2]
 }
@@ -164,9 +178,12 @@ pred winElection[s: Server] {
     majorityVotes[s]
     -- ACTION: become leader, send heartbeat messages
     s.role' = Leader 
+    s.currentTerm' = s.currentTerm
+    no s.votedFor' 
+
     -- TODO: heartbeats
     -- For now, we'll just advance their terms and cancel votes
-    -- directly, rather than using the network
+    -- directly as a FRAME, rather than using the network
     all f: Server - s | {
         f.role' = Follower
         no f.votedFor'
@@ -190,40 +207,119 @@ pred haltElection {
     --   (There is no requirement that everyone has voted; indeed, that wouldn't 
     --    work since the network might be broken, etc.)
     no s: Server | s.role = Candidate and majorityVotes[s]
+    
     -- ACTION: each Candidate (not each server, necessarily) will increment their term
-    all c: Server | c.role = Candidate implies 
-      c.currentTerm' = add[c.currentTerm, 1]
+    --    and clear their vote.
+    all c: Server | { 
+        c.role = Candidate => c.currentTerm' = add[c.currentTerm, 1]
+                         else c.currentTerm' = c.currentTerm
+        no c.votedFor'
+    }
     -- ACTION: initiating another round of RequestVote
     -- ... we can't model this yet: no message passing
+
+    -- FRAME: nobody's role changes
+    all c: Server | c.role' = c.role
 }
 ```
 
-Whew! That's a lot of constraints without ever running the model. We should do that now. But first, let's check in. What have we even accomplished? 
+Whew! That's a lot of constraints without ever running the model. We should do that next. 
+
+#### Running the Model
+
+First, let's check in. What have we even accomplished? 
   * We've forced ourselves to enumerate the sentences from the paper "in our own words" (and better, in less ambiguous language); 
   * We've probably prompted ourselves to ask questions that we wouldn't just from reading the paper. For example, when I went through the predicates above, I had originally read the paper as saying "each server will time out and start a new election", not "each _candidate_". Writing it down made me notice my misunderstanding. 
   * We've made a start at our formal model, and we can even run it. That we haven't modeled the "whole protocol" is not a concern at this point. We make incremental progress, which is the only way to make progress on a large model. 
 
+Because this is only one part of the overall model we want to build, we'll allow unguarded no-op transitions in our trace predicate. This will make it easier to spot some classes of bugs, and (soon) help compose different modules as we write them.
+
 ```forge
+/** Guardless no-op */
+pred election_doNothing {
+    -- ACTION: no change
+    role' = role
+    votedFor' = votedFor
+    currentTerm' = currentTerm
+}
+
+/** Allow arbitrary no-op ("stutter") transitions, a la TLA+. We'll either 
+    assert fairness, or use some other means to avoid useless traces. */ 
 pred electionSystemTrace {
     init 
-    always { some s: Server | {
-        startElection[s]
+    always { 
+        (some s: Server | startElection[s])
         or
-        (some c: Server | makeVote[s, c])
+        (some s, c: Server | makeVote[s, c])
         or 
-        winElection[s]
+        (some s: Server | winElection[s])
         or
-        haltElection
-    }}
+        (haltElection)
+        or 
+        (election_doNothing)
+    }
 }
-run electionSystemTrace 
+
+run { 
+    electionSystemTrace 
+    eventually {some s: Server | winElection[s]}
+    #Server > 1
+}
 ```
 
-Let's see what we get. 
+Let's see what we get. The minimap shows a lasso trace of 4 states:
 
-**TODO: missing frame conditions in a few places (how hard would it be to just, like, add protection a la Alex's work?**
+<center>
+<img alt="4 states in sequence, with a self-loop on the final state" src="./img/model1/minimap.png" width=40%/>
+</center>
 
-**TODO: add diffs from actual frg file**
+Here's what we see in the default visualization:
 
-**TODO: do we want to add a "which transition indicator?"**
+<table>
+
+<tr>
+  <td>State0</td>
+  <td>The initial state: both servers are followers with current term 0.</td>
+  <td><img alt="Both followers, term 0" src="./img/model1/state0.png" width=60%/></td>
+</tr>
+<tr>
+  <td>State1</td>
+  <td>One server initiates an election, voting for themselves and advancing their term.</td>
+  <td><img alt="One candidate with term 1, one follower with term 0" src="./img/model1/state1.png" width=60%/></td>
+</tr>
+<tr>
+  <td>State2</td>
+  <td>The other server votes for the candidate.</td>
+  <td><img alt="The follower votes for the candidate" src="./img/model1/state2.png" width=60%/></td>
+</tr>
+<tr>
+  <td>State3</td>
+  <td>The candidate wins the election, and is now cluster leader. Both servers now agree on the term.</td>
+  <td><img alt="The candidate wins the election" src="./img/model1/state3.png" width=60%/></td>
+</tr>
+</table>
+
+This looks more or less like what we'd expect. Let's finish this stage of the model by doing a little validation. We'll try to validate in a way that will still be useful after we add more features to the model. 
+
+#### Validation
+
+What's important here? Well, there's the set of standard transition-system properties we'd like to check. E.g., 
+* All of these transitions (except the no-op) should be mututally exclusive. 
+* It should be possible to execute all the transitions.
+But we also have some domain-specific properties:
+* No server should ever transition directly from `Leader` to `Candidate`. 
+* It should be possible to witness two elections in a row.
+* It should be possible for two different servers to win elections in the same trace. 
+* It should be invariant that there is only ever at most one `Leader`. 
+
+We could go on, but let's stop with these, since we're still working at a fairly high level. 
+
+**FILL**
+
+##### Problem: Only One Election 
+
+Our test for "It should be possible to witness two elections in a row." has failed. In retrospect, this isn't surprising: there is no transition that models a `Leader` _stopping_ its leadership. 
+
+
+**FILL: fix**
 
