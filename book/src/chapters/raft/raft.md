@@ -2,6 +2,10 @@
 
 This case study is going to be personal. That is, I'll be modeling a protocol from scratch in the honest desire to understand it better. I'll be making false starts or modeling mistakes, and leaving all of that in as part of the story. I'll talk through recovering from my own mistakes, and in the end hopefully both understand this protocol better myself _and_ show you how you might approach modeling a larger system in Forge. 
 
+~~~admonish note title="Instance images" 
+I won't always include screenshots of the instances I see when I'm debugging. However, when I don't I'll try to explain what I see in them. 
+~~~
+
 In this section, we'll be modeling [Raft](https://raft.github.io) in **Temporal Forge**. This isn't a distributed-systems textbook, so if you're curious about more details than I cover here, you should check out the Raft Github, some of the [implementations](https://raft.github.io/#implementations) (including [the one powering etcd](https://github.com/etcd-io/raft)), or the original 2014 [Raft paper](https://raft.github.io/raft.pdf) by Ongaro and Ousterhout.
 
 ## What is Raft?
@@ -161,6 +165,10 @@ pred noLessUpToDateThan[moreOrSame: Server, baseline: Server] {
 }
 ```
 
+~~~admonish warning title="Leaders shouldn't be able to vote." 
+Oops. I forgot a guard constraint that seems important: I'll just add: `voter in Follower + Candidate` in order to allow the vote to occur only if the voter is not a `Leader` already. 
+~~~
+
 #### Ending an Election
 
 > A candidate wins an election if it receives votes from a majority of the servers in the full cluster for the same term. 
@@ -314,23 +322,96 @@ But we also have some domain-specific properties:
 
 We could go on, but let's stop with these, since we're still working at a fairly high level. 
 
-**FILL**
+##### Problem: Prefix Unsatisfiable 
 
-##### Problem: Only One Election 
+I wrote a test like this: 
+
+```forge
+sat_start_make_win: {
+    (some s: Server | startElection[s])
+    next_state (some s1, s2: Server | makeVote[s1, s2])
+    next_state next_state (some s: Server | winElection[s])
+  } is sat 
+```
+
+This is a useful pattern because it only requires a _prefix_. So if it's unsatisfiable (and it is, oops!) we can comment out the transitions in reverse order to easily discover where the problem lies. At the moment, I need to comment out _both_ the `makeVote` and `winElection` transitions to make this satisfiable, which means there's probably some sort of issue with `makeVote`. 
+
+~~~admonish note title="Initial-state" 
+I've left out the `init` predicate from the above test, although once we fix the issue we should add it back in. This way we've learned about the problem without `init` being involved at all.
+~~~
+
+In these situations, I like to try unsat cores. If the core is small, we might learn something quickly. 
+
+```forge
+option solver MiniSatProver
+option logtranslation 1
+option coregranularity 1
+option core_minimization rce
+```
+
+The core I get only highlights one line, which would seem to indicate that the `makeVote` transition just can't fire from the second state:
+
+```forge
+next_state (some s1, s2: Server | makeVote[s1, s2])
+```
+
+Let's see if it can _ever_ fire:
+
+```forge
+eventually (some s1, s2: Server | makeVote[s1, s2])
+```
+
+Indeed, this is unsatisfiable by itself. So what's wrong with `makeVote`? Notice that there's no constraint at all on what happened _before_ the transition in this `run`; whatever is wrong has a very strong effect. Let's first check whether the guard of `makeVote` can be satisfied:
+
+```forge
+    some voter, c: Server | {
+      no voter.votedFor -- GUARD: has not yet voted
+      voter in Follower -- GUARD: avoid Leaders voting
+      c.role = Candidate -- GUARD: election is running 
+      noLessUpToDateThan[c, voter] -- GUARD: candidate is no less updated
+    }
+```
+
+Still unsatisfiable! What in the world is wrong? I increase the core granularity and translation log settings from `1` to `2`; this is expensive, and sometimes leads to confusing output, but can give a finer-grained core. Now Forge blames two things:
+* the fact that `voter` is a `Server`; and 
+* `voter in Follower + Candidate`.
+
+At this point, it's clear what the problem is. I made a terrible typo in my model. `Follower` and `Candidate` are`Role`s, and so `voter` can never be in them; I should have written `voter.role in Follower + Candidate` instead. 
+
+~~~admonish warning title="Error?"
+I worked on this model during the summer of 2024, during which I was also cleaning up Forge's error-handling code. So I was both annoyed and pleased to encounter this problem&mdash;this should have given me an error, telling me that `voter` and `Follower+Candidate` were necessarily disjoint!
+
+Even if this specific issue doesn't happen to you, I'm leaving the debugging process in. Hopefully it's useful.
+~~~
+
+I'll remove the unsat-core options now, since they reduce performance.
+
+##### Another Problem: Only One Election 
 
 Our test for "It should be possible to witness two elections in a row." has failed. In retrospect, this isn't surprising: there is no transition that models a `Leader` _stopping_ its leadership. I neglected to add a transition for this sentence in the paper: 
 
 > If a candidate or leader discovers that its term is out of date, it immediately reverts to follower state. 
 
-We'll add that now: 
+We'll add that now as a `stepDown` transition, and add it to the overall trace predicate: 
 
 ```forge
-/** If a candidate or leader discovers that its term is out of date, it immediately reverts to follower state. */
+/** If a candidate or leader discovers that its term is out of date, it immediately reverts to follower state. 
+    If the leader’s term (included in its RPC) is at least as large as the candidate’s current term, then the 
+    candidate recognizes the leader as legitimate and returns to follower state. 
+*/
 pred stepDown[s: Server] {
-    -- GUARD: is leader or candidate
-    s.role in (Leader + Candidate)
-    -- GUARD: see a message with a higher term (abstracted!)
-    some s2: Server-s | s2.currentTerm > s.currentTerm
+    -- Two guard cases
+    {
+        -- GUARD: is leader, someone has a higher term (abstracted out message)
+        s.role in Leader
+        and
+        (some s2: Server-s | s2.currentTerm > s.currentTerm)
+    } or {
+        -- GUARD: is candidate, someone claims to be leader and has term no smaller
+        s.role in Candidate 
+        and 
+        (some s2: Server-s | s2.role = Leader and s2.currentTerm >= s.currentTerm)
+    }
 
     -- ACTION: step down
     s.role' = Follower
@@ -344,11 +425,53 @@ pred stepDown[s: Server] {
 }
 ```
 
+Unfortunately, there are two problems still:
+* Adding this transition isn't enough. It can't actually fire, because we have no way for a higher term number to be seen. Even though we abstracted out the network and just let the servers see each others' terms directly, there is not yet anything that might cause one server's term to exceed another's. This tells me that maybe it's almost time to actually model the network. 
+* What I said above wasn't actually clear, was it? We still have the `startElection` transition, which (at the moment) allows any `Follower` to become a candidate, and then servers can vote for them. If they win, they'd become `Leader`. So why can't we see this? 
+
+Let's resolve the second issue first. We'll use a telescoping prefix run to debug this. At first, we'll just add one more transition to our existing test. Can we even _start_ a second election?
+
+```forge
+  -- Start -> Vote -> Win -> Start
+  run {
+    (some s: Server | startElection[s])
+    next_state (some s1, s2: Server | makeVote[s1, s2])
+    next_state next_state (some s: Server | winElection[s])
+    next_state next_state next_state (some s: Server | startElection[s])
+  } 
+```
+
+Yes! Ok, good. Let's add the next step: we should be able to see someone vote for that server. So we can reference the second `Candidate`, we'll combine the two transitions like this:
+
+```forge
+    next_state next_state next_state { some s: Server | {
+        startElection[s]
+        next_state (some s2: Server | makeVote[s2, s])
+    }}
+```
+
+This is now unsatisfiable. So the problem may be in that second vote being made. Let's back up to what we had before and run it, then check what the final state can look like, after the second election begins. If we're _looking at_ a trace prefix, we should add `init` to the beginning of the `run`, to make sure we don't get confused (unhelpfully!) by a garbage start state. 
+
+The first instance I see contains 2 `Server`s. We see that the original `Leader` still has that role, and the new contender has the `Candidate` role (as we would expect). But now nobody can vote at all, because the only non-`Leader` has already voted (for themselves). What about a _larger_ instance? 
+* Adding `for exactly 4 Server` to the `run` leads to unsat. (Oh, no! We should consider why in a minute.)
+* Adding `for exactly 3 Server` to the `run` is satisfiable. (Whew.) Now there _is_ a `Follower`, and we can see that their term has been cleared in the last state. So *why can't they vote*? Time to re-enable unsat cores. This time the core is bigger, but it blames:
+    * `init`
+    * When `s` wins an election, `s.role' = Leader`
+    * Three lines in `makeVote`: 
+        * `no voter.votedFor`; 
+        * `voter.votedFor' = c`; and 
+        * `all s: Server | (s.role' = s.role and s.currentTerm' = s.currentTerm)` (Notice that this actually omits one of the constraints inside the `all`; this is one of the benefits of increasing the core granularity. However, there's a consequence: these kinds of "partial" quantified formulas don't always highlight well in VSCode. As a backup, you can always look at the console output to see a readout of the formulas in the core.)
+    * Three lines in `startElection`: 
+        * `s.role = Follower`;
+        * `s.role' = Candidate`; and 
+        * A piece of the `all`-quantified frame condition again, this time: `(all other : Server - s | other.votedFor' = other.votedFor && other.currentTerm' = other.currentTerm)`.
+    * The uniqueness of roles, shown as a highlight on the field declaration: `var role: one Role`. 
+
+Whew, that's more than we'd ideally have to look through! 
 
 
-**FILL: fix**
 
 
-STILL unsat. Why? Well, can it ever fire? (no) 
 
-The problem is that we have no way for a higher term number to be seen. There is not yet any notion of a network that could fail. Information is perfect. 
+
+**FILL: is now the time to model the network?**

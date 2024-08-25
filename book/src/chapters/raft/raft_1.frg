@@ -4,26 +4,28 @@
   Abstract model of leader election in the Raft protocol. 
 */
 
-/*option solver MiniSatProver
-option logtranslation 1
-option coregranularity 1
+
+
+option solver MiniSatProver
+option logtranslation 2
+option coregranularity 2
 option core_minimization rce
-*/
+
 
 abstract sig Role {}
 one sig Follower, Candidate, Leader extends Role {}
 
 sig Server {
     var role: one Role,
-    var votedFor: lone Server, -- NEW
-    var currentTerm: one Int -- NEW
+    var votedFor: lone Server, 
+    var currentTerm: one Int 
 }
 /** The initial startup state for the cluster */
 pred init {
     all s: Server | { 
         s.role = Follower
-        no s.votedFor -- NEW
-        s.currentTerm = 0 -- NEW
+        no s.votedFor
+        s.currentTerm = 0 
     } 
 }
 
@@ -48,7 +50,7 @@ pred startElection[s: Server] {
     "on a first-come-first-served basis". */
 pred makeVote[voter: Server, c: Server] {
     no voter.votedFor -- GUARD: has not yet voted
-    voter in Follower -- GUARD: avoid Leaders voting
+    voter.role in Follower + Candidate -- GUARD: avoid Leaders voting
     c.role = Candidate -- GUARD: election is running 
     noLessUpToDateThan[c, voter] -- GUARD: candidate is no less updated
 
@@ -75,7 +77,10 @@ pred noLessUpToDateThan[moreOrSame: Server, baseline: Server] {
 
 /** Server `s` is supported by a majority of the cluster.*/
 pred majorityVotes[s: Server] {
+
+    -- This will be a bug, because taking floor **TODO**
     #{voter: Server | voter.votedFor = s} > divide[#Server, 2]
+    
 }
 /** Server `s` wins the election. */
 pred winElection[s: Server] {
@@ -178,6 +183,7 @@ pred electionSystemTrace {
     }
 }
 
+
 /*
 run { 
     electionSystemTrace 
@@ -189,55 +195,66 @@ run {
 -----------------------------
 -- VALIDATION
 -----------------------------
+/*
 
 -- Transition-system checks for combinations of transitions; no use of the trace pred yet.
 test expect {
   -- All of these transitions (except the no-op) should be mututally exclusive. 
-  {eventually {some s1, s2, s3: Server | startElection[s1] and makeVote[s2, s3]}} is unsat
-  {eventually {some s1, s2: Server | startElection[s1] and winElection[s2]}} is unsat
-  {eventually {some s1: Server |     startElection[s1] and haltElection }} is unsat
-  {eventually {some s1, s2, s3: Server | makeVote[s1, s2] and winElection[s3]}} is unsat
-  {eventually {some s1, s2: Server |     makeVote[s1, s2] and haltElection}} is unsat
-  {eventually {some s1: Server |     winElection[s1] and haltElection}} is unsat
+  overlap_start_make: {eventually {some s1, s2, s3: Server | startElection[s1] and makeVote[s2, s3]}} is unsat
+  overlap_start_win: {eventually {some s1, s2: Server | startElection[s1] and winElection[s2]}} is unsat
+  overlap_start_halt: {eventually {some s1: Server |     startElection[s1] and haltElection }} is unsat
+  overlap_make_win: {eventually {some s1, s2, s3: Server | makeVote[s1, s2] and winElection[s3]}} is unsat
+  overlap_make_halt: {eventually {some s1, s2: Server |     makeVote[s1, s2] and haltElection}} is unsat
+  overlap_win_halt: {eventually {some s1: Server |     winElection[s1] and haltElection}} is unsat
   
   -- It should be possible to execute all the transitions. We'll encode this as specific
   -- orderings, rather than as 4 different "eventually transition_k" checks.
   
   -- Start -> Vote -> Win
-  {
+  sat_start_make_win: {
     (some s: Server | startElection[s])
     next_state (some s1, s2: Server | makeVote[s1, s2])
     next_state next_state (some s: Server | winElection[s])
   } is sat 
   -- Start -> Vote -> Halt 
-  {
+  sat_start_make_halt: {
     (some s: Server | startElection[s])
     next_state (some s1, s2: Server | makeVote[s1, s2])
     next_state next_state (haltElection)
   } is sat 
   -- Start -> Halt
-  {
+  sat_start_halt: {
     (some s: Server | startElection[s])
     next_state (haltElection)
   } is sat 
   
+  -- Start -> Vote -> Win -> Start
+  sat_start_make_win: {
+    (some s: Server | startElection[s])
+    next_state (some s1, s2: Server | makeVote[s1, s2])
+    next_state next_state (some s: Server | winElection[s])
+    next_state next_state next_state (some s: Server | startElection[s])
+  } is sat 
+
 }
+
+
 
 -- Transition-system checks that are aware of the trace predicate, but focus on interplay/ordering 
 -- of individual transitions.
 test expect {
   -- Cannot Halt, Vote, or Win until started
-  {
+  win_implies_started: {
     electionSystemTrace implies
     (some s: Server | winElection[s]) implies 
     once (some s: Server | startElection[s])
   } is theorem 
-  {
+  halt_implies_started: {
     electionSystemTrace implies
     (haltElection) implies 
     once (some s: Server | startElection[s])
   } is theorem 
-  {
+  vote_implies_started: {
     electionSystemTrace implies
     (some s1, s2: Server | makeVote[s1, s2]) implies 
     once (some s: Server | startElection[s])
@@ -254,7 +271,7 @@ test expect {
     })} is theorem
 
   -- It should be possible to witness two elections in a row.
-  { 
+  two_elections_in_a_row: { 
     electionSystemTrace
     eventually {
         some s: Server | startElection[s] 
@@ -263,7 +280,7 @@ test expect {
   } is sat
 
   -- It should be possible for two different servers to win elections in the same trace. 
-  {
+  two_different_winners_in_succession: {
     electionSystemTrace
     some disj s1, s2: Server | {
         eventually s1.role = Leader 
@@ -271,8 +288,22 @@ test expect {
     } } is sat
 
   -- It should be invariant that there is only ever at most one `Leader`. 
-  {
+  invariant_lone_leader: {
     electionSystemTrace implies
     always {lone role.Leader}
   } is theorem
 }
+*/
+
+
+-- Start -> Vote -> Win -> Start
+  run {
+    init
+    (some s: Server | startElection[s])
+    next_state (some s1, s2: Server | makeVote[s1, s2])
+    next_state next_state (some s: Server | winElection[s])
+    next_state next_state next_state { some s: Server | {
+        startElection[s]
+        next_state (some s2: Server | makeVote[s2, s])
+    }}
+  } for exactly 3 Server
