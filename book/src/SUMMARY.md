@@ -103,6 +103,7 @@
   -->
 
 # Additional Examples, Case Studies, and Further Reading
+- [Modeling Raft in Anger](./chapters/raft/raft.md)
 - [Forge: Comparing Prim's and Dijkstra's Algorithms (FILL from model; low priority)]()
 - [Model-Based ("Stateful") Testing (nice-to-have priority)]()
 - [Industry: Concolic Execution (DEMO: KLEE)]()
