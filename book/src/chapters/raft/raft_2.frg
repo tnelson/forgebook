@@ -4,6 +4,9 @@
   Abstract model of leader election in the Raft protocol. 
 */
 
+open "messages.frg"
+open "rpc.frg"
+
 option max_tracelength 10
 
 /*
@@ -12,8 +15,6 @@ option logtranslation 2
 option coregranularity 2
 option core_minimization rce
 */
-
-open "rpc.frg"
 
 /** The initial startup state for the cluster */
 pred init {
@@ -31,7 +32,18 @@ pred startElection[s: Server] {
     s.votedFor' = s -- ACTION: votes for itself 
     s.currentTerm' = add[s.currentTerm, 1] -- ACTION: increments term
     -- ACTION: issues RequestVote calls
-    -- ... we can't model this yet: no message passing
+    all other: Server - s | {
+        some rv: RequestVote | {
+            rv not in Network.messages -- not currently being used
+            rv.from = s
+            rv.to = other
+            rv.requestVoteTerm = s.currentTerm
+            rv.candidateID = s
+            rv.lastLogIndex = -1 -- TODO: NOT MODELING YET
+            rv.lastLogTerm = -1 -- TODO: NOT MODELING YET
+            send[rv]
+        }
+    }
     
     -- FRAME: role, currentTerm, votedFor for all other servers
     all other: Server - s | {

@@ -561,7 +561,12 @@ pred drop[m: Message] {
 }
 ```
 
-We'll use the `drop` predicate to represent a large number of potential communication issues, all of which would prevent a server from seeing another's messages. But what should those look like? We'll define them in yet another module. This one is a bit long, but it's mostly comments taken almost verbatim from figure 2 of the Raft paper. 
+We'll use the `drop` predicate to represent a large number of potential communication issues, all of which would prevent a server from seeing another's messages. 
+
+
+### The Raft RPC Messages
+
+But what should those messages look like? We'll define them in yet another module. This one is a bit long, but it's mostly comments taken almost verbatim from figure 2 of the Raft paper. 
 
 ```forge
 #lang forge/temporal 
@@ -660,5 +665,66 @@ Because I wanted the RPC model to refer to `Server`, I moved those basic definit
 
 I also added `Entry`, because it's needed for one of the messages. But it's just an empty `sig` for the moment, because we aren't modeling that yet. 
 ~~~
+
+### Sending and Receiving Messages 
+
+Ok, great. But now we need to actually use these messages in the leader-election model. Let's take stock. We have:
+* `RequestVote`: sent by a server when becoming a candidate; 
+* `RequestVoteReply`: sent by a server when asked for a vote;
+* `AppendEntries`: sent by the leader to request a follower update, or as a "heartbeat" message; and
+* `AppendEntriesReply`: sent by a follower in reply to an update request. 
+The next step is to ask how these fit into our existing model of leader election. Here's one option, and where we'll start:
+* `RequestVote` is sent to all other servers as part of the `startElection` transition.
+* `RequestVoteReply` is sent as part of the `makeVote` action, but (as written) only if the vote is agreed to. We don't have a transition in place to represent this message being sent when the vote is rejected&mdash;we'll add one, but only if we need to. 
+* `AppendEntries` and `AppendEntriesReply` don't currently have transition representing them yet, either. They're either about actual data updates (which we haven't modeled) or preventing other servers from running for election. 
+
+I think we should start with the two voting-related messages and then decide whether we need the data-update messages. 
+
+### Adding `RequestVote` 
+
+We need to expand on `startElection` to have the candidate send `RequestVote` messages to all other servers. In principle, this should be easy if we set up the other files correctly. We even left ourselves a convenient note in the Forge file: `ACTION: issues RequestVote calls`. Since Forge doesn't have a notion of manufacturing a brand new `Message` atom, we'll use `some` to say that an unused `Message` just happens to exist, then constrain its fields. Finally, we'll invoke `send` on it to make sure it's added to the "in flight" set.
+
+```forge
+/** Server `s` runs for election. */
+pred startElection[s: Server] {
+    s.role = Follower -- GUARD 
+    s.role' = Candidate -- ACTION: in candidate role now
+    s.votedFor' = s -- ACTION: votes for itself 
+    s.currentTerm' = add[s.currentTerm, 1] -- ACTION: increments term
+    
+    -- ACTION: issues RequestVote calls
+    all other: Server - s | {
+        some rv: RequestVote | {
+            rv not in Network.messages -- not currently being used
+            rv.from = s
+            rv.to = other
+            rv.requestVoteTerm = s.currentTerm
+            rv.candidateID = s
+            rv.lastLogIndex = -1 -- TODO: NOT MODELING YET
+            rv.lastLogTerm = -1 -- TODO: NOT MODELING YET
+            send[rv]
+        }
+    }
+    
+    -- FRAME: role, currentTerm, votedFor for all other servers
+    all other: Server - s | {
+        other.votedFor' = other.votedFor
+        other.currentTerm' = other.currentTerm
+        other.role' = other.role
+    }
+}
+```
+
+~~~admonish warning title="I'm a little worried about messages."
+How many of these will we need? If every time a server becomes a candidate we use just less than `#Server` messages, I could see needing to give a very high scope, which would cause performance issues. If we hit that point, we will refactor the model&mdash;although I like the message-hierarchy style we've currently got. 
+~~~
+
+
+
+
+
+**NOTE: messages need to be received/dropped in order to get the lasso's loopback.**
+
+
 
 
