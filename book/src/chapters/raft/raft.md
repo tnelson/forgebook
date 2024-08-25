@@ -537,7 +537,7 @@ I'll start with this very simple model:
 
 abstract sig Message {}
 one sig Network {
-    messages: set Message 
+    var messages: set Message 
 }
 
 /** When the system starts, there are no messages "in flight". */
@@ -719,11 +719,13 @@ pred startElection[s: Server] {
 How many of these will we need? If every time a server becomes a candidate we use just less than `#Server` messages, I could see needing to give a very high scope, which would cause performance issues. If we hit that point, we will refactor the model&mdash;although I like the message-hierarchy style we've currently got. 
 ~~~
 
+We need to import both the messages and RPC modules to make this run. And all the tests still pass (although notice that we aren't testing the new predicates _at all_ yet). We can even run the model and get instances which now show the state of the network. Of course, we don't yet _receive_ anything. 
 
+~~~admonish note title="The `doNothing` predicate"
+Notice that the barely-constrained no-op predicate is doing more work for us. Without it, our model would have just become unsatisfiable, since we'd have no way to build the lasso-trace loopback: so far, we can only _add_ messages, but never _remove_ them. The `doNothing` option really does help when you're adding to a model.
+~~~
 
-
-
-**NOTE: messages need to be received/dropped in order to get the lasso's loopback.**
+**NOTE: ADD**
 
 
 

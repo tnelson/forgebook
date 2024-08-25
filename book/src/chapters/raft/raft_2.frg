@@ -188,13 +188,13 @@ pred electionSystemTrace {
 }
 
 
-/*
+
 run { 
     electionSystemTrace 
     eventually {some s: Server | winElection[s]}
     #Server > 1
 }
-*/
+
 
 -----------------------------
 -- VALIDATION

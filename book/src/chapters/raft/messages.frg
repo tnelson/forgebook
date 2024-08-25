@@ -10,7 +10,7 @@
 
 abstract sig Message {}
 one sig Network {
-    messages: set Message 
+    var messages: set Message 
 }
 
 /** When the system starts, there are no messages "in flight". */
