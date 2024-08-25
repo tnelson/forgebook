@@ -4,13 +4,14 @@
   Abstract model of leader election in the Raft protocol. 
 */
 
+option max_tracelength 10
 
-
+/*
 option solver MiniSatProver
 option logtranslation 2
 option coregranularity 2
 option core_minimization rce
-
+*/
 
 abstract sig Role {}
 one sig Follower, Candidate, Leader extends Role {}
@@ -75,12 +76,9 @@ pred noLessUpToDateThan[moreOrSame: Server, baseline: Server] {
 }
 
 
-/** Server `s` is supported by a majority of the cluster.*/
+/** Server `s` is supported by a majority of the cluster. */
 pred majorityVotes[s: Server] {
-
-    -- This will be a bug, because taking floor **TODO**
     #{voter: Server | voter.votedFor = s} > divide[#Server, 2]
-    
 }
 /** Server `s` wins the election. */
 pred winElection[s: Server] {
@@ -195,7 +193,7 @@ run {
 -----------------------------
 -- VALIDATION
 -----------------------------
-/*
+
 
 -- Transition-system checks for combinations of transitions; no use of the trace pred yet.
 test expect {
@@ -229,12 +227,13 @@ test expect {
   } is sat 
   
   -- Start -> Vote -> Win -> Start
-  sat_start_make_win: {
+  sat_start_make_win_start: {
     (some s: Server | startElection[s])
     next_state (some s1, s2: Server | makeVote[s1, s2])
     next_state next_state (some s: Server | winElection[s])
     next_state next_state next_state (some s: Server | startElection[s])
   } is sat 
+  
 
 }
 
@@ -293,17 +292,5 @@ test expect {
     always {lone role.Leader}
   } is theorem
 }
-*/
 
 
--- Start -> Vote -> Win -> Start
-  run {
-    init
-    (some s: Server | startElection[s])
-    next_state (some s1, s2: Server | makeVote[s1, s2])
-    next_state next_state (some s: Server | winElection[s])
-    next_state next_state next_state { some s: Server | {
-        startElection[s]
-        next_state (some s2: Server | makeVote[s2, s])
-    }}
-  } for exactly 3 Server

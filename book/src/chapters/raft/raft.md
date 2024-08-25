@@ -426,7 +426,7 @@ pred stepDown[s: Server] {
 ```
 
 Unfortunately, there are two problems still:
-* Adding this transition isn't enough. It can't actually fire, because we have no way for a higher term number to be seen. Even though we abstracted out the network and just let the servers see each others' terms directly, there is not yet anything that might cause one server's term to exceed another's. This tells me that maybe it's almost time to actually model the network. 
+* Adding this transition isn't enough. It can't actually fire, because we have no way for a higher term number to be seen. Even though we abstracted out the network and just let the servers see each others' terms directly, there is not yet anything that might cause one server's term to exceed another's. This tells me that maybe it's almost time to actually model the network, or add some other component we're currently missing. 
 * What I said above wasn't actually clear, was it? We still have the `startElection` transition, which (at the moment) allows any `Follower` to become a candidate, and then servers can vote for them. If they win, they'd become `Leader`. So why can't we see this? 
 
 Let's resolve the second issue first. We'll use a telescoping prefix run to debug this. At first, we'll just add one more transition to our existing test. Can we even _start_ a second election?
@@ -454,24 +454,64 @@ This is now unsatisfiable. So the problem may be in that second vote being made.
 
 The first instance I see contains 2 `Server`s. We see that the original `Leader` still has that role, and the new contender has the `Candidate` role (as we would expect). But now nobody can vote at all, because the only non-`Leader` has already voted (for themselves). What about a _larger_ instance? 
 * Adding `for exactly 4 Server` to the `run` leads to unsat. (Oh, no! We should consider why in a minute.)
-* Adding `for exactly 3 Server` to the `run` is satisfiable. (Whew.) Now there _is_ a `Follower`, and we can see that their term has been cleared in the last state. So *why can't they vote*? Time to re-enable unsat cores. This time the core is bigger, but it blames:
-    * `init`
-    * When `s` wins an election, `s.role' = Leader`
-    * Three lines in `makeVote`: 
-        * `no voter.votedFor`; 
-        * `voter.votedFor' = c`; and 
-        * `all s: Server | (s.role' = s.role and s.currentTerm' = s.currentTerm)` (Notice that this actually omits one of the constraints inside the `all`; this is one of the benefits of increasing the core granularity. However, there's a consequence: these kinds of "partial" quantified formulas don't always highlight well in VSCode. As a backup, you can always look at the console output to see a readout of the formulas in the core.)
-    * Three lines in `startElection`: 
-        * `s.role = Follower`;
-        * `s.role' = Candidate`; and 
-        * A piece of the `all`-quantified frame condition again, this time: `(all other : Server - s | other.votedFor' = other.votedFor && other.currentTerm' = other.currentTerm)`.
-    * The uniqueness of roles, shown as a highlight on the field declaration: `var role: one Role`. 
+* Adding `for exactly 3 Server` to the `run` is satisfiable. (Whew.) Now there _is_ a `Follower`, and we can see that their term has been cleared in the last state. So *why can't they vote*? Time to re-enable unsat cores. This time the core is bigger. I'll put what it blames inside a spoiler tag; read if you're curious. 
 
-Whew, that's more than we'd ideally have to look through! 
+<details>
+<summary>Unsat core result</summary>
+
+* `init`
+* When `s` wins an election, `s.role' = Leader`
+* Three lines in `makeVote`: 
+    * `no voter.votedFor`; 
+    * `voter.votedFor' = c`; and 
+    * `all s: Server | (s.role' = s.role and s.currentTerm' = s.currentTerm)` (Notice that this actually omits one of the constraints inside the `all`; this is one of the benefits of increasing the core granularity. However, there's a consequence: these kinds of "partial" quantified formulas don't always highlight well in VSCode. As a backup, you can always look at the console output to see a readout of the formulas in the core.)
+* Three lines in `startElection`: 
+    * `s.role = Follower`;
+    * `s.role' = Candidate`; and 
+    * A piece of the `all`-quantified frame condition again, this time: `(all other : Server - s | other.votedFor' = other.votedFor && other.currentTerm' = other.currentTerm)`.
+* The uniqueness of roles, shown as a highlight on the field declaration: `var role: one Role`. 
+
+Whew, that's more than we'd ideally have to look through! And it's incredibly confusing, because it still looks as if we ought to be able to take the `makeVote` transition with the 3rd `Server`. 
+
+
+</details>
+
+The problem is simple, and the core doesn't really help us find it. **We're still using the default trace length maximum: 5 states.** Count how many I'm asking for: 
+* initial state; 
+* election 1 has just started; 
+* someone has voted; 
+* someone has won the election; 
+* election 2 has just started; and 
+* someone has voted. 
+This is too many states! We'll fix the problem by saying `option max_tracelength 10`. 
+
+This fixes one problem, but I'm still curious why `for 4 Server` was unsatisfiable. It still is, even at the longer maximum trace length. So I start collapsing the trace: no 2nd vote, no 2nd election, ... In the end, this is where it becomes satisfiable: 
+
+```forge
+init
+(some s: Server | startElection[s])
+next_state (some s1, s2: Server | makeVote[s1, s2])
+```
+So in a 4-server cluster, nobody can actually win an election? That's silly. But actually it was me being silly. In order to win the election, a server needs a majority vote. If there are 4 servers, there need to be 3 votes for the new winner. But I only had one `makeVote` transition! If I make that fix to my `run`, all is well:
+
+```forge
+run {
+    init
+    (some s: Server | startElection[s])
+    next_state (some s1, s2: Server | makeVote[s1, s2])
+    next_state next_state (some s1, s2: Server | makeVote[s1, s2])
+    next_state next_state next_state (some s: Server | winElection[s])
+  } for exactly 4 Server
+```
+
+Importantly, after all the above fixes, _the tests all pass_. I think we're now ready to do more modeling. Because network failures are so important for understanding Raft, I think we ought to model that. We just need to choose between a couple different perspectives. E.g., we could pick one of these:
+* Network _messages_. We'd have a "bag" of messages in flight, which could be received. But they could also be dropped, replayed, etc. 
+* Network _connectivity_. This would be a more abstract model, and perhaps more efficient. We wouldn't be able to represent specific RPC messages, but we'd be able to tell when one server could hear another. 
+
+I'm going to go with the first option, because if I want to understand Raft, I probably need to understand the messages that servers send one another. 
+
+## Messages on the Network 
 
 
 
 
-
-
-**FILL: is now the time to model the network?**
