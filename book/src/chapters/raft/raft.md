@@ -797,9 +797,15 @@ pred sendAndReceive[to_send: set Message, to_receive: set Message] {
 }
 ```
 
-Now we can edit the `startElection` and `makeVote` predicates to use this instead of just `send` and `receive`. 
+Now we can edit the `startElection` and `makeVote` predicates to use this instead of just `send` and `receive`. The first is a bit challenging, because we need to build the _set_ of messages and pass it all at once. But we also need to make sure the right message atoms actually exist. So we'll split this into two parts: existence and identity. 
 
-**TODO**
+
+
+
+
+**TODO: startElection**
+
+**TODO: makeVote**
 
 
 **NOTE: composition annoyance: any transition that doesn't use `send` or `receive` will allow the message bag to change.**

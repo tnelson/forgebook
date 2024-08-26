@@ -9,6 +9,8 @@ open "rpc.frg"
 
 option max_tracelength 10
 
+//option verbose 10
+
 
 option solver MiniSatProver
 option logtranslation 2
@@ -52,6 +54,43 @@ pred startElection[s: Server] {
         other.role' = other.role
     }
 }
+
+/** Server `s` runs for election. */
+pred startElection2[s: Server] {
+    s.role = Follower -- GUARD 
+    s.role' = Candidate -- ACTION: in candidate role now
+    s.votedFor' = s -- ACTION: votes for itself 
+    s.currentTerm' = add[s.currentTerm, 1] -- ACTION: increments term
+    
+    -- ACTION: issues RequestVote calls (MODIFIED)
+    // The set of unused messages exists
+    all other: Server - s | { some rv: RequestVote | { rvFor[s, other, rv] } }
+    // They are all actually sent, with nothing received
+    sendAndReceive[{rv: RequestVote | some other: Server | rvFor[s, other, rv]}, 
+                   none & Message]
+                   -- ^ Interestingly we need to do the intersection here, so the checker understands an `Int` isn't a possibility
+                   --  for the empty set.
+
+    -- FRAME: role, currentTerm, votedFor for all other servers
+    all other: Server - s | {
+        other.votedFor' = other.votedFor
+        other.currentTerm' = other.currentTerm
+        other.role' = other.role
+    }
+}
+
+/** Factor this out, since we'll use it twice (existence, set-builder) */
+pred rvFor[s: Server, other: Server, rv: RequestVote] {
+    rv not in Network.messages -- not currently being used
+    rv.from = s
+    rv.to = other
+    rv.requestVoteTerm = s.currentTerm
+    rv.candidateID = s
+    rv.lastLogIndex = -1 -- TODO: NOT MODELING YET
+    rv.lastLogTerm = -1 -- TODO: NOT MODELING YET
+}
+
+
 
 /** A server can vote for another server on request, 
     "on a first-come-first-served basis". */
@@ -322,7 +361,8 @@ test expect {
 */
 
 run {
-    (some s: Server | startElection[s])
-    next_state (some s1, s2: Server | makeVote[s1, s2])
+    init
+    (some s: Server | startElection2[s])
+    --next_state (some s1, s2: Server | makeVote[s1, s2])
     --next_state next_state (some s: Server | winElection[s])
-} for 6 Message
+} for exactly 3 Server, 10 Message
