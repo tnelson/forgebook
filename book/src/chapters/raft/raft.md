@@ -547,22 +547,26 @@ pred message_init {
 
 /** Add a message to the set of messages "in flight". */ 
 pred send[m: Message] {
+    m not in Network.messages
     Network.messages' = Network.messages + m
 }
 
 /** A message can also be received if it's "in flight". */
 pred receive[m: Message] {
+    m in Network.messages
     Network.messages' = Network.messages - m
 }
 
 /** A message might be dropped. On the surface, this is the same as `receive`. */
 pred drop[m: Message] {
+    m in Network.messages
     Network.messages' = Network.messages - m
 }
 ```
 
 We'll use the `drop` predicate to represent a large number of potential communication issues, all of which would prevent a server from seeing another's messages. 
 
+Let's remember to add `message_init` to the trace predicate of our leader-election model.
 
 ### The Raft RPC Messages
 
@@ -692,7 +696,7 @@ pred startElection[s: Server] {
     s.votedFor' = s -- ACTION: votes for itself 
     s.currentTerm' = add[s.currentTerm, 1] -- ACTION: increments term
     
-    -- ACTION: issues RequestVote calls
+    -- ACTION: issues RequestVote calls (NEW)
     all other: Server - s | {
         some rv: RequestVote | {
             rv not in Network.messages -- not currently being used
@@ -717,6 +721,8 @@ pred startElection[s: Server] {
 
 ~~~admonish warning title="I'm a little worried about messages."
 How many of these will we need? If every time a server becomes a candidate we use just less than `#Server` messages, I could see needing to give a very high scope, which would cause performance issues. If we hit that point, we will refactor the model&mdash;although I like the message-hierarchy style we've currently got. 
+
+*If we _do_ run into scope limitations, we might consider making message fields `var`, but enforcing they remain constant while the message is in transit. That would allow message atoms to be re-used.*
 ~~~
 
 We need to import both the messages and RPC modules to make this run. And all the tests still pass (although notice that we aren't testing the new predicates _at all_ yet). We can even run the model and get instances which now show the state of the network. Of course, we don't yet _receive_ anything. 
@@ -725,8 +731,75 @@ We need to import both the messages and RPC modules to make this run. And all th
 Notice that the barely-constrained no-op predicate is doing more work for us. Without it, our model would have just become unsatisfiable, since we'd have no way to build the lasso-trace loopback: so far, we can only _add_ messages, but never _remove_ them. The `doNothing` option really does help when you're adding to a model.
 ~~~
 
-**NOTE: ADD**
+### Receiving and Replying to `RequestVote` 
+
+A `RequestVote` message ought to prompt votes, which in turn ought to produce a reply. It's tempting to not model replies, but I'd like to allow the "network" to break in such a way that the `Follower` believes they've voted but the `Candidate` is unaware of that fact. So we'll model both of them. 
+
+Receiving `RequestVote` should be as easy as sending. We'll modify the `makeVote` transition, remembering to ensure that the request term isn't smaller than the voter's current term. I also notice that the RPC specification says: "If votedFor is null or candidateId, and candidate’s log is at least as up-to-date as receiver’s log, grant vote", which means I should change the first guard line to be more permissive than it was previously. Finally, we'll remove the old guard constraint that covered for the lack of messages; we now have messages, and no longer needed it. 
+
+```forge
+pred makeVote[voter: Server, c: Server] {
+    -- GUARD: has not yet voted *OR* has voted for this candidate (CHANGED)
+    (no voter.votedFor or voter.votedFor = c) 
+    voter.role in Follower + Candidate -- GUARD: avoid Leaders voting
+    -- Removed, now that we see an explicit message
+    --c.role = Candidate -- GUARD: election is running (REMOVED)
+    noLessUpToDateThan[c, voter] -- GUARD: candidate is no less updated
+
+    -- ACTION/GUARD: must receive a RequestVote message (NEW)
+    some rv: RequestVote | { 
+        receive[rv] -- enforces message "in flight"
+        rv.to = voter
+        rv.from = c
+        voter.currentTerm <= rv.requestVoteTerm
+    }
+
+    voter.votedFor' = c -- ACTION: vote for c
+    -- FRAME role, currentTerm for voter
+    -- FRAME: role, currentTerm, votedFor for all others
+    all s: Server | {
+        s.role' = s.role
+        s.currentTerm' = s.currentTerm
+        (s != voter) => (s.votedFor' = s.votedFor)
+    }
+}
+```
+
+All tests still pass after this change, and we can `run` to see traces. Great! Now, what about replies? We can add a `send` for some new `RequestVoteReply`, but if we do that we should add some way for that message to be `receive`d. We'll add the message first as another new block in `makeVote`, although we need access to the request message, so I'll add this _within_ the `rv` quantifier:
+
+```forge
+    -- ACTION/GUARD: must send a RequestVoteReply message (NEW)
+    some rvp: RequestVoteReply | { 
+        send[rvp] -- enforces message not in flight
+        rvp.to = c
+        rvp.from = voter
+        rvp.voteGranted = c -- stand-in for boolean true
+        rvp.replyRequestVoteTerm = rv.requestVoteTerm
+    }
+```
+
+But this makes some `is sat` tests fail. One reason might be that there are not enough `Message` atoms: we need one for _each_ `RequestVote` message sent, and one for _each_ `RequestVoteReply`. But the default of `4` should suffice if there are only 2 `Server` atoms: one request, one reply. So we expect something else. The "telescoping prefix" method shows that the problem is with `makeVote` (not surprising), and the corresponding core is:
+* the line from `send` that adds the message to the "in flight" set; 
+* the line from `receive` that removes the message from the "in flight" set; 
+* the fact that `rv` is a `RequestVote` and must be in the "in flight" set when received. 
+
+What's the problem? Both `send` and `receive` have an implicit frame condition. When I write `Network.messages' = Network.messages - m`, it means that no other changes to `Network.messages` are possible on this "tick". So using `send` and `receive` in the same transition will, as written, be contradictory. Likewise, because requesting a vote happens for many servers at once, this bug would also cause problems if there were more than one `Follower`. 
+
+To fix this, I'll add a `sendAndReceive` pred to the messages module. It will take _sets_ of messages, so that we can send and/or receive multiple messages at a time.  
+
+```forge
+/** We might need to send/receive multiple messages. Note that the way this is written, if there is any message
+    in both the to_send and to_receive sets, it will remain "in flight".  */
+pred sendAndReceive[to_send: set Message, to_receive: set Message] {
+    no to_send & Network.messages
+    to_receive in Network.messages
+    Network.messages' = (Network.messages - to_receive) + to_send
+}
+```
+
+Now we can edit the `startElection` and `makeVote` predicates to use this instead of just `send` and `receive`. 
+
+**TODO**
 
 
-
-
+**NOTE: composition annoyance: any transition that doesn't use `send` or `receive` will allow the message bag to change.**

@@ -9,12 +9,12 @@ open "rpc.frg"
 
 option max_tracelength 10
 
-/*
+
 option solver MiniSatProver
 option logtranslation 2
 option coregranularity 2
 option core_minimization rce
-*/
+
 
 /** The initial startup state for the cluster */
 pred init {
@@ -56,10 +56,29 @@ pred startElection[s: Server] {
 /** A server can vote for another server on request, 
     "on a first-come-first-served basis". */
 pred makeVote[voter: Server, c: Server] {
-    no voter.votedFor -- GUARD: has not yet voted
+    -- GUARD: has not yet voted *OR* has voted for this candidate (CHANGED)
+    (no voter.votedFor or voter.votedFor = c) 
     voter.role in Follower + Candidate -- GUARD: avoid Leaders voting
-    c.role = Candidate -- GUARD: election is running 
+    -- Removed, now that we see an explicit message
+    --c.role = Candidate -- GUARD: election is running 
     noLessUpToDateThan[c, voter] -- GUARD: candidate is no less updated
+
+    -- ACTION/GUARD: must receive a RequestVote message (NEW)
+    some rv: RequestVote | { 
+        receive[rv] -- enforces message "in flight"
+        rv.to = voter
+        rv.from = c
+        voter.currentTerm <= rv.requestVoteTerm
+     
+        -- ACTION/GUARD: must send a RequestVoteReply message (NEW)
+       some rvp: RequestVoteReply | { 
+            send[rvp] -- enforces message not in flight
+            rvp.to = c
+            rvp.from = voter
+            rvp.voteGranted = c -- stand-in for boolean true
+            rvp.replyRequestVoteTerm = rv.requestVoteTerm
+       }
+    }
 
     voter.votedFor' = c -- ACTION: vote for c
     -- FRAME role, currentTerm for voter
@@ -172,6 +191,7 @@ pred election_doNothing {
     assert fairness, or use some other means to avoid useless traces. */ 
 pred electionSystemTrace {
     init 
+    message_init
     always { 
         (some s: Server | startElection[s])
         or
@@ -188,19 +208,20 @@ pred electionSystemTrace {
 }
 
 
-
+/*
 run { 
     electionSystemTrace 
     eventually {some s: Server | winElection[s]}
     #Server > 1
 }
+*/
 
 
 -----------------------------
 -- VALIDATION
 -----------------------------
 
-
+/*
 -- Transition-system checks for combinations of transitions; no use of the trace pred yet.
 test expect {
   -- All of these transitions (except the no-op) should be mututally exclusive. 
@@ -219,7 +240,7 @@ test expect {
     (some s: Server | startElection[s])
     next_state (some s1, s2: Server | makeVote[s1, s2])
     next_state next_state (some s: Server | winElection[s])
-  } is sat 
+  } for 6 Message is sat 
   -- Start -> Vote -> Halt 
   sat_start_make_halt: {
     (some s: Server | startElection[s])
@@ -298,5 +319,10 @@ test expect {
     always {lone role.Leader}
   } is theorem
 }
+*/
 
-
+run {
+    (some s: Server | startElection[s])
+    next_state (some s1, s2: Server | makeVote[s1, s2])
+    --next_state next_state (some s: Server | winElection[s])
+} for 6 Message
