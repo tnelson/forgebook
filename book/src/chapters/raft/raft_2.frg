@@ -11,15 +11,16 @@ option max_tracelength 10
 
 //option verbose 10
 
-
+/*
 option solver MiniSatProver
 option logtranslation 2
 option coregranularity 2
 option core_minimization rce
-
+*/
 
 /** The initial startup state for the cluster */
 pred init {
+    message_init -- no messages in flight
     all s: Server | { 
         s.role = Follower
         no s.votedFor
@@ -32,34 +33,7 @@ pred startElection[s: Server] {
     s.role = Follower -- GUARD 
     s.role' = Candidate -- ACTION: in candidate role now
     s.votedFor' = s -- ACTION: votes for itself 
-    s.currentTerm' = add[s.currentTerm, 1] -- ACTION: increments term
-    -- ACTION: issues RequestVote calls
-    all other: Server - s | {
-        some rv: RequestVote | {
-            rv not in Network.messages -- not currently being used
-            rv.from = s
-            rv.to = other
-            rv.requestVoteTerm = s.currentTerm
-            rv.candidateID = s
-            rv.lastLogIndex = -1 -- TODO: NOT MODELING YET
-            rv.lastLogTerm = -1 -- TODO: NOT MODELING YET
-            send[rv]
-        }
-    }
-    
-    -- FRAME: role, currentTerm, votedFor for all other servers
-    all other: Server - s | {
-        other.votedFor' = other.votedFor
-        other.currentTerm' = other.currentTerm
-        other.role' = other.role
-    }
-}
 
-/** Server `s` runs for election. */
-pred startElection2[s: Server] {
-    s.role = Follower -- GUARD 
-    s.role' = Candidate -- ACTION: in candidate role now
-    s.votedFor' = s -- ACTION: votes for itself 
     s.currentTerm' = add[s.currentTerm, 1] -- ACTION: increments term
     
     -- ACTION: issues RequestVote calls (MODIFIED)
@@ -68,8 +42,8 @@ pred startElection2[s: Server] {
     // They are all actually sent, with nothing received
     sendAndReceive[{rv: RequestVote | some other: Server | rvFor[s, other, rv]}, 
                    none & Message]
-                   -- ^ Interestingly we need to do the intersection here, so the checker understands an `Int` isn't a possibility
-                   --  for the empty set.
+                   -- ^ Interestingly we need to do the intersection here, so the checker understands this empty set 
+                   -- can't have type `Int`. 
 
     -- FRAME: role, currentTerm, votedFor for all other servers
     all other: Server - s | {
@@ -103,20 +77,18 @@ pred makeVote[voter: Server, c: Server] {
     noLessUpToDateThan[c, voter] -- GUARD: candidate is no less updated
 
     -- ACTION/GUARD: must receive a RequestVote message (NEW)
-    some rv: RequestVote | { 
-        receive[rv] -- enforces message "in flight"
+    -- ACTION/GUARD: must send a RequestVoteReply message (NEW)
+    some rv: RequestVote, rvp: RequestVoteReply  | { 
         rv.to = voter
         rv.from = c
-        voter.currentTerm <= rv.requestVoteTerm
-     
-        -- ACTION/GUARD: must send a RequestVoteReply message (NEW)
-       some rvp: RequestVoteReply | { 
-            send[rvp] -- enforces message not in flight
-            rvp.to = c
-            rvp.from = voter
-            rvp.voteGranted = c -- stand-in for boolean true
-            rvp.replyRequestVoteTerm = rv.requestVoteTerm
-       }
+        voter.currentTerm <= rv.requestVoteTerm     
+        
+        rvp.to = c
+        rvp.from = voter
+        rvp.voteGranted = c -- stand-in for boolean true
+        rvp.replyRequestVoteTerm = rv.requestVoteTerm
+
+        sendAndReceive[rvp, rv] -- enforces message "unused"/"used" respectively
     }
 
     voter.votedFor' = c -- ACTION: vote for c
@@ -140,14 +112,22 @@ pred noLessUpToDateThan[moreOrSame: Server, baseline: Server] {
 }
 
 
-/** Server `s` is supported by a majority of the cluster. */
-pred majorityVotes[s: Server] {
-    #{voter: Server | voter.votedFor = s} > divide[#Server, 2]
+/** Server `s` is supported by a majority of the cluster. E.g., 
+  |cluster| = 5 ---> need 5/2 + 1 = 3 votes. */
+pred receiveMajorityVotes[s: Server] {
+    --#{voter: Server | voter.votedFor = s} > divide[#Server, 2]
+    -- This formulation identifies the set of replies destined for this server, 
+    -- and evaluates to true if they get removed from the message bag and there are 
+    -- a sufficient number of them granting a vote.
+    let voteReplies = {m: Network.messages & RequestVoteReply | m.to = s} | {
+        receive[voteReplies]
+        #{m: voteReplies | some m.voteGranted} > divide[#Server, 2]
+    }
 }
 /** Server `s` wins the election. */
 pred winElection[s: Server] {
-    -- GUARD: won the majority
-    majorityVotes[s]
+    -- GUARD: won the majority (NOTE: this invokes a message predicate)
+    receiveMajorityVotes[s]
     -- ACTION: become leader, send heartbeat messages
     s.role' = Leader 
     s.currentTerm' = s.currentTerm
@@ -161,6 +141,9 @@ pred winElection[s: Server] {
         no f.votedFor'
         f.currentTerm' = add[f.currentTerm, 1] 
     }
+
+    -- Frame the network state explicitly
+    sendAndReceive[none & Message, none & Message]
 }
 
 
@@ -181,11 +164,13 @@ pred haltElection {
         no c.votedFor'
     }
     -- ACTION: initiating another round of RequestVote
-    -- ... we can't model this yet: no message passing
+    -- ... we can't model this yet: no message passing (TODO)
 
     -- FRAME: nobody's role changes
     all c: Server | c.role' = c.role
 
+    -- Frame the network state explicitly
+    sendAndReceive[none & Message, none & Message]
 }
 
 /** If a candidate or leader discovers that its term is out of date, it immediately reverts to follower state. 
@@ -216,6 +201,8 @@ pred stepDown[s: Server] {
         (x != s) => x.role' = x.role
     }
 
+    -- Frame the network state explicitly
+    sendAndReceive[none & Message, none & Message]
 }
 
 /** Guardless no-op */
@@ -224,13 +211,15 @@ pred election_doNothing {
     role' = role
     votedFor' = votedFor
     currentTerm' = currentTerm
+
+    -- Frame the network state explicitly
+    sendAndReceive[none & Message, none & Message]
 }
 
 /** Allow arbitrary no-op ("stutter") transitions, a la TLA+. We'll either 
     assert fairness, or use some other means to avoid useless traces. */ 
 pred electionSystemTrace {
-    init 
-    message_init
+    init
     always { 
         (some s: Server | startElection[s])
         or
@@ -362,7 +351,8 @@ test expect {
 
 run {
     init
-    (some s: Server | startElection2[s])
-    --next_state (some s1, s2: Server | makeVote[s1, s2])
-    --next_state next_state (some s: Server | winElection[s])
+    (some s: Server | startElection[s])
+    next_state (some s1, s2: Server | makeVote[s1, s2])
+    next_state next_state (some s1, s2: Server | makeVote[s1, s2])
+    next_state next_state next_state (some s: Server | winElection[s])
 } for exactly 3 Server, 10 Message

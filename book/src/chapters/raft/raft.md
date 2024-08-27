@@ -566,7 +566,7 @@ pred drop[m: Message] {
 
 We'll use the `drop` predicate to represent a large number of potential communication issues, all of which would prevent a server from seeing another's messages. 
 
-Let's remember to add `message_init` to the trace predicate of our leader-election model.
+Let's remember to add `message_init` to the `init` predicate of our leader-election model.
 
 ### The Raft RPC Messages
 
@@ -799,13 +799,52 @@ pred sendAndReceive[to_send: set Message, to_receive: set Message] {
 
 Now we can edit the `startElection` and `makeVote` predicates to use this instead of just `send` and `receive`. The first is a bit challenging, because we need to build the _set_ of messages and pass it all at once. But we also need to make sure the right message atoms actually exist. So we'll split this into two parts: existence and identity. 
 
+```forge
+-- ACTION: issues RequestVote calls (MODIFIED)
+    // The set of unused messages exists
+    all other: Server - s | { some rv: RequestVote | { rvFor[s, other, rv] } }
+    // They are all actually sent, with nothing received
+    sendAndReceive[{rv: RequestVote | some other: Server | rvFor[s, other, rv]}, 
+                   none & Message]
+                   -- ^ Interestingly we need to do the intersection here, so the checker understands this empty set 
+                   -- can't have type `Int`. 
+```
+
+What about `makeVote`? That's easier, because we have a _single_ message to receive and a different, _single_ message to send. We end up changing the message block we had before just a bit: 
+
+```forge
+    -- ACTION/GUARD: must receive a RequestVote message (NEW)
+    -- ACTION/GUARD: must send a RequestVoteReply message (NEW)
+    some rv: RequestVote, rvp: RequestVoteReply  | { 
+        rv.to = voter
+        rv.from = c
+        voter.currentTerm <= rv.requestVoteTerm     
+        
+        rvp.to = c
+        rvp.from = voter
+        rvp.voteGranted = c -- stand-in for boolean true
+        rvp.replyRequestVoteTerm = rv.requestVoteTerm
+
+        sendAndReceive[rvp, rv] -- enforces message "unused"/"used" respectively
+    }
+```
+
+
+~~~admonish warning title="Framing and composition"
+As written, any transition that doesn't use one of the message predicates, or speak of `Network.messages` directly itself, will allow the message bag to change arbitrarily. E.g., our `winElection` transition doesn't yet refer to the network, and so that slice of the system's state is unconstrained on this transition. 
+
+For now, we'll go and add the following to every transition except the two we've already changed:
+```forge
+    -- Frame the network state explicitly
+    sendAndReceive[none & Message, none & Message]
+```
+~~~
+
+### Receiving Replies 
+
+In order to actually receive these replies, we need a new transition. Or do we? We might choose to have the `RequestVoteReply` messages get received all at once, as part of stepping down or winning the election. This isn't exactly in accordance with reality, but we're using the message buffer as a stand-in for the record of how many votes each server receives over the course of the election. This consumes less of our `max_tracelength` than receiving them all one at a time and explicitly storing votes in a `Server` field.
 
 
 
 
-**TODO: startElection**
 
-**TODO: makeVote**
-
-
-**NOTE: composition annoyance: any transition that doesn't use `send` or `receive` will allow the message bag to change.**

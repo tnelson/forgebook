@@ -14,7 +14,7 @@ one sig Follower, Candidate, Leader extends Role {}
 sig Server {
     var role: one Role,
     var votedFor: lone Server, 
-    var currentTerm: one Int 
+    var currentTerm: one Int,
 }
 
 /** Now we need a notion of intended sender and receiver. */
