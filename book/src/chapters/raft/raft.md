@@ -842,8 +842,60 @@ For now, we'll go and add the following to every transition except the two we've
 
 ### Receiving Replies 
 
-In order to actually receive these replies, we need a new transition. Or do we? We might choose to have the `RequestVoteReply` messages get received all at once, as part of stepping down or winning the election. This isn't exactly in accordance with reality, but we're using the message buffer as a stand-in for the record of how many votes each server receives over the course of the election. This consumes less of our `max_tracelength` than receiving them all one at a time and explicitly storing votes in a `Server` field.
+In order to actually receive these replies, we need a new transition. Or do we? We might choose to have the `RequestVoteReply` messages get received all at once, as part of stepping down or winning the election. This isn't exactly in accordance with reality, but we're using the message buffer as a stand-in for the record of how many votes each server receives over the course of the election. This consumes less of our `max_tracelength` than receiving them all one at a time and explicitly storing votes in a `Server` field. Let's give that idea try to start with. We'll just have `receiveMajorityVotes` examine and change the currently "in flight" messages.
 
+```forge
+/** Server `s` is supported by a majority of the cluster. E.g., 
+  |cluster| = 5 ---> need 5/2 + 1 = 3 votes. */
+pred receiveMajorityVotes[s: Server] {
+    -- This formulation identifies the set of replies destined for this server, 
+    -- and evaluates to true if they get removed from the message bag and there are 
+    -- a sufficient number of them granting a vote.
+    let voteReplies = {m: Network.messages & RequestVoteReply | m.to = s} | {
+        receive[voteReplies]
+        #{m: voteReplies | some m.voteGranted} > divide[#Server, 2]
+    }
+}
+```
+
+As always, we'll check that we can generate a pertinent prefix. Here's what I ran:
+
+```forge
+run {
+    init
+    (some s: Server | startElection[s])
+    next_state (some s1, s2: Server | makeVote[s1, s2])
+    next_state next_state (some s1, s2: Server | makeVote[s1, s2])
+    next_state next_state next_state (some s: Server | winElection[s])
+} for exactly 3 Server, 10 Message
+```
+
+Unsatisfiable _again_! But this isn't unusual; often when we make a change there's some factor we forgot to account for. We'll follow the same recipe as before, removing constraints from the end of the prefix until we reach satisfiability. We don't have to do much, because only the last transition seems to cause a problem&mdash;unsurprising, since the conditions for winning are what we just changed. 
+
+The unsat core has only 3 formulas in it. Rather than just looking at code location, let's examine what the command-line output says. I'll add newlines to make it a bit more readable:
+
+```
+Unsat core available (3 formulas):
+Core(part 1/3): [/Users/tbn/repos/cs1710/newbook/book/src/chapters/raft/messages.frg:32:4 (span 40)] 
+(Network.messages' = Network.messages - {m : Network.messages & RequestVoteReply | m.to = s})
+Core(part 2/3): [/Users/tbn/repos/cs1710/newbook/book/src/chapters/raft/raft_2.frg:124:8 (span 59)] 
+(#{m : {m : Network.messages & RequestVoteReply | m.to = s} | some m.voteGranted} > divide[#Server, 2])
+Core(part 3/3): [/Users/tbn/repos/cs1710/newbook/book/src/chapters/raft/messages.frg:47:4 (span 61)] 
+(Network.messages' = Network.messages - none  & Message + none  & Message)
+```
+
+The command-line core output prints core formulas _after substitution_. So, for example, `(Network.messages' = Network.messages - none  & Message + none  & Message)` is the result of applying `sendAndReceive` (defined in `messages.frg`) to the arguments `none & Message` and `none  & Message`. But that's not surprising: the `winElection` predicate actually contains the frame condition `sendAndReceive[none & Message, none & Message]`. 
+
+No, what's far more suspicious is the apparent tangle between the frame condition and the first formula, which calls `receive`. This is how we've currently defined `receive`: 
+
+```forge
+pred receive[m: Message] {
+    m in Network.messages
+    Network.messages' = Network.messages - m
+}
+```
+
+And there's the problem: that pesky `=`. If we call `receive` and `sendAndReceive` in the same transition, they will conflict with each other! So we need to be a bit more clever in how we write `winElection`. 
 
 
 
