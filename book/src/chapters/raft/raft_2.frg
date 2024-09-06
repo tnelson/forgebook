@@ -143,7 +143,8 @@ pred winElection[s: Server] {
     }
 
     -- Frame the network state explicitly
-    sendAndReceive[none & Message, none & Message]
+    -- sendAndReceive[none & Message, none & Message]
+    -- We don't need to do this, since the `receiveMajorityVotes` predicate does already.
 }
 
 

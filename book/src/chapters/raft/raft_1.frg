@@ -1,7 +1,9 @@
 #lang forge/temporal
 
 /*
-  Abstract model of leader election in the Raft protocol. 
+  Abstract model of leader election in the Raft protocol. We won't represent 
+  message passing or the RPC yet, but since leader election is core to the 
+  protocol, we'll start here. 
 */
 
 option max_tracelength 10
@@ -69,7 +71,7 @@ pred makeVote[voter: Server, c: Server] {
     the second server? 
 */
 pred noLessUpToDateThan[moreOrSame: Server, baseline: Server] { 
-    -- true (for now)
+    -- true (for now); leaving this as a reminder
     -- TODO: once we model logs, the paper describes this relation as:
     --   the log with the later term is more up-to-date.
     --   if the logs end with the same term, then the longer log is more up-to-date.
@@ -182,14 +184,6 @@ pred electionSystemTrace {
 }
 
 
-/*
-run { 
-    electionSystemTrace 
-    eventually {some s: Server | winElection[s]}
-    #Server > 1
-}
-*/
-
 -----------------------------
 -- VALIDATION
 -----------------------------
@@ -294,3 +288,9 @@ test expect {
 }
 
 
+
+run { 
+    electionSystemTrace 
+    eventually {some s: Server | winElection[s]}
+    #Server > 1
+}

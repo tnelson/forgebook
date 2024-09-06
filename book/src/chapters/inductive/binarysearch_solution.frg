@@ -201,7 +201,7 @@ pred bsearchInvariant[s: SearchState] {
             s.low >= firstIndex[s.arr]
             s.low <= s.arr.lastIndex
             s.high >= firstIndex[s.arr]
-            s.high <= s.arr.lastIndex
+            s.high <= s.arr.lastIndex 
             -- Note: these _technically_ should apply if the item is missing, but then we'd need to 
             --  be more careful, because a 1-element array (low=0; high=1) would end up with low>high 
             --  and depending on how we model that, high could become -1. (high := mid-1)

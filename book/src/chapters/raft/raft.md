@@ -895,8 +895,15 @@ pred receive[m: Message] {
 }
 ```
 
-And there's the problem: that pesky `=`. If we call `receive` and `sendAndReceive` in the same transition, they will conflict with each other! So we need to be a bit more clever in how we write `winElection`. 
+And there's the problem: that pesky `=`. If we call `receive` and `sendAndReceive` in the same transition, they will conflict with each other! So we need to be a bit more clever in how we write `winElection`. But it's annoying, because the call to `receive` is inside a helper predicate: `receiveMajorityVotes`. I don't want to inline the helper-predicate body, because that would clutter the transition predicate. 
 
+But, wait. Do we _really_ need to re-frame the network state in this predicate? Probably not, since the only modification comes from `receiveMajorityVotes`. So we'll remove this line entirely:
+
+```forge
+sendAndReceive[none & Message, none & Message]
+```
+
+Now we're back to satisfiable, and we can view a run of the protocol. 
 
 
 
