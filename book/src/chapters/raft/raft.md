@@ -1020,3 +1020,62 @@ This passes. We'll look at a couple more instances, but I think we're ready to a
 
 ## Modeling Network Failure 
 
+~~~admonish note title="Model 3"
+At this point, I copied the entire model into a new file, so that it would be clear where we were _after_ the above section. For myself, I could use a Git commit to find the model state, but I want to share these separately. 
+~~~
+
+It would be nice to make the degree of network failure adjustable, so we can check how Raft does under certain conditions. So we'll break out the various kinds of network failure into their own predicates and then see if we can add them cleanly to our model as a new transition type. We'll want to model at least:
+* messages being _dropped_ by the network, rather than delivered; and 
+* messages being _duplicated_ by the network. 
+
+We already wrote something for the message-drop case:
+
+```forge
+/** A message might be dropped. On the surface, this is the same as `receive`. This is a single-change predicate: if used, it will
+    preclude other message activity within a transition. */
+pred drop[m: Message] {
+    m in Network.messages
+    Network.messages' = Network.messages - m
+}
+```
+
+Let's write something similar for duplication. It starts out quite well, but then we encounter a problem:
+
+```forge
+/** A message might be duplicated. This asserts that another Message atom exists (in flight), having 
+    the same content as the other. */
+pred duplicate[m: Message] {
+    m in Network.messages
+    some m2: Network.messages | { 
+        // *** THEY MUST BE THE SAME KIND OF MESSAGE, AND HAVE SAME FIELD VALUES ***
+        Network.messages' = Network.messages + m2
+    }
+}
+```
+
+The problem is that here, in `messages.frg`, we have no information about the kinds of `Message` that will be defined. So we can't say that `m` is of the same type as `m2`, or that they have equal field values. To make this work, we'd either need Forge to support something vaguely like dynamic dispatch (perhaps via built-in helpers like `sameSig[x,y]` and `eqFields[x,y]`) or to move this predicate up into a file that has knowledge of message types: `rpc.frg`. Because I'm working with Forge today, not working _on_ Forge, we'll go with the latter option.
+
+```forge
+/** A message might be duplicated. This asserts that another Message atom exists (in flight), having 
+    the same content as the other. */
+pred duplicate_rv[m: RequestVote] {
+    m in Network.messages
+    m in RequestVote
+    some m2: Network.messages | { 
+        // *** THEY MUST BE THE SAME KIND OF MESSAGE, AND HAVE SAME FIELD VALUES ***
+        m2 in RequestVote
+        m2.requestVoteTerm = m1.requestVoteTerm
+        m2.candidateID = m1.candidateID
+        m2.lastLogIndex = m1.lastLogIndex
+        m2.lastLogTerm = m1.lastLogTerm
+        
+        Network.messages' = Network.messages + m2
+    }
+}
+```
+
+This isn't ideal. There's probably a better way to handle this _without_ a lot of code duplication. But for now we'll press on. 
+
+~~~admonish warning title="Alloy"
+Note to self: Is this why Alloy supports reflection to some extent?
+~~~
