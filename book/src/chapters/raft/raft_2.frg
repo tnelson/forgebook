@@ -11,13 +11,6 @@ option max_tracelength 10
 
 //option verbose 10
 
-/*
-option solver MiniSatProver
-option logtranslation 2
-option coregranularity 2
-option core_minimization rce
-*/
-
 /** The initial startup state for the cluster */
 pred init {
     message_init -- no messages in flight
@@ -116,18 +109,21 @@ pred noLessUpToDateThan[moreOrSame: Server, baseline: Server] {
   |cluster| = 5 ---> need 5/2 + 1 = 3 votes. */
 pred receiveMajorityVotes[s: Server] {
     --#{voter: Server | voter.votedFor = s} > divide[#Server, 2]
+
     -- This formulation identifies the set of replies destined for this server, 
     -- and evaluates to true if they get removed from the message bag and there are 
     -- a sufficient number of them granting a vote.
+    -- Note well: the candidate voted for themselves, but doesn't send a vote reply. Hence the -1.
     let voteReplies = {m: Network.messages & RequestVoteReply | m.to = s} | {
         receive[voteReplies]
-        #{m: voteReplies | some m.voteGranted} > divide[#Server, 2]
+        #{m: voteReplies | some m.voteGranted} > add[-1, divide[#Server, 2]]
     }
 }
 /** Server `s` wins the election. */
 pred winElection[s: Server] {
     -- GUARD: won the majority (NOTE: this invokes a message predicate)
     receiveMajorityVotes[s]
+    s.role = Candidate
     -- ACTION: become leader, send heartbeat messages
     s.role' = Leader 
     s.currentTerm' = s.currentTerm
@@ -155,7 +151,7 @@ pred haltElection {
     -- GUARD: no server with the Candidate role has received a majority vote.
     --   (There is no requirement that everyone has voted; indeed, that wouldn't 
     --    work since the network might be broken, etc.)
-    no s: Server | s.role = Candidate and majorityVotes[s]
+    no s: Server | s.role = Candidate and receiveMajorityVotes[s]
     
     -- ACTION: each Candidate (not each server, necessarily) will increment their term
     --    and clear their vote.
@@ -245,115 +241,28 @@ run {
 }
 */
 
-
------------------------------
--- VALIDATION
------------------------------
+/** "Optional trace predicate". Used to be just a test, but extracted for visualization. */ 
+pred two_elections_in_a_row {
+  electionSystemTrace
+  eventually {
+    some s: Server | s.role = Candidate
+    eventually {
+      no s: Server | s.role = Candidate
+      eventually {
+        some s: Server | s.role = Candidate
+      }
+    }
+  }
+}
 
 /*
--- Transition-system checks for combinations of transitions; no use of the trace pred yet.
-test expect {
-  -- All of these transitions (except the no-op) should be mututally exclusive. 
-  overlap_start_make: {eventually {some s1, s2, s3: Server | startElection[s1] and makeVote[s2, s3]}} is unsat
-  overlap_start_win: {eventually {some s1, s2: Server | startElection[s1] and winElection[s2]}} is unsat
-  overlap_start_halt: {eventually {some s1: Server |     startElection[s1] and haltElection }} is unsat
-  overlap_make_win: {eventually {some s1, s2, s3: Server | makeVote[s1, s2] and winElection[s3]}} is unsat
-  overlap_make_halt: {eventually {some s1, s2: Server |     makeVote[s1, s2] and haltElection}} is unsat
-  overlap_win_halt: {eventually {some s1: Server |     winElection[s1] and haltElection}} is unsat
-  
-  -- It should be possible to execute all the transitions. We'll encode this as specific
-  -- orderings, rather than as 4 different "eventually transition_k" checks.
-  
-  -- Start -> Vote -> Win
-  sat_start_make_win: {
-    (some s: Server | startElection[s])
-    next_state (some s1, s2: Server | makeVote[s1, s2])
-    next_state next_state (some s: Server | winElection[s])
-  } for 6 Message is sat 
-  -- Start -> Vote -> Halt 
-  sat_start_make_halt: {
-    (some s: Server | startElection[s])
-    next_state (some s1, s2: Server | makeVote[s1, s2])
-    next_state next_state (haltElection)
-  } is sat 
-  -- Start -> Halt
-  sat_start_halt: {
-    (some s: Server | startElection[s])
-    next_state (haltElection)
-  } is sat 
-  
-  -- Start -> Vote -> Win -> Start
-  sat_start_make_win_start: {
-    (some s: Server | startElection[s])
-    next_state (some s1, s2: Server | makeVote[s1, s2])
-    next_state next_state (some s: Server | winElection[s])
-    next_state next_state next_state (some s: Server | startElection[s])
-  } is sat 
-  
-
-}
-
-
-
--- Transition-system checks that are aware of the trace predicate, but focus on interplay/ordering 
--- of individual transitions.
-test expect {
-  -- Cannot Halt, Vote, or Win until started
-  win_implies_started: {
-    electionSystemTrace implies
-    (some s: Server | winElection[s]) implies 
-    once (some s: Server | startElection[s])
-  } is theorem 
-  halt_implies_started: {
-    electionSystemTrace implies
-    (haltElection) implies 
-    once (some s: Server | startElection[s])
-  } is theorem 
-  vote_implies_started: {
-    electionSystemTrace implies
-    (some s1, s2: Server | makeVote[s1, s2]) implies 
-    once (some s: Server | startElection[s])
-  } is theorem 
-}
-
--- Domain-specific checks involving the trace pred
-test expect {
-  -- No server should ever transition directly from `Leader` to `Candidate`. 
-  no_direct_leader_to_candidate: {
-    electionSystemTrace implies
-    (all s: Server | {
-      always {s.role = Leader implies s.role' != Candidate}
-    })} is theorem
-
-  -- It should be possible to witness two elections in a row.
-  two_elections_in_a_row: { 
-    electionSystemTrace
-    eventually {
-        some s: Server | startElection[s] 
-        next_state eventually (some s2: Server | startElection[s2])
-    }
-  } is sat
-
-  -- It should be possible for two different servers to win elections in the same trace. 
-  two_different_winners_in_succession: {
-    electionSystemTrace
-    some disj s1, s2: Server | {
-        eventually s1.role = Leader 
-        eventually s2.role = Leader 
-    } } is sat
-
-  -- It should be invariant that there is only ever at most one `Leader`. 
-  invariant_lone_leader: {
-    electionSystemTrace implies
-    always {lone role.Leader}
-  } is theorem
-}
+option solver MiniSatProver
+option logtranslation 2
+option coregranularity 2
+option core_minimization rce
 */
 
-run {
-    init
-    (some s: Server | startElection[s])
-    next_state (some s1, s2: Server | makeVote[s1, s2])
-    next_state next_state (some s1, s2: Server | makeVote[s1, s2])
-    next_state next_state next_state (some s: Server | winElection[s])
-} for exactly 3 Server, 10 Message
+
+run {    
+  two_elections_in_a_row
+} for exactly 3 Server, 6 Message

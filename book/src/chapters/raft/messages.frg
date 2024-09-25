@@ -28,8 +28,8 @@ pred send[m: Message] {
 /** A message can also be received if it's "in flight". This is a single-change predicate: if used, it will
     preclude other message activity within a transition. */
 pred receive[m: Message] {
-    m in Network.messages
-    Network.messages' = Network.messages - m
+    m in Network.messages                    -- GUARD
+    Network.messages' = Network.messages - m -- ACTION
 }
 
 /** A message might be dropped. On the surface, this is the same as `receive`. This is a single-change predicate: if used, it will

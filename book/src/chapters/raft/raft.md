@@ -897,13 +897,126 @@ pred receive[m: Message] {
 
 And there's the problem: that pesky `=`. If we call `receive` and `sendAndReceive` in the same transition, they will conflict with each other! So we need to be a bit more clever in how we write `winElection`. But it's annoying, because the call to `receive` is inside a helper predicate: `receiveMajorityVotes`. I don't want to inline the helper-predicate body, because that would clutter the transition predicate. 
 
-But, wait. Do we _really_ need to re-frame the network state in this predicate? Probably not, since the only modification comes from `receiveMajorityVotes`. So we'll remove this line entirely:
+But, wait. Do we _really_ need to re-frame the network state in this predicate? Probably not, since the only modification comes from `receiveMajorityVotes`. And that _already_ frames the state of the network. So we'll remove this line entirely:
 
 ```forge
 sendAndReceive[none & Message, none & Message]
 ```
 
-Now we're back to satisfiable, and we can view a run of the protocol. 
+We don't need it at all! And now we're back to satisfiable, and we can view a run of the protocol. And _most_ of our validation suite passes too, which is comforting. There's just one thing that fails: 
+* It should be possible for two different servers to win elections in the same trace. 
 
+My first thought is that maybe we haven't given Forge enough states to witness this. But then I remembered that we were just making _winning_ possible again. Is it ever possible for a leader to stop being a leader in our current model? We have a passing test that looks for such a pattern, or so I thought. Here it is as a predicate:
 
+```forge
+pred two_elections_in_a_row {
+  electionSystemTrace
+  eventually {
+    some s: Server | startElection[s] 
+    next_state eventually (some s2: Server | startElection[s2])
+  }
+}
+```
+
+But this doesn't mean what it says. It's not _two different elections_. It's _two `startElection` actions_. This could be satisfied by two candidates running for leader in the same election cycle. So let's write a better test. As an experiment, let's write it in terms of server roles rather than transitions:
+
+```forge
+pred two_elections_in_a_row {
+  electionSystemTrace
+  eventually {
+    -- At time t, someone is a candidate
+    some s: Server | s.role = Candidate
+    eventually {
+      -- At time t2, nobody is a candidate
+      no s: Server | s.role = Candidate
+      eventually {
+        -- At time t3, someone (same or different) is a candidate again
+        some s: Server | s.role = Candidate
+      }
+    }
+  }
+}
+```
+
+Let's try something simpler. Can a leader ever _stop_ being a leader? 
+
+```forge
+leader_stops_leading: {
+    electionSystemTrace 
+    eventually {
+      some s: Server | s.role = Leader 
+      eventually { 
+        no s: Server | s.role = Leader
+      }
+    }
+  } is sat
+```
+
+Unsatisfiable. No. Wait&mdash;we know our `stepDown` transition can be satisfied, but maybe it's buggy. This generates a trace:
+
+```forge
+(some s: Server | startElection[s])
+next_state (some s1, s2: Server | makeVote[s1, s2])
+next_state next_state (some s: Server | winElection[s])
+next_state next_state next_state (some s: Server | startElection[s])
+next_state next_state next_state next_state (some s: Server | stepDown[s])
+```
+
+This looks like what we expected. So where's the discrepancy between this and `leader_stops_leading`? 
+
+```
+> electionSystemTrace
+false
+```
+
+Uh oh. I forgot to assert that the trace starts in an initial state. Adding that makes the above unsatisfiable. But it also becomes unsatisfiable even without the `stepDown` transition. I go back to my basic tests, and realize I had forgotten to add `init` in several of them! After fixing this, one fails:
+
+```forge
+-- Start -> Vote -> Win
+  sat_start_make_win: {
+    init
+    (some s: Server | startElection[s])
+    next_state (some s1, s2: Server | makeVote[s1, s2])
+    next_state next_state (some s: Server | winElection[s])
+  } for 6 Message is sat 
+```
+
+~~~admonish warning title="Yes, this happens!"
+Sometimes you'll be working on a model, and then realize you neglected something that might force changes throughout. You may have seen this happen when working on a program; it's the same here. I'm deliberately leaving this in rather than cleaning it up so you can see how I deal with the issue. 
+~~~
+
+If I remove the win requirement, it passes. So something still isn't right with `winElection`; possibly with message passing. The unsat core makes me also think there might be a problem with numbers of messages, because it points to this line:
+
+```
+Core(part 5/6): [/Users/tbn/repos/cs1710/newbook/book/src/chapters/raft/raft_2.frg:117:8 (span 59)] (#{m : {m : Network.messages & RequestVoteReply | m.to = s} | some m.voteGranted} > divide[#Server, 2])
+```
+
+The problem is that, before we added messages, we measured a majority vote by looking directly at everyone's `votedFor` field. The candidate votes for themself, *but doesn't send a vote reply*. So we need to look for _one less_ reply message than we expect votes for the candidate:
+
+```forge
+let voteReplies = {m: Network.messages & RequestVoteReply | m.to = s} | {
+    receive[voteReplies]
+    #{m: voteReplies | some m.voteGranted} > add[-1, divide[#Server, 2]]
+}
+```
+
+Now we see an instance again. And, after we make one small change, all our tests pass once again (even after adding `init` where it was needed). (The small change is to require the winner of an election to actually be a `Candidate`; one of our tests was failing because a server could win without starting an election in a cluster of size `1`.) 
+
+### Getting Our Bearings 
+
+Where have we ended up? We have a model of leader election in Raft which has some notion of a network and the messages on it. We can see execution traces for single elections, or sequential elections. We'll add a quick test to make sure that it's possible for two servers to be candidates at the same time:
+
+```forge
+  two_simultaneous_candidates: {
+    electionSystemTrace
+    some disj s1, s2: Server | eventually {
+        s1.role = Candidate
+        s2.role = Candidate
+    }
+  } is sat
+```
+
+This passes. We'll look at a couple more instances, but I think we're ready to add network _failure_ to our model. After we do that, we'll be able to really see whether or not Raft _works_ under "real" conditions&mdash;where messages may be lost, for example. 
+
+## Modeling Network Failure 
 
