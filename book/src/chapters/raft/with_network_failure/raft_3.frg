@@ -229,6 +229,8 @@ pred electionSystemTrace {
         (haltElection)
         or 
         (election_doNothing)
+        or 
+        (network_error)
     }
 }
 

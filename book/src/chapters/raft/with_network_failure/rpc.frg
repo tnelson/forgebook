@@ -92,10 +92,10 @@ sig AppendEntriesReply extends RaftMessage {
 
 /** A message might be duplicated. This asserts that another Message atom exists (in flight), having 
     the same content as the other. */
-pred duplicate_rv[m: RequestVote] {
-    m in Network.messages
-    m in RequestVote
-    some m2: Network.messages | { 
+pred duplicate_rv[m1: RequestVote] {
+    m1 in Network.messages
+    m1 in RequestVote
+    some m2: Network.messages - m1 | { 
         // *** THEY MUST BE THE SAME KIND OF MESSAGE, AND HAVE SAME FIELD VALUES ***
         m2 in RequestVote
         m2.requestVoteTerm = m1.requestVoteTerm
@@ -105,4 +105,22 @@ pred duplicate_rv[m: RequestVote] {
         
         Network.messages' = Network.messages + m2
     }
+}
+
+/** Helper to keep a server's state constant. Useful in composition. */
+pred frame_server[s: Server] {
+  s.role' = s.role
+  s.votedFor' = s.votedFor
+  s.currentTerm' = s.currentTerm
+}
+
+/** Transition predicate: the network performs some error behavior. */
+pred network_error { 
+  // One of the various flavors of error occurs
+  (some m: Network.messages | drop[m])
+  or 
+  (some rv: RequestVote | duplicate_rv[rv])
+
+  // Server state remains the same 
+  all s: Server | frame_server[s]
 }

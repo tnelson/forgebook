@@ -1044,9 +1044,9 @@ Let's write something similar for duplication. It starts out quite well, but the
 ```forge
 /** A message might be duplicated. This asserts that another Message atom exists (in flight), having 
     the same content as the other. */
-pred duplicate[m: Message] {
-    m in Network.messages
-    some m2: Network.messages | { 
+pred duplicate[m1: Message] {
+    m1 in Network.messages
+    some m2: Network.messages - m1  | { 
         // *** THEY MUST BE THE SAME KIND OF MESSAGE, AND HAVE SAME FIELD VALUES ***
         Network.messages' = Network.messages + m2
     }
@@ -1058,10 +1058,10 @@ The problem is that here, in `messages.frg`, we have no information about the ki
 ```forge
 /** A message might be duplicated. This asserts that another Message atom exists (in flight), having 
     the same content as the other. */
-pred duplicate_rv[m: RequestVote] {
-    m in Network.messages
-    m in RequestVote
-    some m2: Network.messages | { 
+pred duplicate_rv[m1: RequestVote] {
+    m1 in Network.messages
+    m1 in RequestVote
+    some m2: Network.messages - m1 | { 
         // *** THEY MUST BE THE SAME KIND OF MESSAGE, AND HAVE SAME FIELD VALUES ***
         m2 in RequestVote
         m2.requestVoteTerm = m1.requestVoteTerm
@@ -1077,5 +1077,57 @@ pred duplicate_rv[m: RequestVote] {
 This isn't ideal. There's probably a better way to handle this _without_ a lot of code duplication. But for now we'll press on. 
 
 ~~~admonish warning title="Alloy"
-Note to self: Is this why Alloy supports reflection to some extent?
+Note to self: Do I remember that Alloy has some undocumented reflection features? TODO: look into this. 
 ~~~
+
+Let's add the potential for the network to take an action to our main model, in `rpc.frg`:
+
+```forge
+/** Helper to keep a server's state constant. Useful in composition. */
+pred frame_server[s: Server] {
+  s.role' = s.role
+  s.votedFor' = s.votedFor
+  s.currentTerm' = s.currentTerm
+}
+
+/** Transition predicate: the network performs some error behavior. */
+pred network_error { 
+  // One of the various flavors of error occurs
+  (some m: Network.messages | drop[m])
+  or 
+  (some rv: RequestVote | duplicate_rv[rv])
+
+  // Server state remains the same 
+  all s: Server | frame_server[s]
+}
+```
+
+We'll add `network_error` as one of the possibilities in our main transition predicate, too. We're getting quite a long list of possibilities:
+
+```forge
+pred electionSystemTrace {
+    init
+    always { 
+        (some s: Server | startElection[s])
+        or
+        (some s, c: Server | makeVote[s, c])
+        or 
+        (some s: Server | winElection[s])
+        or 
+        (some s: Server | stepDown[s])
+        or
+        (haltElection)
+        or 
+        (election_doNothing)
+        or 
+        (network_error)
+    }
+}
+```
+
+Having added this capability to the model, we should add tests to make sure the behavior can occur as we intended:
+
+```forge
+
+```
+

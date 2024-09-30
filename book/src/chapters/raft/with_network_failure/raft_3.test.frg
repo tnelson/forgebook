@@ -2,7 +2,7 @@
 
 open "messages.frg"
 open "rpc.frg"
-open "raft_2.frg"
+open "raft_3.frg"
 
 
 -- Transition-system checks for combinations of transitions; no use of the trace pred yet.
@@ -137,4 +137,51 @@ test expect {
     electionSystemTrace 
     eventually {some s: Server | s.currentTerm = 3}
   } is sat
+}
+
+////////////////////////////
+// Tests for network failure
+////////////////////////////
+
+test expect {
+  // Failure during an election
+  sat_drop_during: {electionSystemTrace and eventually {
+    (some c: Server | c.role = Candidate) and network_error}} is sat
+  // Failure outside an election
+  sat_drop_outside: {electionSystemTrace and eventually {
+    (no c: Server | c.role = Candidate) and network_error}} is sat
+  // Failure can involve dropping a message
+  sat_failure_drop: {electionSystemTrace and eventually {
+    network_error and Network.messages' in Network.messages}} is sat
+  // Failure can involve duplicating a message
+  sat_failure_dupe: {electionSystemTrace and eventually {
+    network_error and Network.messages in Network.messages'}} is sat
+
+  // A failure cannot occur if the network is empty (no messages to duplicate or drop)
+  unsat_failure_empty: {electionSystemTrace and eventually { 
+    network_error and no Network.messages
+  }} is unsat
+
+  // If there is one message in flight, a duplication followed by a drop will be idempotent
+  prop_1_dupe_drop_idempotent: {
+    electionSystemTrace 
+    eventually {
+      one Network.messages
+
+      network_error // duplicate
+      Network.messages in Network.messages'
+
+      next_state network_error // drop
+      Network.messages'' in Network.messages'
+
+      // Seek counterexample to idempotence. Note that dropping may not drop the same _atom_, but 
+      // we need to define idempotence extensionally, i.e., by the field values of the remaining message. 
+      not {
+        one Network.messages''
+        // want to write "all fields same" again, without reference to message type...
+        // TODO
+      }
+    }
+
+  } is unsat
 }
