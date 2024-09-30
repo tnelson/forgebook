@@ -178,8 +178,7 @@ test expect {
       // we need to define idempotence extensionally, i.e., by the field values of the remaining message. 
       not {
         one Network.messages''
-        // want to write "all fields same" again, without reference to message type...
-        // TODO
+        message_extensional_equality[Network.messages, Network.messages'']
       }
     }
 

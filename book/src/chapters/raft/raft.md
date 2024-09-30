@@ -1125,9 +1125,71 @@ pred electionSystemTrace {
 }
 ```
 
-Having added this capability to the model, we should add tests to make sure the behavior can occur as we intended:
+Having added this capability to the model, we should add tests to make sure the behavior can occur as we intended. To make this easier, I ended up refactoring some of the above. Most importantly, I changed from a per-type duplication predicate to a single `duplicate` predicate that refers to a helper `message_extensional_equality` that is true if and only if its two arguments are the same type and have the same field values. 
+
+~~~admonish warning title="I don't like this solution!"
+If I ever add a new message type, or even alter the fields of an existing type, I need to go back and edit `message_extensional_equality`. 
+~~~
 
 ```forge
+test expect {
+  // Failure during an election
+  sat_drop_during: {electionSystemTrace and eventually {
+    (some c: Server | c.role = Candidate) and network_error}} is sat
+  // Failure outside an election
+  sat_drop_outside: {electionSystemTrace and eventually {
+    (no c: Server | c.role = Candidate) and network_error}} is sat
+  // Failure can involve dropping a message
+  sat_failure_drop: {electionSystemTrace and eventually {
+    network_error and Network.messages' in Network.messages}} is sat
+  // Failure can involve duplicating a message
+  sat_failure_dupe: {electionSystemTrace and eventually {
+    network_error and Network.messages in Network.messages'}} is sat
 
+  // A failure cannot occur if the network is empty (no messages to duplicate or drop)
+  unsat_failure_empty: {electionSystemTrace and eventually { 
+    network_error and no Network.messages
+  }} is unsat
+
+  // If there is one message in flight, a duplication followed by a drop will be idempotent
+  prop_1_dupe_drop_idempotent: {
+    electionSystemTrace 
+    eventually {
+      one Network.messages
+
+      network_error // duplicate
+      Network.messages in Network.messages'
+
+      next_state network_error // drop
+      Network.messages'' in Network.messages'
+
+      // Seek counterexample to idempotence. Note that dropping may not drop the same _atom_, but 
+      // we need to define idempotence extensionally, i.e., by the field values of the remaining message. 
+      not {
+        one Network.messages''
+        message_extensional_equality[Network.messages, Network.messages'']
+      }
+    }
+
+  } is unsat
+}
 ```
 
+That last test passes, but it takes about a minute to run on my laptop, which is interesting. The model is getting complex enough that yielding UNSAT is, at times, real work for the solver. And the work _is_ happening in the solver, not in translation to boolean logic:
+
+```
+#vars: (size-variables 344839); #primary: (size-primary 12820); #clauses: (size-clauses 979303)
+Transl (ms): (time-translation 923); Solving (ms): (time-solving 60520) Core min (ms): (time-core 0)
+```
+
+We could probably reduce this by changing the trace length to something below 10, which is where we currently have it set. 
+
+### What about changing message field values? 
+
+In practice, a network can do more than duplicate or drop a packet. The network has the power to arbitrarily change the bits in a message. 
+
+TODO
+
+## Now what? 
+
+TODO: what can we check about Raft now, even before we model the update request RPC?

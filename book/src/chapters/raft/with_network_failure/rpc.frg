@@ -92,17 +92,12 @@ sig AppendEntriesReply extends RaftMessage {
 
 /** A message might be duplicated. This asserts that another Message atom exists (in flight), having 
     the same content as the other. */
-pred duplicate_rv[m1: RequestVote] {
+pred duplicate[m1: Message] {
     m1 in Network.messages
-    m1 in RequestVote
-    some m2: Network.messages - m1 | { 
+    // m2 must be un-used currently
+    some m2: Message - Network.messages | { 
         // *** THEY MUST BE THE SAME KIND OF MESSAGE, AND HAVE SAME FIELD VALUES ***
-        m2 in RequestVote
-        m2.requestVoteTerm = m1.requestVoteTerm
-        m2.candidateID = m1.candidateID
-        m2.lastLogIndex = m1.lastLogIndex
-        m2.lastLogTerm = m1.lastLogTerm
-        
+        message_extensional_equality[m1, m2]
         Network.messages' = Network.messages + m2
     }
 }
@@ -114,12 +109,49 @@ pred frame_server[s: Server] {
   s.currentTerm' = s.currentTerm
 }
 
+/** Helper to judge field-equality. 
+    NOTE WELL: this must be expanded if more messages are added or fields are changed. 
+*/ 
+pred message_extensional_equality[m1, m2: Message] { 
+  m1 in RaftMessage => {
+    m2 in RaftMessage
+    m1.from = m2.from
+    m1.to = m2.to
+  }
+  m1 in RequestVote => {
+    m2 in RequestVote
+    m1.requestVoteTerm = m2.requestVoteTerm
+    m1.candidateID = m2.candidateID
+    m1.lastLogIndex = m2.lastLogIndex
+    m1.lastLogTerm = m2.lastLogTerm
+  }
+  m1 in RequestVoteReply => {
+    m2 in RequestVoteReply
+    m1.replyRequestVoteTerm = m2.replyRequestVoteTerm
+    m1.voteGranted = m2.voteGranted
+  }
+  m1 in AppendEntries => {
+    m2 in AppendEntries
+    m1.appendEntriesTerm = m2.appendEntriesTerm
+    m1.leaderID = m2.leaderID
+    m1.prevLogIndex = m2.prevLogIndex
+    m1.prevLogTerm = m2.prevLogTerm
+    m1.entries = m2.entries
+    m1.leaderCommit = m2.leaderCommit
+  }
+  m1 in AppendEntriesReply => {
+    m2 in AppendEntriesReply
+    m1.appendEntriesReplyTerm = m2.appendEntriesReplyTerm
+    m1.success = m2.success
+  }
+}
+
 /** Transition predicate: the network performs some error behavior. */
 pred network_error { 
   // One of the various flavors of error occurs
   (some m: Network.messages | drop[m])
   or 
-  (some rv: RequestVote | duplicate_rv[rv])
+  (some m: Network.messages | duplicate[m])
 
   // Server state remains the same 
   all s: Server | frame_server[s]
