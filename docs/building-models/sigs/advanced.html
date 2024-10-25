@@ -1,0 +1,295 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Advanced: Sigs and fields, under-the-hood - Logic for Systems: Lightweight Formal Methods for Everybody</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="shortcut icon" href="../../../favicon.png">
+        <link rel="stylesheet" href="../../../css/variables.css">
+        <link rel="stylesheet" href="../../../css/general.css">
+        <link rel="stylesheet" href="../../../css/chrome.css">
+        <link rel="stylesheet" href="../../../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../../../highlight.css">
+        <link rel="stylesheet" href="../../../tomorrow-night.css">
+        <link rel="stylesheet" href="../../../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../../../././mdbook-admonish.css">
+        <link rel="stylesheet" href="../../.././mdbook-admonish.css">
+        <link rel="stylesheet" href="../../.././custom.css">
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../../../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item affix "><a href="../../../welcome.html">How to Read this book</a></li><li class="chapter-item affix "><li class="part-title">Preamble: Beyond Testing</li><li class="chapter-item "><a href="../../../chapters/manifesto/job.html">What good is this book?</a></li><li class="chapter-item "><a href="../../../chapters/manifesto/manifesto.html">Logic for Systems</a></li><li class="chapter-item "><a href="../../../chapters/properties/pbt.html">From Tests to Properties</a></li><li class="chapter-item affix "><li class="part-title">Modeling Static Scenarios</li><li class="chapter-item "><a href="../../../chapters/ttt/ttt.html">Tic-Tac-Toe</a></li><li class="chapter-item "><a href="../../../chapters/bst/bst.html">Binary Search Trees</a></li><li class="chapter-item "><a href="../../../chapters/adder/rca.html">Ripple-Carry Adder</a></li><li class="chapter-item "><a href="../../../chapters/qna/static.html">Q&A: Static Modeling</a></li><li class="chapter-item affix "><li class="part-title">Discrete Event Systems</li><li class="chapter-item "><a href="../../../chapters/ttt/ttt_games.html">Transitions, Traces, and Verification</a></li><li class="chapter-item "><a href="../../../chapters/inductive/bsearch.html">Counterexamples to Induction</a></li><li class="chapter-item "><a href="../../../chapters/bst/descent.html">BSTs: Recursive Descent</a></li><li class="chapter-item "><a href="../../../chapters/validation/validating_events.html">Validating Models (in progress)</a></li><li class="chapter-item "><a href="../../../chapters/qna/events.html">Q&A: Event Systems (in progress)</a></li><li class="chapter-item affix "><li class="part-title">Modeling Relationships</li><li class="chapter-item "><a href="../../../chapters/relations/modeling-booleans-1.html">Relational Forge, Modeling Logic</a></li><li class="chapter-item "><a href="../../../chapters/relations/reachability.html">Transitive Closure</a></li><li class="chapter-item "><a href="../../../chapters/relations/sets-induction-mutex.html">Modeling Mutual Exclusion</a></li><li class="chapter-item "><a href="../../../chapters/relations/sets-beyond-assertions.html">Going Beyond Assertions</a></li><li class="chapter-item "><a href="../../../chapters/solvers/bounds_booleans_how_forge_works.html">How does Forge Work?</a></li><li class="chapter-item "><a href="../../../chapters/qna/relations.html">Q&A: Relations</a></li><li class="chapter-item affix "><li class="part-title">Temporal Specification</li><li class="chapter-item "><a href="../../../chapters/temporal/liveness_and_lassos.html">Liveness and Lassos</a></li><li class="chapter-item "><a href="../../../chapters/temporal/temporal_operators.html">Temporal Forge</a></li><li class="chapter-item "><a href="../../../chapters/temporal/temporal_operators_2.html">Linear Temporal Logic</a></li><li class="chapter-item "><a href="../../../chapters/temporal/obligations_past.html">Obligations and the Past</a></li><li class="chapter-item "><a href="../../../chapters/temporal/fixing_lock_temporal.html">Mutual Exclusion, Revisited</a></li><li class="chapter-item affix "><li class="part-title">Additional Examples, Case Studies, and Further Reading</li><li class="chapter-item "><a href="../../../chapters/raft/raft.html">Modeling Raft in Anger (in progress)</a></li><li class="chapter-item "><div>Forge: Comparing Prim's and Dijkstra's Algorithms (in progress)</div></li><li class="chapter-item "><div>Forge+Industry: Policy and Network Analysis (in progress; DEMO: ABAC, Margrave, Zelkova)</div></li><li class="chapter-item "><div>Forge+Industry: Crypto Protocol Analysis (in progress; DEMO: crypto lang, CPSA or other)</div></li><li class="chapter-item "><div>Program Synthesis (in progress; DEMO: SSA synth, Sygus)</div></li><li class="chapter-item "><a href="../../../further_reading.html">Further Reading (in progress)</a></li><li class="chapter-item affix "><li class="part-title">Construction Storage</li><li class="chapter-item "><a href="../../../chapters/solvers/dpll.html">DPLL (to edit)</a></li><li class="chapter-item "><a href="../../../chapters/solvers/resolution.html">Propositional resolution (to edit)</a></li><li class="chapter-item affix "><li class="part-title">Forge Documentation</li><li class="chapter-item "><a href="../../../chapters/docs/test.html">Forge Version</a></li><li class="chapter-item "><a href="../../../docs/getting-started/installation.html">Installation</a></li><li class="chapter-item "><a href="../../../docs/building-models/overview.html">Overview</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../../docs/building-models/alloy-user-overview.html">Addendum for Alloy Users</a></li></ol></li><li class="chapter-item expanded "><a href="../../../docs/building-models/sigs/sigs.html">Sigs</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../../docs/building-models/sigs/inheritance.html">Inheritance</a></li><li class="chapter-item "><a href="../../../docs/building-models/sigs/singleton-maybe-sigs.html">Singleton, Maybe, and Abstract Sigs</a></li><li class="chapter-item "><a href="../../../docs/building-models/sigs/multiplicity.html">Field Multiplicity</a></li><li class="chapter-item expanded "><a href="../../../docs/building-models/sigs/advanced.html" class="active">Advanced: Sigs and fields, under-the-hood</a></li></ol></li><li class="chapter-item "><a href="../../../docs/building-models/constraints/constraints.html">Constraints</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../../docs/building-models/constraints/instances.html">Instances</a></li><li class="chapter-item "><a href="../../../docs/building-models/constraints/formulas/formulas.html">Formulas</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../../docs/building-models/constraints/formulas/operators.html">Operators</a></li><li class="chapter-item "><a href="../../../docs/building-models/constraints/formulas/cardinality-membership.html">Cardinality and Membership</a></li><li class="chapter-item "><a href="../../../docs/building-models/constraints/formulas/quantifiers.html">Quantifiers</a></li><li class="chapter-item "><a href="../../../docs/building-models/constraints/formulas/predicates.html">Predicates</a></li></ol></li><li class="chapter-item "><a href="../../../docs/building-models/constraints/expressions/expressions.html">Expressions</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../../docs/building-models/constraints/expressions/relational-expressions/relational-expressions.html">Relational Operators</a></li><li class="chapter-item "><a href="../../../docs/building-models/constraints/expressions/functions.html">Functions</a></li><li class="chapter-item "><a href="../../../docs/building-models/constraints/expressions/let-expressions.html">Let-Expressions</a></li></ol></li></ol></li><li class="chapter-item "><a href="../../../docs/building-models/comments.html">Comments</a></li><li class="chapter-item "><a href="../../../docs/running-models/running.html">Running</a></li><li class="chapter-item "><a href="../../../docs/running-models/sterling-visualizer.html">Sterling Visualizer</a></li><li class="chapter-item "><a href="../../../docs/running-models/bounds.html">Bounds</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../../docs/running-models/concrete-instance-bounds.html">Concrete Instance Bounds</a></li></ol></li><li class="chapter-item "><a href="../../../docs/running-models/options.html">Options</a></li><li class="chapter-item "><a href="../../../docs/testing-chapter/testing.html">Testing</a></li><li class="chapter-item "><a href="../../../docs/forge-standard-library/integers.html">Integers</a></li><li class="chapter-item "><a href="../../../docs/forge-standard-library/constants-and-keywords.html">Constants and Keywords</a></li><li class="chapter-item "><a href="../../../docs/forge-standard-library/helpers.html">Helpers: Sequences and Reachability</a></li><li class="chapter-item "><a href="../../../docs/electrum/electrum-overview.html">Temporal Forge Overview and Operators</a></li><li class="chapter-item "><a href="../../../docs/sterling/custom-basics.html">Custom Visualization Basics</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../../docs/sterling/d3fx_apr23.html">D3FX Helpers (April 2023)</a></li><li class="chapter-item "><a href="../../../docs/sterling/svg-tips.html">Working with SVG and Imports</a></li></ol></li><li class="chapter-item "><a href="../../../docs/dsl/abac.html">Attribute-Based Access Control</a></li><li class="chapter-item "><a href="../../../docs/glossary.html">What should I do if...</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Logic for Systems: Lightweight Formal Methods for Everybody</h1>
+
+                    <div class="right-buttons">
+                        <a href="../../../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css" integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3+Aro6EYUG4+cU+KJWu/X" crossorigin="anonymous">
+<h1 id="advanced-material-how-do-sigs-and-fields-work"><a class="header" href="#advanced-material-how-do-sigs-and-fields-work">Advanced Material (How do sigs and fields work?)</a></h1>
+<p>In case you're curious, we include a very brief sketch of how sigs, fields, etc. relate to Forge's core solver engine. This information might be useful when debugging a tough problem or just for understanding the tool better.</p>
+<div id="admonition-froglet" class="admonition admonish-warning">
+<div class="admonition-title">
+<p>Froglet</p>
+<p><a class="admonition-anchor-link" href="#admonition-froglet"></a></p>
+</div>
+<div>
+<p>If you are currently working in Froglet, you may see terms in this document that you aren't yet familiar with.</p>
+</div>
+</div>
+<p>Forge's solver engine works entirely in terms of <em>sets</em>, regardless of which Forge language you are using. Each <code>sig</code> name corresponds to the set of atoms of that type in a given instance. Similarly, each field name <code>f</code> corresponds to a relation (set) with arity <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">a</span><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="mord mathnormal">i</span><span class="mord mathnormal">t</span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.10764em;">f</span><span class="mclose">)</span></span></span></span>. (The extra column in the relation holds the atom the field value belongs to.) </p>
+<div id="admonition-arity" class="admonition admonish-note">
+<div class="admonition-title">
+<p>Arity</p>
+<p><a class="admonition-anchor-link" href="#admonition-arity"></a></p>
+</div>
+<div>
+<p>The <em>arity</em> of a set is how many elements its member tuples contain. E.g., a set of atoms would have arity 1, but a set of pairs of atoms would have arity 2.</p>
+</div>
+</div>
+<p>E.g.,</p>
+<pre><code>sig B {}
+sig A {
+    myField: set A -&gt; B
+}
+</code></pre>
+<p>is internally represented as a pair of sets <code>A</code> and <code>B</code> and a 3-ary relation named <code>myField</code> that must be a subset of <code>A -&gt; A -&gt; B</code> in any instance. </p>
+<h2 id="the-role-of-bounds"><a class="header" href="#the-role-of-bounds">The role of bounds</a></h2>
+<p>Because every <code>run</code> is always equipped with a finite bound on every sig, the solver is then able to convert Forge constraints to a purely boolean logic problem, where every <em>possible</em> membership in each set is assigned a unique boolean variable. </p>
+<div id="admonition-compiling-a-forge-problem" class="admonition admonish-example">
+<div class="admonition-title">
+<p>Compiling a Forge problem</p>
+<p><a class="admonition-anchor-link" href="#admonition-compiling-a-forge-problem"></a></p>
+</div>
+<div>
+<pre><code class="language-clike">#lang forge
+sig Person {
+    bestFriend: one Person
+}
+run {
+    all p: Person | { 
+        some disj p1, p2: Person | {
+            p1.bestFriend = p 
+            p2.bestFriend = p
+        }
+    }
+} for exactly 4 Person
+</code></pre>
+<p>This model defines two sets: </p>
+<ul>
+<li><code>Person</code>, of arity 1; and</li>
+<li><code>bestFriend</code>, of arity 2.</li>
+</ul>
+<p>Since there are exactly 4 people allowed by the <code>run</code>, the contents of <code>Person</code> is fixed. But <code>bestFriend</code> may contain any pair of <code>Person</code> objects. There are <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">4</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">4</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">16</span></span></span></span> possible pairs, and so there are 16 boolean variables needed to define the <code>bestFriend</code> field.</p>
+<p>You can see these reflected in the <em>primary variable</em> portion of the statistical output Forge gives when running this file:</p>
+<pre><code>#vars: (size-variables 178); #primary: (size-primary 16); #clauses: (size-clauses 311)
+</code></pre>
+</div>
+</div>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../../docs/building-models/sigs/multiplicity.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../../../docs/building-models/constraints/constraints.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../../docs/building-models/sigs/multiplicity.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../../../docs/building-models/constraints/constraints.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+        <script src="../../../ace.js"></script>
+        <script src="../../../editor.js"></script>
+        <script src="../../../mode-rust.js"></script>
+        <script src="../../../theme-dawn.js"></script>
+        <script src="../../../theme-tomorrow_night.js"></script>
+
+        <script src="../../../elasticlunr.min.js"></script>
+        <script src="../../../mark.min.js"></script>
+        <script src="../../../searcher.js"></script>
+
+        <script src="../../../clipboard.min.js"></script>
+        <script src="../../../highlight.js"></script>
+        <script src="../../../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>
