@@ -153,12 +153,12 @@ Forge's `test expect` blocks are the most general, but also the most complex, fo
 Every `test expect` contains a set of individual checks. Each has:
 * an optional test name;
 * a predicate block; and 
-* an intention (`is sat`, `is unsat`, `is theorem`, or&mdash;rarely!&mdash;`is forge_error`). 
+* an intention (`is sat`, `is unsat`, `is checked`, or&mdash;rarely!&mdash;`is forge_error`). 
 
 The meaning of each intention is:
 * `is sat`: the predicate block is satisfiable under the given bounds; 
 * `is unsat`: the predicate block is unsatisfiable under the given bounds; and 
-* `is theorem`: the predicate block's *negation* is unsatisfiable under the given bounds.
+* `is checked`: the predicate block's *negation* is unsatisfiable under the given bounds.
 * `is forge_error`: running the predicate block under the given bounds results in a Forge error message. This is primarily used in our internal test suites. This intention allows an optional string that must match a substring of the actual error message. E.g., `... is forge_error "very bad"` would pass if the run produced a Forge error containing the substring `"very bad"`. 
 
 Like the other test forms, each test may be accompanied by numeric scopes and `inst` bounds.

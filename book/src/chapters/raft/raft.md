@@ -1186,7 +1186,7 @@ We could probably reduce this by changing the trace length to something below 10
 
 ### What about changing message field values? 
 
-In practice, a network can do more than duplicate or drop a packet. The network has the power to arbitrarily change the bits in a message. 
+In practice, a network can do more than duplicate or drop a packet. The network has the power to arbitrarily change the bits in a message. It might even manufacture a message on its own! 
 
 TODO
 

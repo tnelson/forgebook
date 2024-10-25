@@ -2,7 +2,7 @@
 <!-- # Logic for Systems: Lightweight Formal Methods for the Practical Engineer -->
 # Summary 
 [How to Read this book](./welcome.md)
-[TEMP: todos index](./todo.md)
+<!-- [TEMP: todos index](./todo.md) -->
 <!-- "prefix chapters"; cannot be nested -->
 
 # Preamble: Beyond Testing
@@ -41,8 +41,8 @@
 - [Transitions, Traces, and Verification](./chapters/ttt/ttt_games.md)
 - [Counterexamples to Induction](./chapters/inductive/bsearch.md)
 - [BSTs: Recursive Descent](./chapters/bst/descent.md)
-- [Validating Models (FILL/ADAPT; med priority)](./chapters/validation/validating_events.md) 
-- [Q&A: Event Systems (FILL/ADAPT; med priority)](./chapters/qna/events.md) 
+- [Validating Models (in progress)](./chapters/validation/validating_events.md) 
+- [Q&A: Event Systems (in progress)](./chapters/qna/events.md) 
 
 # Modeling Relationships 
 - [Relational Forge, Modeling Logic](./chapters/relations/modeling-booleans-1.md)
@@ -103,14 +103,14 @@
   -->
 
 # Additional Examples, Case Studies, and Further Reading
-- [Modeling Raft in Anger](./chapters/raft/raft.md)
-- [Forge: Comparing Prim's and Dijkstra's Algorithms (FILL from model; low priority)]()
-- [Model-Based ("Stateful") Testing (nice-to-have priority)]()
-- [Industry: Concolic Execution (DEMO: KLEE)]()
-- [Forge+Industry: Policy and Network Analysis (DEMO: ABAC, Margrave, Zelkova)]()
-- [Forge+Industry: Crypto Protocol Analysis (DEMO: crypto lang, CPSA or other)]()
-- [Program Synthesis (DEMO: SSA synth, Sygus)]() 
-- [Further Reading](./further_reading.md)
+- [Modeling Raft in Anger (in progress)](./chapters/raft/raft.md)
+- [Forge: Comparing Prim's and Dijkstra's Algorithms (in progress)]()
+<!-- - [Model-Based ("Stateful") Testing (nice-to-have priority)]() -->
+<!-- - [Industry: Concolic Execution (DEMO: KLEE)]() -->
+- [Forge+Industry: Policy and Network Analysis (in progress; DEMO: ABAC, Margrave, Zelkova)]()
+- [Forge+Industry: Crypto Protocol Analysis (in progress; DEMO: crypto lang, CPSA or other)]()
+- [Program Synthesis (in progress; DEMO: SSA synth, Sygus)]() 
+- [Further Reading (in progress)](./further_reading.md)
 
 <!-- ## Case Studies: Applications and Demos
 
@@ -167,14 +167,14 @@
   - Decidability, completeness, and incompleteness -->
 
 # Construction Storage
-- [DPLL](./chapters/solvers/dpll.md)
-- [Propositional resolution](./chapters/solvers/resolution.md)
-- [(Rough) CEGIS](./chapters/solvers/cegis.md)
-- [(Rough) SMT](./chapters/solvers/smt.md)
+- [DPLL (to edit)](./chapters/solvers/dpll.md)
+- [Propositional resolution (to edit)](./chapters/solvers/resolution.md)
+<!-- - [(Rough) CEGIS](./chapters/solvers/cegis.md) -->
+<!-- - [(Rough) SMT](./chapters/solvers/smt.md) -->
 
 
 # Forge Documentation
-- [Placeholder Test for search](./chapters/docs/test.md)
+- [Forge Version](./chapters/docs/test.md)
 
 ## Getting Started
 

@@ -1,5 +1,7 @@
 # Further Reading
 
+**IN PROGRESS**
+
 ## Textbooks
 
 Forge would never have existed without its intellectual parent, [Alloy](alloytools.org). **TODO: Alloy book, but also Jackson's new book?**

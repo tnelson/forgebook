@@ -2,6 +2,10 @@
 
 Welcome to Logic for Systems! Here are some quick hints that will help you use this book effectively.
 
+~~~admonish note title="This book is a draft!"
+This book is a draft, and there are some sections that are currently being filled in. If you want to use these materials and need support (e.g., you want to use the Forge homeworks that go with it, or a specific section you need is incomplete), please contact `Tim_Nelson@brown.edu`. 
+~~~
+
 ---
 
 ### Organization 
@@ -17,11 +21,22 @@ The book is organized into a series of short sections, each of which are grouped
 
 Each chapter contains a variety of examples: data structures, puzzles, algorithms, hardware concepts, etc. We hope that the diversity of domains covered means that everyone will see an example that resonates with them. Full language and tool documentation come _after_ the main body of the book. 
 
+#### What does this book assume? What is its goal? 
+
+This book does not assume *any* prior background with formal methods or even discrete math. It does assume the reader has written programs before at the level of an introductory college course. 
+
+The goal of this chapter progression is to prepare the reader to formally model and reason about a domain *of their own choosing* in Forge (or perhaps in a related tool, such as an SMT solver). 
+
+With that in mind...
+
 #### Do More Than Read
 
-This book is example driven, and the examples are almost always built up from the beginning. The flow of the examples is deliberate, and might even take a "wrong turn" that is meant to teach a specific lesson before changing direction. If you try to read the book passively, you're likely to be very disappointed. 
+This book is example driven, and the examples are almost always built up from the beginning. The flow of the examples is deliberate, and might even take a "wrong turn" that is meant to teach a specific lesson before changing direction. If you try to read the book passively, you're likely to be very disappointed. Worse, you may not actually be able to _do_ much with the material after reading.
 
-Instead, **follow along**, pasting each snippet of code or Forge model into the appropriate tool, and try it! Even try modifying it and see what happens. You'll get much more out of each section as a result. Forge especially is designed to aid experimentation. 
+Instead, **follow along**, pasting each snippet of code or Forge model into the appropriate tool, and try it! Better yet, try modifying it and see what happens. You'll get much more out of each section as a result. Forge especially is designed to aid experimentation. Let your motto be:
+
+<center><strong>Let's find out!</strong></center>
+<br/>
 
 ---
 
