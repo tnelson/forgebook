@@ -1188,6 +1188,8 @@ We could probably reduce this by changing the trace length to something below 10
 
 In practice, a network can do more than duplicate or drop a packet. The network has the power to arbitrarily change the bits in a message. It might even manufacture a message on its own! For simplicity, we'll leave this out. But as a result, some of our results will be weaker than they otherwise might be: showing that Raft maintains consistency in a model that doesn't admit packet modification won't tell us anything about real-world situations where that modification happens.
 
+Likewise, we won't be considering membership changes or log compaction. We'll follow figure 2 pretty closely, and see if we get into trouble. 
+
 ## Requesting Updates
 
 The final major piece to build is the `AppendEntries` RPC messages, and how updates are done in response. We can add the RPC messages easily enough, using the paper's figure 2 as a guide:
@@ -1216,6 +1218,98 @@ m1 in AppendEntriesReply => {
 }
 ```
 
-But we still need to add appropriate transitions for these messages. Right now, the only messages the system will handle are voting-related! 
+But we still need to add appropriate transitions for these messages, and those transitions need to encode the behavior of the system when such a message is received. Figure 2 of the paper sketches what a node does when it receives an `AppendEntries` message:
+
+- Reply false if term < currentTerm (§5.1)
+- Reply false if log doesn’t contain an entry at prevLogIndex whose term matches prevLogTerm (§5.3)
+- If an existing entry conflicts with a new one (same index but different terms), delete the existing entry and all that follow it (§5.3)
+- Append any new entries not already in the log
+- If leaderCommit > commitIndex, set commitIndex = min(leaderCommit, index of last new entry)
+
+I feel like we can encode these into a predicate. We'll just need to watch out to make sure our constraints match the ordering of these steps, and make sure that a reply is always sent. To keep the transition from getting tangled when we start talking about the reply, I'll actually make two transition predicates: one for false replies, and one for true replies. 
+
+```forge
+pred canReceiveAppendGood[msg: AppendEntries] {
+    -- [TODO: term >= currentTerm]
+    -- [TODO: there is a local log entry at (prevLogTerm, prevLogIndex)]
+}
+
+pred receiveAppendBad {
+    -- GUARD 
+    -- [TODO: actually can and do receive the message <msg>. similar to receiving votes.]
+    not canReceiveAppendGood[msg]
+    -- ACTION
+    -- make no change to local log 
+    -- [TODO: add a false reply to the network]
+}
+pred receiveAppendGood {
+    -- GUARD
+    -- [TODO: actually can and do receive the message <msg>. similar to receiving votes.]
+    canReceiveAppendGood[msg]
+    -- ACTION
+    -- make a change to the local log
+    -- [TODO: if there's something at this index with a different term, delete it and all following]
+    -- [TODO: append new entries not already present]
+    -- [TODO: If leaderCommit > commitIndex, set commitIndex = min(leaderCommit, index of last new entry)]
+    -- [TODO: add a true reply to the network]
+}
+```
+
+Those last few "TODO"s in `receiveAppendGood` seem like they'll interfere with each other, since Forge isn't imperative. In particular, we'll need to delete (if needed) and append (if needed) entries in the same transition. So those two will likely get combined into a single constraint. 
+
+And we need to handle replies: 
+
+```forge
+pred receiveAppendReply {
+    -- GUARD
+    -- [TODO: actually can and do receive the reply <msg>. similar to receiving votes.]
+    -- If this is a "true" reply, do nothing. If it's a "false" reply, we need to resend
+    -- with changes: "After a rejection, the leader decrements nextIndex and retries the 
+    -- AppendEntries RPC. Eventually nextIndex will reach a point where the leader and 
+    -- follower logs match."
+    -- [TODO: if false reply, decrement and send a new message]
+}
+```
+
+~~~admonish note title="Number of messages"
+I'm again starting to get a little worried about the bound on `Message` we'll give Forge. We need 2 messages every time the follower rejects an update request. We'll also need 2 state transitions, which means traces are likely to get pretty long for situations where the logs are very out of sync. 
+~~~
+
+We also need to add the log to our servers, which until now have only been concerned with voting and leadership related state. 
+
+```forge
+/** "each entry contains command for state machine, 
+     and term when entry was received by leader" 
+     
+  We'll abstract out state-machine commands for the moment. */
+sig Entry {
+  termReceived: one Int
+}
+```
+
+and one more field for `Server`, along with the necessary additions to helpers like `frame_server`. All servers will begin with an empty log:
+
+```forge
+sig Server {
+    var role: one Role,
+    var votedFor: lone Server, 
+    var currentTerm: one Int,
+    var log: pfunc Int -> Entry
+}
+```
+
+Finally, we need a transition that represents a client request to execute a state-machine command. These requests will be managed only by the current leader (if any). Since we're interested in the replicated log, we won't model the exact command(s) requested, but rather the addition of a new `Entry` that must be replicated. We'll keep commands out of it, unless we end up needing them. 
+
+```forge
+pred processClientRequest {
+    -- GUARD: this can happen at any time, provided there is a Leader
+    some s: Server | s.role = Leader 
+    -- ACTION: the leader updates its log and sends AppendEntries RPC requests to all Followers.
+    -- TODO
+}
+```
+
+## Understanding Raft: 
+
 
 TODO

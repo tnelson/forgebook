@@ -22,8 +22,13 @@ sig RaftMessage extends Message {
     from, to: one Server
 }
 
-/** Nothing here yet. */
-sig Entry {}
+/** "each entry contains command for state machine, 
+     and term when entry was received by leader" 
+     
+  We'll abstract out state-machine commands for the moment. */
+sig Entry {
+  termReceived: one Int
+}
 
 /**
   From figure 2:

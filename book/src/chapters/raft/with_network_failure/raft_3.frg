@@ -18,6 +18,7 @@ pred init {
         s.role = Follower
         no s.votedFor
         s.currentTerm = 0 
+        no s.log
     } 
 }
 
