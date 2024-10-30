@@ -1186,10 +1186,36 @@ We could probably reduce this by changing the trace length to something below 10
 
 ### What about changing message field values? 
 
-In practice, a network can do more than duplicate or drop a packet. The network has the power to arbitrarily change the bits in a message. It might even manufacture a message on its own! 
+In practice, a network can do more than duplicate or drop a packet. The network has the power to arbitrarily change the bits in a message. It might even manufacture a message on its own! For simplicity, we'll leave this out. But as a result, some of our results will be weaker than they otherwise might be: showing that Raft maintains consistency in a model that doesn't admit packet modification won't tell us anything about real-world situations where that modification happens.
+
+## Requesting Updates
+
+The final major piece to build is the `AppendEntries` RPC messages, and how updates are done in response. We can add the RPC messages easily enough, using the paper's figure 2 as a guide:
+
+```forge
+appendEntriesTerm: one Int, 
+    leaderID: one Server, 
+    prevLogIndex: one Int, 
+    prevLogTerm: one Int, 
+    entries: set Entry,
+    leaderCommit: one Int
+}
+sig AppendEntriesReply extends RaftMessage {
+    appendEntriesReplyTerm: one Int, 
+    success: lone Server -- represent true boolean as non-empty
+}
+```
+
+Then we need to add constraints to our `message_extensional_equality` predicate that check fields of these two message types. E.g., 
+
+```forge
+m1 in AppendEntriesReply => {
+    m2 in AppendEntriesReply
+    m1.appendEntriesReplyTerm = m2.appendEntriesReplyTerm
+    m1.success = m2.success
+}
+```
+
+But we still need to add appropriate transitions for these messages. Right now, the only messages the system will handle are voting-related! 
 
 TODO
-
-## Now what? 
-
-TODO: what can we check about Raft now, even before we model the update request RPC?
