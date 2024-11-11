@@ -1309,7 +1309,60 @@ pred processClientRequest {
 }
 ```
 
-## Understanding Raft: 
+## Understanding Raft: Figure 8
+
+~~~admonish warning title="What happens when you step away?"
+I've been away from this project for multiple weeks. I went to OOPSLA to give the Forge talk, and then spent the next 2 weeks playing catch-up. So I'm only now sitting down to work on this project, having again forgotten the local context!
+
+I was about to get into a fairly complicated, inter-related set of predicates. Jumping right in would be a bad idea, so I want to start off working from a different direction.  
+~~~
+
+Let's focus on a desired _outcome_: understanding the scenario in the [Raft paper](https://raft.github.io/raft.pdf)'s figure 8, and the accompanying statement: "a leader cannot determine commitment using log entries from older terms". Let's see if we can get Forge to produce examples like this. Here's the figure, with caption, taken from the extended version of Ongaro and Ousterhout:
+
+[Figure 8. A time sequence showing why a leader cannot determine commitment using log entries from older terms.](./img/figure_8.png) 
+
+The caption describes the following trace of the protocol. I've highlighted the portions that we don't currently have modeled:
+* In (a) S1 is leader and **partially replicates the log entry at index 2**. 
+* In (b) S1 crashes; S5 is elected leader for term 3 with votes from S3, S4, and itself, and **accepts a different entry at log index 2**. 
+* In (c) S5 crashes; S1 restarts, is elected leader, and **continues replication**. At this point, the log entry from term 2 has been **replicated** on a majority of the servers, but it is **not committed**. 
+* If S1 crashes as in (d), S5 could be elected leader (with votes from S2, S3, and S4) and **overwrite the entry** with its own entry from term 3. 
+* However, if S1 **replicates an entry** from its current term on a majority of the servers before crashing, as in (e), then **this entry is committed** (S5 cannot win an election). At this point all preceding entries in the log are **committed** as well.
+
+These are all about the log and commits. The key question is: do we need to model which log entries _have been_ committed, or does it suffice to model only the log itself, and which entries _can_ be committed? At first glance, it seems like recording commit state might be necessary. 
+
+~~~admonish tip title="We didn't model crashes!"
+I haven't highlighted phrases like "S1 crashes" even though we don't have a `crashServer` transition. We model unreliability in the form of dropped messages (which is more general than a crashed server). There are possible risks with this modeling choice, of course: I need to be careful to make sure that dropped messages can always happen, and that the server transitions don't misbehave in the presence of dropped messages.
+~~~
+
+## "Cheating" Benevolently 
+
+Given that we already _have_ an example trace, and we haven't written any tests recently, I think it would be a good idea to turn the figure 8 example into a test. Along the way, we'll understand the figure better and fill in placeholder predicates to represent the missing transitions. Then we can add the real transition constraints, with a test in place to make sure we aren't overconstraining it out. 
+
+Is this "cheating"? I'd argue no. We could have manually come up with a test trace ourselves, and we're aiming to get a lot more out of this model than just echoing what's in the paper. 
+
+### Encoding the Trace 
+
+Let's make the figure caption a comment in a new Forge file ([raft_fig8.frg](./with_network_failure/raft_fig8.frg) and convert it to a test. As I was writing this, I worked through that section of the paper and left comments for myself explaining what I believe the situation is. Here's how those comments end: 
+
+>     Note this subtle wording (caps mine) to motivate the second addition. "a leader knows that an entry from ITS CURRENT TERM is committed once that entry is stored on a majority of the servers." vs. "a leader cannot immediately conclude that an entry from A PREVIOUS TERM is committed once it is stored on a majority of servers"
+>
+>    *** TAKEAWAY ***
+>    When a server crashes (or becomes inaccessible), a currently pending entry will either be considered committed or not committed after a new leader is elected, depending on whether that entry is replicated on a majority of servers _at the time of the election_.
+
+Once we're done with this trace, we'll write an `is_committed` predicate that encodes this logic. 
+
+
+```forge
+test expect {
+
+}
+```
+
+
+
+
+# ## Is an entry committed?
+
 
 
 TODO

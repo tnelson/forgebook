@@ -266,6 +266,6 @@ option core_minimization rce
 */
 
 
-run {    
-  two_elections_in_a_row
-} for exactly 3 Server, 6 Message
+// run {    
+//   two_elections_in_a_row
+// } for exactly 3 Server, 6 Message

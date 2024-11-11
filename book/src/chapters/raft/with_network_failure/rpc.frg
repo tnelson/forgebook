@@ -14,7 +14,8 @@ one sig Follower, Candidate, Leader extends Role {}
 sig Server {
     var role: one Role,
     var votedFor: lone Server, 
-    var currentTerm: one Int
+    var currentTerm: one Int,
+    var log: pfunc Int -> Entry
 }
 
 /** Now we need a notion of intended sender and receiver. */
@@ -25,7 +26,10 @@ sig RaftMessage extends Message {
 /** "each entry contains command for state machine, 
      and term when entry was received by leader" 
      
-  We'll abstract out state-machine commands for the moment. */
+  We'll abstract out state-machine commands for the moment. 
+  
+  TODO: concern: what if termReceived differs across servers?
+  */
 sig Entry {
   termReceived: one Int
 }
