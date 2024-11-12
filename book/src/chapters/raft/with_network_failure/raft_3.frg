@@ -12,13 +12,12 @@ option max_tracelength 10
 //option verbose 10
 
 /** The initial startup state for the cluster */
-pred init {
+pred election_init {
     message_init -- no messages in flight
     all s: Server | { 
         s.role = Follower
         no s.votedFor
         s.currentTerm = 0 
-        no s.log
     } 
 }
 
@@ -217,7 +216,7 @@ pred election_doNothing {
 /** Allow arbitrary no-op ("stutter") transitions, a la TLA+. We'll either 
     assert fairness, or use some other means to avoid useless traces. */ 
 pred electionSystemTrace {
-    init
+    election_init
     always { 
         (some s: Server | startElection[s])
         or

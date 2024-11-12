@@ -4,7 +4,6 @@ open "messages.frg"
 open "rpc.frg"
 open "raft_3.frg"
 
-
 -- Transition-system checks for combinations of transitions; no use of the trace pred yet.
 test expect {
   -- All of these transitions (except the no-op) should be mututally exclusive. 
@@ -22,7 +21,7 @@ test expect {
   
   -- Start -> Vote -> Win
   sat_start_make_win: {
-    init
+    election_init
     (some s: Server | startElection[s])
     next_state (some s1, s2: Server | makeVote[s1, s2])
     next_state next_state (some s: Server | winElection[s])
@@ -30,7 +29,7 @@ test expect {
 
   -- Start -> Vote -> Halt 
   sat_start_make_halt: {
-    init
+    election_init
     (some s: Server | startElection[s])
     next_state (some s1, s2: Server | makeVote[s1, s2])
     next_state next_state (haltElection)
@@ -38,14 +37,14 @@ test expect {
 
   -- Start -> Halt
   sat_start_halt: {
-    init
+    election_init
     (some s: Server | startElection[s])
     next_state (haltElection)
   } is sat 
   
   -- Start -> Vote -> Win -> Start
   sat_start_make_win_start: {
-    init
+    election_init
     (some s: Server | startElection[s])
     next_state (some s1, s2: Server | makeVote[s1, s2])
     next_state next_state (some s: Server | winElection[s])
@@ -54,7 +53,7 @@ test expect {
 
   -- Start -> Vote -> Win -> Start -> StepDown
   sat_start_make_win_start_stepdown: {
-    init
+    election_init
     (some s: Server | startElection[s])
     next_state (some s1, s2: Server | makeVote[s1, s2])
     next_state next_state (some s: Server | winElection[s])
@@ -73,17 +72,17 @@ test expect {
     electionSystemTrace implies
     (some s: Server | winElection[s]) implies 
     once (some s: Server | startElection[s])
-  } is theorem 
+  } is checked 
   halt_implies_started: {
     electionSystemTrace implies
     (haltElection) implies 
     once (some s: Server | startElection[s])
-  } is theorem 
+  } is checked
   vote_implies_started: {
     electionSystemTrace implies
     (some s1, s2: Server | makeVote[s1, s2]) implies 
     once (some s: Server | startElection[s])
-  } is theorem 
+  } is checked
 }
 
 -- Domain-specific checks involving the trace pred
@@ -93,7 +92,7 @@ test expect {
     electionSystemTrace implies
     (all s: Server | {
       always {s.role = Leader implies s.role' != Candidate}
-    })} is theorem
+    })} is checked
 
   leader_stops_leading: {
     electionSystemTrace 
@@ -130,7 +129,7 @@ test expect {
   invariant_lone_leader: {
     electionSystemTrace implies
     always {lone role.Leader}
-  } is theorem
+  } is checked
 
   -- Check that the term is being advanced (dependent on trace length settings)
   term_can_reach_3: {
