@@ -1,0 +1,372 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>What should I do if... - Logic for Systems: Lightweight Formal Methods for Everybody</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../././mdbook-admonish.css">
+        <link rel="stylesheet" href=".././mdbook-admonish.css">
+        <link rel="stylesheet" href=".././custom.css">
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item affix "><a href="../welcome.html">How to Read this book</a></li><li class="chapter-item affix "><li class="part-title">Preamble: Beyond Testing</li><li class="chapter-item "><a href="../chapters/manifesto/job.html">What good is this book?</a></li><li class="chapter-item "><a href="../chapters/manifesto/manifesto.html">Logic for Systems</a></li><li class="chapter-item "><a href="../chapters/properties/pbt.html">From Tests to Properties</a></li><li class="chapter-item affix "><li class="part-title">Modeling Static Scenarios</li><li class="chapter-item "><a href="../chapters/ttt/ttt.html">Tic-Tac-Toe</a></li><li class="chapter-item "><a href="../chapters/bst/bst.html">Binary Search Trees</a></li><li class="chapter-item "><a href="../chapters/adder/rca.html">Ripple-Carry Adder</a></li><li class="chapter-item "><a href="../chapters/qna/static.html">Q&A: Static Modeling</a></li><li class="chapter-item affix "><li class="part-title">Discrete Event Systems</li><li class="chapter-item "><a href="../chapters/ttt/ttt_games.html">Transitions, Traces, and Verification</a></li><li class="chapter-item "><a href="../chapters/inductive/bsearch.html">Counterexamples to Induction</a></li><li class="chapter-item "><a href="../chapters/bst/descent.html">BSTs: Recursive Descent</a></li><li class="chapter-item "><a href="../chapters/validation/validating_events.html">Validating Models (in progress)</a></li><li class="chapter-item "><a href="../chapters/qna/events.html">Q&A: Event Systems (in progress)</a></li><li class="chapter-item affix "><li class="part-title">Modeling Relationships</li><li class="chapter-item "><a href="../chapters/relations/modeling-booleans-1.html">Relational Forge, Modeling Logic</a></li><li class="chapter-item "><a href="../chapters/relations/reachability.html">Transitive Closure</a></li><li class="chapter-item "><a href="../chapters/relations/sets-induction-mutex.html">Modeling Mutual Exclusion</a></li><li class="chapter-item "><a href="../chapters/relations/sets-beyond-assertions.html">Going Beyond Assertions</a></li><li class="chapter-item "><a href="../chapters/solvers/bounds_booleans_how_forge_works.html">How does Forge Work?</a></li><li class="chapter-item "><a href="../chapters/qna/relations.html">Q&A: Relations</a></li><li class="chapter-item affix "><li class="part-title">Temporal Specification</li><li class="chapter-item "><a href="../chapters/temporal/liveness_and_lassos.html">Liveness and Lassos</a></li><li class="chapter-item "><a href="../chapters/temporal/temporal_operators.html">Temporal Forge</a></li><li class="chapter-item "><a href="../chapters/temporal/temporal_operators_2.html">Linear Temporal Logic</a></li><li class="chapter-item "><a href="../chapters/temporal/obligations_past.html">Obligations and the Past</a></li><li class="chapter-item "><a href="../chapters/temporal/fixing_lock_temporal.html">Mutual Exclusion, Revisited</a></li><li class="chapter-item affix "><li class="part-title">Additional Examples, Case Studies, and Further Reading</li><li class="chapter-item "><a href="../chapters/raft/raft.html">Modeling Raft in Anger (in progress)</a></li><li class="chapter-item "><div>Forge: Comparing Prim's and Dijkstra's Algorithms (in progress)</div></li><li class="chapter-item "><div>Forge+Industry: Policy and Network Analysis (in progress; DEMO: ABAC, Margrave, Zelkova)</div></li><li class="chapter-item "><div>Forge+Industry: Crypto Protocol Analysis (in progress; DEMO: crypto lang, CPSA or other)</div></li><li class="chapter-item "><div>Program Synthesis (in progress; DEMO: SSA synth, Sygus)</div></li><li class="chapter-item "><a href="../further_reading.html">Further Reading (in progress)</a></li><li class="chapter-item affix "><li class="part-title">Construction Storage</li><li class="chapter-item "><a href="../chapters/solvers/dpll.html">DPLL (to edit)</a></li><li class="chapter-item "><a href="../chapters/solvers/resolution.html">Propositional resolution (to edit)</a></li><li class="chapter-item affix "><li class="part-title">Forge Documentation</li><li class="chapter-item "><a href="../chapters/docs/test.html">Forge Version</a></li><li class="chapter-item "><a href="../docs/getting-started/installation.html">Installation</a></li><li class="chapter-item "><a href="../docs/building-models/overview.html">Overview</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../docs/building-models/alloy-user-overview.html">Addendum for Alloy Users</a></li></ol></li><li class="chapter-item "><a href="../docs/building-models/sigs/sigs.html">Sigs</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../docs/building-models/sigs/inheritance.html">Inheritance</a></li><li class="chapter-item "><a href="../docs/building-models/sigs/singleton-maybe-sigs.html">Singleton, Maybe, and Abstract Sigs</a></li><li class="chapter-item "><a href="../docs/building-models/sigs/multiplicity.html">Field Multiplicity</a></li><li class="chapter-item "><a href="../docs/building-models/sigs/advanced.html">Advanced: Sigs and fields, under-the-hood</a></li></ol></li><li class="chapter-item "><a href="../docs/building-models/constraints/constraints.html">Constraints</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../docs/building-models/constraints/instances.html">Instances</a></li><li class="chapter-item "><a href="../docs/building-models/constraints/formulas/formulas.html">Formulas</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../docs/building-models/constraints/formulas/operators.html">Operators</a></li><li class="chapter-item "><a href="../docs/building-models/constraints/formulas/cardinality-membership.html">Cardinality and Membership</a></li><li class="chapter-item "><a href="../docs/building-models/constraints/formulas/quantifiers.html">Quantifiers</a></li><li class="chapter-item "><a href="../docs/building-models/constraints/formulas/predicates.html">Predicates</a></li></ol></li><li class="chapter-item "><a href="../docs/building-models/constraints/expressions/expressions.html">Expressions</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../docs/building-models/constraints/expressions/relational-expressions/relational-expressions.html">Relational Operators</a></li><li class="chapter-item "><a href="../docs/building-models/constraints/expressions/functions.html">Functions</a></li><li class="chapter-item "><a href="../docs/building-models/constraints/expressions/let-expressions.html">Let-Expressions</a></li></ol></li></ol></li><li class="chapter-item "><a href="../docs/building-models/comments.html">Comments</a></li><li class="chapter-item "><a href="../docs/running-models/running.html">Running</a></li><li class="chapter-item "><a href="../docs/running-models/sterling-visualizer.html">Sterling Visualizer</a></li><li class="chapter-item "><a href="../docs/running-models/bounds.html">Bounds</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../docs/running-models/concrete-instance-bounds.html">Concrete Instance Bounds</a></li></ol></li><li class="chapter-item "><a href="../docs/running-models/options.html">Options</a></li><li class="chapter-item "><a href="../docs/testing-chapter/testing.html">Testing</a></li><li class="chapter-item "><a href="../docs/forge-standard-library/integers.html">Integers</a></li><li class="chapter-item "><a href="../docs/forge-standard-library/constants-and-keywords.html">Constants and Keywords</a></li><li class="chapter-item "><a href="../docs/forge-standard-library/helpers.html">Helpers: Sequences and Reachability</a></li><li class="chapter-item "><a href="../docs/electrum/electrum-overview.html">Temporal Forge Overview and Operators</a></li><li class="chapter-item "><a href="../docs/sterling/custom-basics.html">Custom Visualization Basics</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../docs/sterling/d3fx_apr23.html">D3FX Helpers (April 2023)</a></li><li class="chapter-item "><a href="../docs/sterling/svg-tips.html">Working with SVG and Imports</a></li></ol></li><li class="chapter-item "><a href="../docs/dsl/abac.html">Attribute-Based Access Control</a></li><li class="chapter-item expanded "><a href="../docs/glossary.html" class="active">What should I do if...</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Logic for Systems: Lightweight Formal Methods for Everybody</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css" integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3+Aro6EYUG4+cU+KJWu/X" crossorigin="anonymous">
+<h1 id="what-should-i-do-if"><a class="header" href="#what-should-i-do-if">What should I do if...?</a></h1>
+<h2 id="pardinus-cli-shut-down-unexpectedly"><a class="header" href="#pardinus-cli-shut-down-unexpectedly">Pardinus CLI shut down unexpectedly</a></h2>
+<p>This means that the backend solver process (Pardinus) has terminated early. Usually there is an error message, or at least some error state that is displayed. If you don't see anything, turn on <code>option verbosity 2</code>, which will echo back the info messages that Pardinus sends. </p>
+<h3 id="arity-too-large"><a class="header" href="#arity-too-large">Arity too large</a></h3>
+<p>You might see an info message like this:</p>
+<pre><code>(info &quot;Arity too large 5 for a universe of size 131 line 10, pos 56:
+r:posture [-&gt; none -&gt; none -&gt; none -&gt; none none :: {130 128 129 129 128}]
+                                                       ^
+&quot;)
+</code></pre>
+<p>This is a low-level translation error, and it comes from the fact that Pardinus needs to index all possible tuples in every relation. Even tuples that cannot exist because of typing constraints must have an index. But indexes can only go as high as Java's <code>Integer.MAX_VALUE</code>—just over 4 billion.</p>
+<p>To see this happening, you can try running this small example. The problem can happen when you have &quot;wide&quot; fields like this. It's natural to want to model a router or firewall as a wide relation or function:</p>
+<pre><code class="language-forge">#lang forge
+option verbosity 2
+sig Interface {}
+sig IP {}
+sig ForwardingTable {
+  posture: set Interface -&gt; IP -&gt; IP -&gt; Interface
+}
+run {} for 1 Interface, 1 IP, 1 ForwardingTable, 7 Int
+</code></pre>
+<p>In principle, there is only <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span> possible tuple that could inhabit <code>posture</code>, because there are never more than 1 of each of the non-integer types. This should be <em>easy</em> to solve! But Pardinus crashes with the above error. Why? Because at <code>7 Int</code>, there are <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8141em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">7</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">128</span></span></span></span> integer atoms, and thus <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">131</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">131</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">131</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">131</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">131</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8141em;"></span><span class="mord">13</span><span class="mord"><span class="mord">1</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">5</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8389em;vertical-align:-0.1944em;"></span><span class="mord">38</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">579</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">489</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">651</span></span></span></span> tuples in the indexable space that Pardinus will try to optimize. But this is far above Java's <code>Integer.MAX_VALUE</code>. </p>
+<p>Adding constraints or more typing information won't solve this problem. Not even a partial <code>inst</code> will help. There are effectively only two things you can do:</p>
+<ul>
+<li>reduce the number of potential atoms in any instance; or </li>
+<li>reduce the arity of your model's relations.
+Neither of these are ideal, but you can often make progress by reducing scopes on your <code>sig</code>s, especially <code>Int</code>. If you don't need <code>Int</code>, reduce the bitwidth to the minimum: <code>1 Int</code>. That may reduce the number of atoms enough. 
+You can also try refactoring your model to make relations smaller. </li>
+</ul>
+<p>This is, unfortunately, a low-level issue that the Forge team can't easily fix. And it's a rare problem. But when it occurs, it can be a big problem. Hence this entry. </p>
+<h3 id="errors-related-to-bounds"><a class="header" href="#errors-related-to-bounds">Errors Related to Bounds</a></h3>
+<h4 id="please-specify-an-upper-bound-for-ancestors-of-"><a class="header" href="#please-specify-an-upper-bound-for-ancestors-of-">Please specify an upper bound for ancestors of ...</a></h4>
+<p>If <code>A</code> is a <code>sig</code>, and you get an error that says &quot;Please specify an upper bound for ancestors of A&quot;, this means that, while you've defined the contents of <code>A</code>, Forge cannot infer corresponding contents for the parent <code>sig</code> of <code>A</code> and needs you to provide a binding. </p>
+<div id="admonition-example" class="admonition admonish-example">
+<div class="admonition-title">
+<p>Example</p>
+<p><a class="admonition-anchor-link" href="#admonition-example"></a></p>
+</div>
+<div>
+<p>Given this definition:</p>
+<pre><code>sig Course {}
+sig Intro, Intermediate, UpperLevel extends Course {} 
+</code></pre>
+<p>and this example:</p>
+<pre><code>example someIntro is {wellformed} for {
+    Intro = `CSCI0150
+}
+</code></pre>
+<p>the above error will be produced. Add a bound for <code>Course</code>:</p>
+<pre><code>example someIntro is {wellformed} for {
+    Intro = `CSCI0150
+    Course = `CSCI0150
+}
+</code></pre>
+</div>
+</div>
+<h3 id="errors-related-to-testing"><a class="header" href="#errors-related-to-testing">Errors Related to Testing</a></h3>
+<h4 id="invalid-example--the-instance-specified-is-impossible-"><a class="header" href="#invalid-example--the-instance-specified-is-impossible-">Invalid example ... the instance specified is impossible ...</a></h4>
+<p>If an <code>example</code> fails, Forge will attempt to disambiguate between:</p>
+<ul>
+<li>it actually fails the <em>predicate under test</em>; and </li>
+<li>it fails because it violates the type declarations for sigs and fields. </li>
+</ul>
+<p>Consider this example: </p>
+<pre><code class="language-forge">#lang forge/bsl 
+
+abstract sig Grade {} 
+one sig A, B, C, None extends Grade {} 
+sig Course {} 
+sig Person { 
+    grades: func Course -&gt; Grade,
+    spouse: lone Person 
+}
+
+pred wellformed { 
+    all p: Person | p != p.spouse 
+    all p1,p2: Person | p1 = p2.spouse implies p2 = p1.spouse
+}
+
+example selfloopNotWellformed is {wellformed} for {
+    Person = `Tim + `Nim 
+    Course = `CSCI1710 + `CSCI0320
+    A = `A   B = `B   C = `C   None = `None 
+    Grade = A + B + C + None
+
+    -- this violates wellformed
+    `Tim.spouse = `Tim 
+    
+    -- but this violates the definition: &quot;grades&quot; is a total function
+    -- from courses to grades; there's no entry for `CSCI0320.
+    `Tim.grades = (`CSCI1710) -&gt; B
+</code></pre>
+<p>If you receive this message, it means your example does something like the above, where some type declaration unrelated to the predicate under test is being violated.</p>
+<h3 id="errors-related-to-syntax"><a class="header" href="#errors-related-to-syntax">Errors related to syntax</a></h3>
+<h4 id="unexpected-type-or-contract-violation"><a class="header" href="#unexpected-type-or-contract-violation">Unexpected type or Contract Violation</a></h4>
+<p>In Forge there are 2 kinds of constraint syntax for use in predicates:</p>
+<ul>
+<li>formulas, which evaluate to true or false; and </li>
+<li>expressions, which evaluate to values like specific atoms. </li>
+</ul>
+<p>If you write something like this:</p>
+<div id="admonition-contract-violation" class="admonition admonish-example">
+<div class="admonition-title">
+<p>Contract Violation</p>
+<p><a class="admonition-anchor-link" href="#admonition-contract-violation"></a></p>
+</div>
+<div>
+<pre><code>#lang forge/bsl 
+sig Person {spouse: lone Person}
+run { some p: Person | p.spouse}
+</code></pre>
+<p>produces (along with a filename, row, and column location):</p>
+<pre><code>some quantifier body expected a formula, got (join p (Relation spouse))
+</code></pre>
+<p>In older versions of Forge, it would produce:</p>
+<pre><code>some: contract violation
+  expected: formula?
+  given: (join p (Relation spouse))
+</code></pre>
+</div>
+</div>
+<p>The syntax is invalid: the <code>some</code> quantifier expects a <em>formula</em> after its such-that bar, but <code>p.spouse</code> is an expression. Something like <code>some p.spouse</code> is OK. </p>
+<p>Likewise:</p>
+<div id="admonition-unexpected-type" class="admonition admonish-example">
+<div class="admonition-title">
+<p>Unexpected Type</p>
+<p><a class="admonition-anchor-link" href="#admonition-unexpected-type"></a></p>
+</div>
+<div>
+<pre><code>sig Person {spouse: lone Person}
+run { all p1,p2: Person | p1.spouse = p2.spouse implies p2.spouse}
+</code></pre>
+<p>results in (along with a filename, row, and column location):</p>
+<pre><code>argument 2 of 2 to =&gt; had unexpected type. Expected boolean-valued formula, got (p2.spouse), which was atom- or set-valued expression.
+</code></pre>
+<p>Older versions of Forge would produce something like:</p>
+<pre><code>=&gt;: argument to =&gt; had unexpected type. 
+  expected #&lt;procedure:node/formula?&gt;,
+  got (join p2 (Relation spouse))
+</code></pre>
+</div>
+</div>
+<p>Since <code>implies</code> is a boolean operator, it takes a <em>formula</em> as its argument. Unfortunately, <code>p2.spouse</code> is an expression, not a formula. To fix this, express what you really meant was <em>implied</em>. </p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../docs/dsl/abac.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../docs/dsl/abac.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+        <script src="../ace.js"></script>
+        <script src="../editor.js"></script>
+        <script src="../mode-rust.js"></script>
+        <script src="../theme-dawn.js"></script>
+        <script src="../theme-tomorrow_night.js"></script>
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>
